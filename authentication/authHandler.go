@@ -9,9 +9,12 @@ Common practice to attach hash key is by using cookies OR URL parameter
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/guinso/goweb/routing"
 
 	"github.com/guinso/stringtool"
 
@@ -21,19 +24,55 @@ import (
 const (
 	//AnonymousID anonymous user ID
 	AnonymousID = 0
-	//x cookieKey   = "gorilla-goweb"
+	cookieKey   = "gorilla-goweb"
 )
+
+type loginRequest struct {
+	username string `json:"username"`
+	password string `json:"pwd"`
+}
 
 //HandleHTTPRequest handle incoming http request
 //return true if request URL match and process
-func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) (bool, error) {
+func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
 	if strings.HasPrefix(trimURL, "login") {
+		var loginReq loginRequest
+		err := routing.DecodeJSON(r, &loginReq)
+		if err != nil {
+			fmt.Printf("[login] Encounter error to decode JSON: %s", err.Error())
+			routing.SendHTTPErrorResponse(w)
+			return true
+		}
+
+		isSuccess, hashKey, loginErr := Login(db, loginReq.username, loginReq.password)
+		if loginErr != nil {
+			fmt.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
+			routing.SendHTTPErrorResponse(w)
+			return true
+		}
+
+		if !isSuccess {
+			routing.SendHTTPResponse(w, -1, "username or password not match", "")
+			return true
+		}
+
+		//pass unique ID to cookie
+		//NOTE: memory cookies can set by not providing value to property 'Expires'
+		cookie := http.Cookie{
+			Name:    cookieKey,
+			Value:   hashKey,
+			Expires: time.Now().Add(time.Hour * 2), //expire after 2 hours
+		}
+		http.SetCookie(w, &cookie)
+
+		routing.SendHTTPResponse(w, 0, "login success", "")
+		return true
 
 	} else if strings.HasPrefix(trimURL, "logout") {
 
 	}
 
-	return false, nil
+	return false
 }
 
 //Login try register user to login session if

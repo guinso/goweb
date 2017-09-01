@@ -1,30 +1,14 @@
 package authentication
 
 import (
-	"database/sql"
-	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/guinso/goweb/routing"
 )
 
-var dbb *sql.DB
-
-func getTestDB() *sql.DB {
-	if dbb == nil {
-		dbb, _ = sql.Open("mysql", fmt.Sprintf(
-			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
-			"root",
-			"",
-			"localhost",
-			3306,
-			"test"))
-	}
-
-	return dbb
-}
-
 func TestAddAccount(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -80,7 +64,7 @@ func TestAddSampleAccounts(t *testing.T) {
 */
 
 func TestChangeAccountPassword(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -96,7 +80,7 @@ func TestChangeAccountPassword(t *testing.T) {
 }
 
 func TestGetAccountByName(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 
 	account, err := GetAccountByName(db, "dick")
 	if err != nil {
@@ -119,7 +103,7 @@ func TestGetAccountByName(t *testing.T) {
 }
 
 func TestGetAccountByID(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 
 	account, err := GetAccountByID(db, "1590bc6778288a201895a2dd5c2acb01")
 	if err != nil {

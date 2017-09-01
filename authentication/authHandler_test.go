@@ -3,10 +3,12 @@ package authentication
 import (
 	"strings"
 	"testing"
+
+	"github.com/guinso/goweb/routing"
 )
 
 func TestLogin(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -28,7 +30,7 @@ func TestLogin(t *testing.T) {
 }
 
 func TestLogout(t *testing.T) {
-	db := getTestDB()
+	db := routing.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
