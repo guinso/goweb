@@ -399,13 +399,14 @@ func validateAccountTable(db *sql.DB, dbName string) error {
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
-	accountDef.Columns = append(accountDef.Columns, rdbmstool.ColumnDefinition{
-		Name:             "full_name",
-		DataType:         rdbmstool.CHAR,
-		Length:           200,
-		IsNullable:       false,
-		DecimalPrecision: 0,
-	})
+	/*
+		accountDef.Columns = append(accountDef.Columns, rdbmstool.ColumnDefinition{
+			Name:             "full_name",
+			DataType:         rdbmstool.CHAR,
+			Length:           200,
+			IsNullable:       false,
+			DecimalPrecision: 0,
+		})*/
 
 	accountDef.UniqueKeys = append(accountDef.UniqueKeys, rdbmstool.UniqueKeyDefinition{
 		ColumnNames: []string{"username"},

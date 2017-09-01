@@ -9,6 +9,7 @@ Common practice to attach hash key is by using cookies OR URL parameter
 
 import (
 	"database/sql"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -18,6 +19,18 @@ const (
 	AnonymousID = 0
 	//x cookieKey   = "gorilla-goweb"
 )
+
+//HandleHTTPRequest handle incoming http request
+//return true if request URL match and process
+func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) (bool, error) {
+	if strings.HasPrefix(trimURL, "login") {
+
+	} else if strings.HasPrefix(trimURL, "logout") {
+
+	}
+
+	return false, nil
+}
 
 //Login try register user to login session if
 //1. username and password matched

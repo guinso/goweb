@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/guinso/rdbmstool"
 	"github.com/guinso/stringtool"
 )
 
@@ -33,7 +34,7 @@ func (session *LoginSession) IsSessionExpired() bool {
 
 //RegisterLoginSession register latest login session record
 //return hashkey and error message if encounter exception
-func RegisterLoginSession(db *sql.DB, accountInfo *AccountInfo, logTime time.Time) (string, error) {
+func RegisterLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (string, error) {
 	hashKey := strconv.FormatInt(logTime.UnixNano(), 10)
 
 	//validate login session
@@ -60,25 +61,18 @@ func RegisterLoginSession(db *sql.DB, accountInfo *AccountInfo, logTime time.Tim
 }
 
 //AddLoginSessionRecord add login session record
-func addLoginSessionRecord(db *sql.DB, userID string, hashKey string, now time.Time) error {
+func addLoginSessionRecord(db rdbmstool.DbHandlerProxy, userID string, hashKey string, now time.Time) error {
 	//update database login session table
 	insertSQL := "INSERT INTO login_session (id, account_id, hash_key, login, last_seen) VALUES (?, ?, ?, ?)"
-	trx, err := db.Begin()
-	if err != nil {
-		return err
-	}
 
-	_, err = trx.Exec(insertSQL,
+	_, err := db.Exec(insertSQL,
 		stringtool.MakeMD5("login_session"+strconv.FormatInt(now.UnixNano(), 10)),
 		userID,
 		hashKey,
 		now.Format("2006-01-02 15:04:05"),
 		now.Format("2006-01-02 15:04:05"))
+
 	if err != nil {
-		trx.Rollback()
-		return err
-	}
-	if err := trx.Commit(); err != nil {
 		return err
 	}
 
@@ -87,22 +81,13 @@ func addLoginSessionRecord(db *sql.DB, userID string, hashKey string, now time.T
 
 //RenewLoginSession renew login session with new hash key and time log
 //return hashkey and error message if encounter exception
-func renewLoginSession(db *sql.DB, accountID string, hashKey string, logTime time.Time) (string, error) {
-	updateSQL := "UPDATE login_session SET (hash_key = ?, login = ?, logout = null, last_seen = ?)" +
+func renewLoginSession(db rdbmstool.DbHandlerProxy, accountID string, hashKey string, logTime time.Time) (string, error) {
+	updateSQL := "UPDATE login_session SET hash_key = ?, login = ?, logout = null, last_seen = ?" +
 		" WHERE account_id = ?"
-	trx, err := db.Begin()
-	if err != nil {
-		return "", err
-	}
 
 	logTimeFormat := logTime.Format("2006-01-02 15:04:05")
-	if _, err = trx.Exec(
+	if _, err := db.Exec(
 		updateSQL, hashKey, logTimeFormat, logTimeFormat, accountID); err != nil {
-		trx.Rollback()
-		return "", err
-	}
-
-	if err = trx.Commit(); err != nil {
 		return "", err
 	}
 
@@ -110,21 +95,11 @@ func renewLoginSession(db *sql.DB, accountID string, hashKey string, logTime tim
 }
 
 //EndLoginSessionByAccountID mark login session for specified user to become logout
-func EndLoginSessionByAccountID(db *sql.DB, accountID string) error {
+func EndLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) error {
 	updateSQL := "UPDATE login_session SET (logout = ?) WHERE account_id = ?"
 
-	trx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
-	if _, err = trx.Exec(updateSQL,
+	if _, err := db.Exec(updateSQL,
 		time.Now().Format("2006-01-02 15:04:05"), accountID); err != nil {
-		trx.Rollback()
-		return err
-	}
-
-	if err = trx.Commit(); err != nil {
 		return err
 	}
 
@@ -132,21 +107,11 @@ func EndLoginSessionByAccountID(db *sql.DB, accountID string) error {
 }
 
 //EndLoginSessionByHashKey mark login session for specified user to become logout
-func EndLoginSessionByHashKey(db *sql.DB, hashKey string) error {
+func EndLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) error {
 	updateSQL := "UPDATE login_session SET (logout = ?) WHERE hash_key = ?"
 
-	trx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
-	if _, err = trx.Exec(updateSQL,
+	if _, err := db.Exec(updateSQL,
 		time.Now().Format("2006-01-02 15:04:05"), hashKey); err != nil {
-		trx.Rollback()
-		return err
-	}
-
-	if err = trx.Commit(); err != nil {
 		return err
 	}
 
@@ -155,7 +120,7 @@ func EndLoginSessionByHashKey(db *sql.DB, hashKey string) error {
 
 //GetLoginSessionByHashKey get Login session record by hash key
 //hash key is provided from client's cookies; please refer SessionHandler.go
-func GetLoginSessionByHashKey(db *sql.DB, hashKey string) (*LoginSession, error) {
+func GetLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE hash_key = ?"
 
 	row := db.QueryRow(SQL, hashKey)
@@ -164,7 +129,7 @@ func GetLoginSessionByHashKey(db *sql.DB, hashKey string) (*LoginSession, error)
 }
 
 //GetLoginSessionByAccountID get Login session record by account ID
-func GetLoginSessionByAccountID(db *sql.DB, accountID string) (*LoginSession, error) {
+func GetLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE account_id = ?"
 
 	row := db.QueryRow(SQL, accountID)

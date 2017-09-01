@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/guinso/goweb/routing"
 	//explicitly include GO mysql library
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -70,7 +69,7 @@ func main() {
 
 func startWebServer(port int) error {
 	// handler all request start from "/"
-	http.HandleFunc("/", routing.WebHandler)
+	http.HandleFunc("/", WebHandler)
 
 	// start HTTP server in socket 7777
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)

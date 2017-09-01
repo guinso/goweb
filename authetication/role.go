@@ -1,8 +1,8 @@
 package authetication
 
-import "database/sql"
+import "github.com/guinso/rdbmstool"
 
-func getRolesByAccountID(db *sql.DB, accountID string) ([]string, error) {
+func getRolesByAccountID(db rdbmstool.DbHandlerProxy, accountID string) ([]string, error) {
 	SQL := "SELECT role_id FROM account_role WHERE account_id = ?"
 
 	rows, err := db.Query(SQL, accountID)
