@@ -51,14 +51,21 @@ func validateLoginSessionTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "account_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
+		Length:           100,
+		IsNullable:       false,
+		DecimalPrecision: 0,
+	})
+	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
+		Name:             "hash_key",
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -118,21 +125,21 @@ func validateRoleAccessTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "access_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "role_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -190,7 +197,7 @@ func validateAccessTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -204,7 +211,7 @@ func validateAccessTable(db *sql.DB, dbName string) error {
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "group_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -243,7 +250,7 @@ func validateAccessGroupTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -275,21 +282,21 @@ func validateAccountRoleTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "account_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
 	})
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "role_id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -340,7 +347,7 @@ func validateRoleTable(db *sql.DB, dbName string) error {
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
@@ -373,7 +380,7 @@ func validateAccountTable(db *sql.DB, dbName string) error {
 
 	accountDef.Columns = append(accountDef.Columns, rdbmstool.ColumnDefinition{
 		Name:             "id",
-		DataType:         rdbmstool.INTEGER,
+		DataType:         rdbmstool.CHAR,
 		Length:           100,
 		IsNullable:       false,
 		DecimalPrecision: 0,
