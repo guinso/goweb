@@ -1,4 +1,4 @@
-package authetication
+package authentication
 
 import "github.com/guinso/rdbmstool"
 
@@ -14,11 +14,14 @@ func getRolesByAccountID(db rdbmstool.DbHandlerProxy, accountID string) ([]strin
 	for rows.Next() {
 		var tmpStr string
 		if err = rows.Scan(&tmpStr); err != nil {
+			rows.Close()
 			return nil, err
 		}
 
 		result = append(result, tmpStr)
 	}
+
+	rows.Close()
 
 	return result, nil
 }

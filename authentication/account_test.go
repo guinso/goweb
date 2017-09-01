@@ -1,8 +1,9 @@
-package authetication
+package authentication
 
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -91,5 +92,55 @@ func TestChangeAccountPassword(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	trx.Rollback() //non need to make changes
+	trx.Rollback() //no need to make changes
+}
+
+func TestGetAccountByName(t *testing.T) {
+	db := getTestDB()
+
+	account, err := GetAccountByName(db, "dick")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if account == nil {
+		t.Error("Expect account 'Dick' found in account datatable")
+	}
+
+	//try search non-exists account
+	account, err = GetAccountByName(db, "sucy")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if account != nil {
+		t.Error("Account 'sucy' shouldn't be found in account datatable")
+	}
+}
+
+func TestGetAccountByID(t *testing.T) {
+	db := getTestDB()
+
+	account, err := GetAccountByID(db, "1590bc6778288a201895a2dd5c2acb01")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if account == nil {
+		t.Error("Expect account 'Dick' found in account datatable")
+	}
+
+	if strings.Compare(account.Username, "dick") != 0 {
+		t.Errorf("Expect account 'Dick' found in account datatable, but get %s", account.Username)
+	}
+
+	//try search non-exists account
+	account, err = GetAccountByID(db, "sucy123456789")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if account != nil {
+		t.Error("Account 'sucy' shouldn't be found in account datatable")
+	}
 }

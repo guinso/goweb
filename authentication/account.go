@@ -1,4 +1,4 @@
-package authetication
+package authentication
 
 import (
 	"database/sql"
@@ -55,26 +55,37 @@ func ChangeAccountPassword(db rdbmstool.DbHandlerProxy, username, oldPwd, newPwd
 func GetAccountByName(db rdbmstool.DbHandlerProxy, username string) (*AccountInfo, error) {
 	sql := "SELECT id, username, pwd FROM account WHERE username = ?"
 
-	row := db.QueryRow(sql, username)
+	rows, err := db.Query(sql, username)
+	if err != nil {
+		return nil, err
+	}
 
-	return formatAccountInfo(db, row)
+	return formatAccountInfo(db, rows)
 }
 
 //GetAccountByID get account information by user ID
 func GetAccountByID(db rdbmstool.DbHandlerProxy, userID string) (*AccountInfo, error) {
 	sql := "SELECT id, username, pwd FROM account WHERE id = ?"
 
-	row := db.QueryRow(sql, userID)
+	rows, err := db.Query(sql, userID)
+	if err != nil {
+		return nil, err
+	}
 
-	return formatAccountInfo(db, row)
+	return formatAccountInfo(db, rows)
 }
 
-func formatAccountInfo(db rdbmstool.DbHandlerProxy, row *sql.Row) (*AccountInfo, error) {
-	if row != nil {
+func formatAccountInfo(db rdbmstool.DbHandlerProxy, rows *sql.Rows) (*AccountInfo, error) {
+	//defer rows.Close()
+
+	if rows.Next() {
 		var tmpID, tmpUsername, tmpPwd string
-		if err := row.Scan(&tmpID, &tmpUsername, &tmpPwd); err != nil {
+		if err := rows.Scan(&tmpID, &tmpUsername, &tmpPwd); err != nil {
+			rows.Close()
 			return nil, err
 		}
+
+		rows.Close()
 
 		//get all related roles
 		roles, err := getRolesByAccountID(db, tmpID)

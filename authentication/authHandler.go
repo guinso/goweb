@@ -1,4 +1,4 @@
-package authetication
+package authentication
 
 /***********************************
 authentication login status is keep in database, each record will hold user ID, login time stamp, and released hash key
@@ -12,6 +12,10 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/guinso/stringtool"
+
+	"github.com/guinso/rdbmstool"
 )
 
 const (
@@ -36,7 +40,7 @@ func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimU
 //1. username and password matched
 //2. no one is login
 //return: login result, hash key, exception error message
-func Login(db *sql.DB, username, password string) (bool, string, error) {
+func Login(db rdbmstool.DbHandlerProxy, username, password string) (bool, string, error) {
 	accInfo, err := GetAccountByName(db, username)
 	if err != nil {
 		return false, "", err
@@ -46,10 +50,10 @@ func Login(db *sql.DB, username, password string) (bool, string, error) {
 		return false, "", err //no username found in database
 	}
 
-	if strings.Compare(accInfo.SaltedPwd, password) == 0 {
+	if strings.Compare(accInfo.SaltedPwd, stringtool.MakeSHA256(password)) == 0 {
 		now := time.Now()
 
-		hashKey, err := RegisterLoginSession(db, accInfo, now)
+		hashKey, err := registerLoginSession(db, accInfo, now)
 		if err != nil {
 			return false, "", err
 		}
@@ -70,9 +74,9 @@ func Login(db *sql.DB, username, password string) (bool, string, error) {
 }
 
 //Logout try end user login session
-func Logout(db *sql.DB, hashKey string) (bool, error) {
+func Logout(db rdbmstool.DbHandlerProxy, hashKey string) (bool, error) {
 
-	loginSession, err := GetLoginSessionByHashKey(db, hashKey)
+	loginSession, err := getLoginSessionByHashKey(db, hashKey)
 	if err != nil {
 		return false, err
 	}
@@ -80,8 +84,8 @@ func Logout(db *sql.DB, hashKey string) (bool, error) {
 	if loginSession == nil {
 		return true, nil
 	} else if loginSession.IsStillActive() {
-		//TODO: update login session to expired
-		if err = EndLoginSessionByHashKey(db, hashKey); err != nil {
+		//update login session to expired
+		if err = endLoginSessionByHashKey(db, hashKey); err != nil {
 			return false, err
 		}
 	}
@@ -100,7 +104,7 @@ func GetCurrentUser(db *sql.DB, hashKey string) (*AccountInfo, error) {
 		}
 	*/
 
-	loginSession, err := GetLoginSessionByHashKey(db, hashKey)
+	loginSession, err := getLoginSessionByHashKey(db, hashKey)
 	if err != nil {
 		return nil, err //encounter  error
 	}
