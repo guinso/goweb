@@ -41,39 +41,30 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 
 //handle dynamic HTTP user requset
 func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
-	// find and match trimmed URL to respective REST request
-	//      trimmed URL
-	//      request method
-	//      input parameter(s)
 
-	//handle
+	/***********************************************/
+	//TODO: add your custom web API here:
+	/**********************************************/
+
+	//handle authentication web API
 	//1. /login
 	//2. /logout
 	if authentication.HandleHTTPRequest(util.GetDB(), w, r, trimURL) {
 		return
 	}
 
-	/*
-		if strings.HasPrefix(trimURL, "login") {
-			// example URL: localhost:7777/api/login
-			// TODO: handle login request
-			fmt.Fprint(w, "Request login")
-		} else if strings.HasPrefix(trimURL, "logout") {
-			// example URL: localhost:7777/api/logout
-			// TODO: handle logout request
-			fmt.Fprint(w, "Request logout")
-		}
-	*/
+	//TODO: handle authorization web API
+
+	//sample return JSON
 	if strings.HasPrefix(trimURL, "meals") {
-		// example URL: localhost:7777/api/meals
-		// show list of meals
 		w.Header().Set("Content-Type", "application/json") //MIME to application/json
 		w.WriteHeader(http.StatusOK)                       //status code 200, OK
 		w.Write([]byte("{ msg: \"this is meal A \" }"))    //body text
-	} else if strings.HasPrefix(trimURL, "img/") {
-		// example URL: localhost:7777/api/img/
-		// show image file to client dynamically
+		return
+	}
 
+	//sample return virtual JPG file to client
+	if strings.HasPrefix(trimURL, "img/") {
 		logicalFilePath := "./logic-files/"
 		physicalFileName := "neon.jpg"
 
@@ -92,11 +83,11 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 			// write file (in binary format) direct into HTTP return content
 			w.Write(data)
 		}
-
-	} else {
-		// show error code 404 not found
-		handleErrorCode(404, "Path not found.", w)
 	}
+
+	// show error code 404 not found
+	//(since the requested URL doesn't match any of it)
+	handleErrorCode(404, "Path not found.", w)
 }
 
 // Generate error page

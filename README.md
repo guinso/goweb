@@ -30,7 +30,7 @@ cookie cutter for small scale web application
 1. Create an empty database
 2. Start run with enable flag `dbinittable`
     * in order to generate all basic data tables
-3. Go to **./util/helper_test.go**
+3. Go to **./generateRecord_test.go**
     * uncomment `TestGenerateRecords()`
     * run test on `TestGenerateRecords()`
     * comment back `TestGenerateRecords()`
