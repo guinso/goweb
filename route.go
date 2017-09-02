@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/guinso/goweb/authentication"
+	"github.com/guinso/goweb/util"
 )
 
 // WebHandler HTTP request to either static file server or REST server (URL start with "api/")
@@ -43,15 +46,25 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 	//      request method
 	//      input parameter(s)
 
-	if strings.HasPrefix(trimURL, "login") {
-		// example URL: localhost:7777/api/login
-		// TODO: handle login request
-		fmt.Fprint(w, "Request login")
-	} else if strings.HasPrefix(trimURL, "logout") {
-		// example URL: localhost:7777/api/logout
-		// TODO: handle logout request
-		fmt.Fprint(w, "Request logout")
-	} else if strings.HasPrefix(trimURL, "meals") {
+	//handle
+	//1. /login
+	//2. /logout
+	if authentication.HandleHTTPRequest(util.GetDB(), w, r, trimURL) {
+		return
+	}
+
+	/*
+		if strings.HasPrefix(trimURL, "login") {
+			// example URL: localhost:7777/api/login
+			// TODO: handle login request
+			fmt.Fprint(w, "Request login")
+		} else if strings.HasPrefix(trimURL, "logout") {
+			// example URL: localhost:7777/api/logout
+			// TODO: handle logout request
+			fmt.Fprint(w, "Request logout")
+		}
+	*/
+	if strings.HasPrefix(trimURL, "meals") {
 		// example URL: localhost:7777/api/meals
 		// show list of meals
 		w.Header().Set("Content-Type", "application/json") //MIME to application/json

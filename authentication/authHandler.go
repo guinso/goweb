@@ -9,12 +9,8 @@ Common practice to attach hash key is by using cookies OR URL parameter
 
 import (
 	"database/sql"
-	"fmt"
-	"net/http"
 	"strings"
 	"time"
-
-	"github.com/guinso/goweb/util"
 
 	"github.com/guinso/stringtool"
 
@@ -27,89 +23,50 @@ const (
 	cookieKey   = "gorilla-goweb"
 )
 
-type loginRequest struct {
-	username string `json:"username"`
-	password string `json:"pwd"`
-}
+//LoginStatus login status
+type LoginStatus uint8
 
-//HandleHTTPRequest handle incoming http request
-//return true if request URL match and process
-func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
-	if strings.HasPrefix(trimURL, "login") {
-		var loginReq loginRequest
-		err := util.DecodeJSON(r, &loginReq)
-		if err != nil {
-			fmt.Printf("[login] error to read user input: %s", err.Error())
-			util.SendHTTPErrorResponse(w)
-			return true
-		}
+const (
+	//LoginSuccess login success
+	LoginSuccess LoginStatus = iota
+	//LoginFailed failed to login
+	LoginFailed
+	//AlreadyLoggedIn already logged in
+	AlreadyLoggedIn
+)
 
-		isSuccess, hashKey, loginErr := Login(db, loginReq.username, loginReq.password)
-		if loginErr != nil {
-			fmt.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
-			util.SendHTTPErrorResponse(w)
-			return true
-		}
-
-		if !isSuccess {
-			util.SendHTTPResponse(w, -1, "username or password not match", "")
-			return true
-		}
-
-		//pass unique ID to cookie
-		//NOTE: memory cookies can set by not providing value to property 'Expires'
-		cookie := http.Cookie{
-			Name:    cookieKey,
-			Value:   hashKey,
-			Expires: time.Now().Add(time.Hour * 2), //expire after 2 hours
-		}
-		http.SetCookie(w, &cookie)
-
-		util.SendHTTPResponse(w, 0, "login success", "")
-		return true
-
-	} else if strings.HasPrefix(trimURL, "logout") {
-
-	}
-
-	return false
+//LoginRequest login request information
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"pwd"`
 }
 
 //Login try register user to login session if
 //1. username and password matched
 //2. no one is login
 //return: login result, hash key, exception error message
-func Login(db rdbmstool.DbHandlerProxy, username, password string) (bool, string, error) {
+func Login(db rdbmstool.DbHandlerProxy, username, password string) (LoginStatus, string, error) {
 	accInfo, err := GetAccountByName(db, username)
 	if err != nil {
-		return false, "", err
+		return LoginFailed, "", err
 	}
 
 	if accInfo == nil {
-		return false, "", err //no username found in database
+		return LoginFailed, "", err //no username found in database
 	}
 
 	if strings.Compare(accInfo.SaltedPwd, stringtool.MakeSHA256(password)) == 0 {
 		now := time.Now()
 
-		hashKey, err := registerLoginSession(db, accInfo, now)
+		loginStatus, hashKey, err := registerLoginSession(db, accInfo, now)
 		if err != nil {
-			return false, "", err
+			return LoginFailed, "", err
 		}
-		/*
-			//pass unique ID to cookie
-			//NOTE: memory cookies can set by not providing value to property 'Expires'
-			cookie := http.Cookie{
-				Name:    cookieKey,
-				Value:   hashKey,
-				Expires: now.Add(time.Hour * 2), //expire after 2 hours
-			}
-			http.SetCookie(*w, &cookie)
-		*/
-		return true, hashKey, nil
+
+		return loginStatus, hashKey, nil
 	}
 
-	return false, "", nil //password not match
+	return AlreadyLoggedIn, "", nil //password not match
 }
 
 //Logout try end user login session

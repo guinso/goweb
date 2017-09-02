@@ -24,6 +24,7 @@ import (
 
 	//explicitly include GO mysql library
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/guinso/goweb/util"
 )
 
 const (
@@ -59,6 +60,8 @@ func main() {
 		}
 	}
 
+	util.SetDB(db)
+
 	//start web server
 	fmt.Printf("Starting web server with port number %d \n", config.PortNumber)
 	if webErr := startWebServer(config.PortNumber); webErr != nil {
@@ -80,7 +83,7 @@ func startWebServer(port int) error {
 
 func checkDbConnection(config *configInfo) (*sql.DB, error) {
 	//TODO:  handle various database vendor
-	db, err := sql.Open("mysql", fmt.Sprintf(
+	dbx, err := sql.Open("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8",
 		config.DbUsername,
 		config.DbPassword,
@@ -93,11 +96,11 @@ func checkDbConnection(config *configInfo) (*sql.DB, error) {
 	}
 
 	//check connection is valid or not
-	if pingErr := db.Ping(); pingErr != nil {
+	if pingErr := dbx.Ping(); pingErr != nil {
 		return nil, pingErr
 	}
 
-	return db, nil
+	return dbx, nil
 }
 
 func initFilesAndDirs(config *configInfo) error {

@@ -2,7 +2,6 @@ package authentication
 
 import (
 	"database/sql"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -26,42 +25,37 @@ func (session *LoginSession) IsStillActive() bool {
 	return session.Logout.IsZero()
 }
 
-/*
-//IsSessionExpired calculate weather login session should be logout
-//if last access time is exceed 2 hours from now
-func (session *LoginSession) IsSessionExpired() bool {
-	return time.Now().Sub(session.LastSeen) > time.Hour*2
-}*/
-
 //RegisterLoginSession register latest login session record
 //return hashkey and error message if encounter exception
-func registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (string, error) {
+func registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (LoginStatus, string, error) {
 	hashKey := strconv.FormatInt(logTime.UnixNano(), 10)
 
 	//validate login session
 	currentLoginSession, err := getLoginSessionByAccountID(db, accountInfo.AccountID)
 	if err != nil {
-		return "", err
+		return LoginFailed, "", err
 	}
 
 	if currentLoginSession == nil {
 		//create new login session
 		if err := addLoginSessionRecord(db, accountInfo.AccountID, hashKey, logTime); err != nil {
-			return "", err
+			return LoginFailed, "", err
 		}
 
-		return hashKey, nil
+		return LoginSuccess, hashKey, nil
 
-	} else if currentLoginSession.IsStillActive() {
+	} else if !currentLoginSession.IsStillActive() {
 		//renew login session
-		return renewLoginSession(db, accountInfo.AccountID, hashKey, logTime)
+		hashKey, err := renewLoginSession(db, accountInfo.AccountID, hashKey, logTime)
+		if err != nil {
+			return LoginFailed, "", err
+		}
+
+		return LoginSuccess, hashKey, nil
 	}
 
 	//reject login attempt as there is an active login session
-	return "", fmt.Errorf(
-		"Login request rejected; there is an active session for user <%s>. "+
-			"Please logout and try again", accountInfo.Username)
-
+	return AlreadyLoggedIn, "", nil
 }
 
 //AddLoginSessionRecord add login session record

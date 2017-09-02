@@ -14,11 +14,11 @@ func TestLogin(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	isLoginSuccess, hashKey, err := Login(trx, "dick", "123456789")
+	loginStatus, hashKey, err := Login(trx, "dick", "123456789")
 	if err != nil {
 		t.Error(err.Error())
 
-	} else if !isLoginSuccess {
+	} else if loginStatus != LoginSuccess {
 		t.Error("User 'Dick' failed to login")
 
 	} else if strings.Compare(hashKey, "") == 0 {
@@ -36,11 +36,11 @@ func TestLogout(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	isLoginSuccess, hashKey, err := Login(trx, "dick", "123456789")
+	loginStatus, hashKey, err := Login(trx, "dick", "123456789")
 	if err != nil {
 		t.Error(err.Error())
 
-	} else if !isLoginSuccess {
+	} else if loginStatus != LoginSuccess {
 		t.Error("User 'Dick' failed to login")
 
 	} else if strings.Compare(hashKey, "") == 0 {
