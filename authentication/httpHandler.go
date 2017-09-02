@@ -16,7 +16,7 @@ func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimU
 	if strings.HasPrefix(trimURL, "login") && util.IsPOST(r) {
 		return handleHTTPLogin(db, w, r)
 	} else if strings.HasPrefix(trimURL, "logout") && util.IsPOST(r) {
-		return false //not implemented yet...
+		return handleHTTPLogout(db, w, r)
 	}
 
 	return false
@@ -32,9 +32,23 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 		return true
 	}
 
-	loginStatus, hashKey, loginErr := Login(db, loginReq.Username, loginReq.Password)
+	trx, trxErr := db.Begin()
+	if trxErr != nil {
+		fmt.Printf("[login] error to begin SQL transaction: %s", trxErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return true
+	}
+
+	loginStatus, hashKey, loginErr := Login(trx, loginReq.Username, loginReq.Password)
 	if loginErr != nil {
+		trx.Rollback()
 		fmt.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return true
+	}
+
+	if err = trx.Commit(); err != nil {
+		fmt.Printf("[login] error to commit SQL transaction: %s", trxErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
@@ -65,6 +79,43 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 		fmt.Printf("[login] unknown login status: %d\n", loginStatus)
 		util.SendHTTPErrorResponse(w)
 		break
+	}
+
+	return true
+}
+
+func handleHTTPLogout(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
+	cookie, _ := r.Cookie(cookieKey)
+	if cookie == nil {
+		//cookie not found; either timeout or logged out
+		util.SendHTTPResponse(w, -1, "Logout rejected, you are not login yet", "{}")
+		return true
+	}
+
+	trx, trxErr := db.Begin()
+	if trxErr != nil {
+		fmt.Printf("[logout] failed to begin SQL transaction: %s\n", trxErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return true
+	}
+	result, err := Logout(trx, cookie.Value)
+	if err != nil {
+		trx.Rollback()
+		fmt.Printf("[logout] error on Logout: %s\n", err.Error())
+		util.SendHTTPErrorResponse(w)
+		return true
+	}
+
+	if err = trx.Commit(); err != nil {
+		fmt.Printf("[logout] failed to commit SQL transaction: %s\n", trxErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return true
+	}
+
+	if result {
+		util.SendHTTPResponse(w, 0, "logout success", "{}")
+	} else {
+		util.SendHTTPResponse(w, -1, "logout request rejected", "{}")
 	}
 
 	return true

@@ -58,6 +58,7 @@ func Login(db rdbmstool.DbHandlerProxy, username, password string) (LoginStatus,
 	if strings.Compare(accInfo.SaltedPwd, stringtool.MakeSHA256(password)) == 0 {
 		now := time.Now()
 
+		//right now is single device login session pattern
 		loginStatus, hashKey, err := registerLoginSession(db, accInfo, now)
 		if err != nil {
 			return LoginFailed, "", err
@@ -78,7 +79,7 @@ func Logout(db rdbmstool.DbHandlerProxy, hashKey string) (bool, error) {
 	}
 
 	if loginSession == nil {
-		return true, nil
+		return true, nil //make fool on potential attacker
 	} else if loginSession.IsStillActive() {
 		//update login session to expired
 		if err = endLoginSessionByHashKey(db, hashKey); err != nil {
