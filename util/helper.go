@@ -1,4 +1,4 @@
-package routing
+package util
 
 import (
 	"database/sql"
@@ -15,6 +15,7 @@ import (
 var dbb *sql.DB
 
 //GetTestDB get database handler for unit test
+//WARNING: don't use it in source code other than unit test!
 func GetTestDB() *sql.DB {
 	if dbb == nil {
 		dbb, _ = sql.Open("mysql", fmt.Sprintf(

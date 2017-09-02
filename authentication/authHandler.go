@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/guinso/goweb/routing"
+	"github.com/guinso/goweb/util"
 
 	"github.com/guinso/stringtool"
 
@@ -37,22 +37,22 @@ type loginRequest struct {
 func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
 	if strings.HasPrefix(trimURL, "login") {
 		var loginReq loginRequest
-		err := routing.DecodeJSON(r, &loginReq)
+		err := util.DecodeJSON(r, &loginReq)
 		if err != nil {
-			fmt.Printf("[login] Encounter error to decode JSON: %s", err.Error())
-			routing.SendHTTPErrorResponse(w)
+			fmt.Printf("[login] error to read user input: %s", err.Error())
+			util.SendHTTPErrorResponse(w)
 			return true
 		}
 
 		isSuccess, hashKey, loginErr := Login(db, loginReq.username, loginReq.password)
 		if loginErr != nil {
 			fmt.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
-			routing.SendHTTPErrorResponse(w)
+			util.SendHTTPErrorResponse(w)
 			return true
 		}
 
 		if !isSuccess {
-			routing.SendHTTPResponse(w, -1, "username or password not match", "")
+			util.SendHTTPResponse(w, -1, "username or password not match", "")
 			return true
 		}
 
@@ -65,7 +65,7 @@ func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimU
 		}
 		http.SetCookie(w, &cookie)
 
-		routing.SendHTTPResponse(w, 0, "login success", "")
+		util.SendHTTPResponse(w, 0, "login success", "")
 		return true
 
 	} else if strings.HasPrefix(trimURL, "logout") {

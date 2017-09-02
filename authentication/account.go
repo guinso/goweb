@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/guinso/goweb/routing"
+	"github.com/guinso/goweb/util"
 	"github.com/guinso/stringtool"
 
 	"github.com/guinso/rdbmstool"
@@ -27,7 +27,7 @@ type AccountInfo struct {
 func AddAccount(db rdbmstool.DbHandlerProxy, username, password string) error {
 	sql := "INSERT INTO account (id, username, pwd) VALUES (?, ?, ?)"
 
-	id := routing.GetRandomRunningNumber("account")
+	id := util.GetRandomRunningNumber("account")
 
 	_, err := db.Exec(sql, id, username, stringtool.MakeSHA256(password))
 	return err

@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/routing"
+	"github.com/guinso/goweb/util"
 )
 
 func TestAddAccount(t *testing.T) {
-	db := routing.GetTestDB()
+	db := util.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -64,7 +64,7 @@ func TestAddSampleAccounts(t *testing.T) {
 */
 
 func TestChangeAccountPassword(t *testing.T) {
-	db := routing.GetTestDB()
+	db := util.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -80,7 +80,7 @@ func TestChangeAccountPassword(t *testing.T) {
 }
 
 func TestGetAccountByName(t *testing.T) {
-	db := routing.GetTestDB()
+	db := util.GetTestDB()
 
 	account, err := GetAccountByName(db, "dick")
 	if err != nil {
@@ -103,7 +103,7 @@ func TestGetAccountByName(t *testing.T) {
 }
 
 func TestGetAccountByID(t *testing.T) {
-	db := routing.GetTestDB()
+	db := util.GetTestDB()
 
 	account, err := GetAccountByID(db, "1590bc6778288a201895a2dd5c2acb01")
 	if err != nil {
