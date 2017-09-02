@@ -20,11 +20,11 @@ func GetTestDB() *sql.DB {
 	if dbb == nil {
 		dbb, _ = sql.Open("mysql", fmt.Sprintf(
 			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
-			"root",
-			"",
-			"localhost",
-			3306,
-			"test"))
+			"root",      //username
+			"",          //password
+			"localhost", //server location
+			3306,        //database port number
+			"test"))     //database name
 	}
 
 	return dbb
