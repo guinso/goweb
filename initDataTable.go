@@ -119,8 +119,12 @@ func validateRoleAccessTable(db *sql.DB, dbName string) error {
 		Columns:     []rdbmstool.ColumnDefinition{},
 		PrimaryKey:  []string{"id"},
 		ForiegnKeys: []rdbmstool.ForeignKeyDefinition{},
-		UniqueKeys:  []rdbmstool.UniqueKeyDefinition{},
-		Indices:     []rdbmstool.IndexKeyDefinition{},
+		UniqueKeys: []rdbmstool.UniqueKeyDefinition{
+			rdbmstool.UniqueKeyDefinition{
+				ColumnNames: []string{"access_id", "role_id"},
+			},
+		},
+		Indices: []rdbmstool.IndexKeyDefinition{},
 	}
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
@@ -191,8 +195,12 @@ func validateAccessTable(db *sql.DB, dbName string) error {
 		Columns:     []rdbmstool.ColumnDefinition{},
 		PrimaryKey:  []string{"id"},
 		ForiegnKeys: []rdbmstool.ForeignKeyDefinition{},
-		UniqueKeys:  []rdbmstool.UniqueKeyDefinition{},
-		Indices:     []rdbmstool.IndexKeyDefinition{},
+		UniqueKeys: []rdbmstool.UniqueKeyDefinition{
+			rdbmstool.UniqueKeyDefinition{
+				ColumnNames: []string{"name"},
+			},
+		},
+		Indices: []rdbmstool.IndexKeyDefinition{},
 	}
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
@@ -244,8 +252,12 @@ func validateAccessGroupTable(db *sql.DB, dbName string) error {
 		Columns:     []rdbmstool.ColumnDefinition{},
 		PrimaryKey:  []string{"id"},
 		ForiegnKeys: []rdbmstool.ForeignKeyDefinition{},
-		UniqueKeys:  []rdbmstool.UniqueKeyDefinition{},
-		Indices:     []rdbmstool.IndexKeyDefinition{},
+		UniqueKeys: []rdbmstool.UniqueKeyDefinition{
+			rdbmstool.UniqueKeyDefinition{
+				ColumnNames: []string{"name"},
+			},
+		},
+		Indices: []rdbmstool.IndexKeyDefinition{},
 	}
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
