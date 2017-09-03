@@ -11,6 +11,9 @@ import (
 	"time"
 
 	"github.com/guinso/stringtool"
+
+	//explicitly include GO mysql library
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var dbb *sql.DB
@@ -31,13 +34,19 @@ func GetDB() *sql.DB {
 //WARNING: don't use it in source code other than unit test!
 func GetTestDB() *sql.DB {
 	if dbb == nil {
-		dbb, _ = sql.Open("mysql", fmt.Sprintf(
+		dbTest, dbErr := sql.Open("mysql", fmt.Sprintf(
 			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
 			"root",      //username
 			"",          //password
 			"localhost", //server location
 			3306,        //database port number
 			"test"))     //database name
+
+		if dbErr != nil {
+			panic(dbErr)
+		}
+
+		dbb = dbTest
 	}
 
 	return dbb

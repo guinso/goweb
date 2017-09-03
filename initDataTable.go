@@ -276,8 +276,12 @@ func validateAccountRoleTable(db *sql.DB, dbName string) error {
 		Columns:     []rdbmstool.ColumnDefinition{},
 		PrimaryKey:  []string{"id"},
 		ForiegnKeys: []rdbmstool.ForeignKeyDefinition{},
-		UniqueKeys:  []rdbmstool.UniqueKeyDefinition{},
-		Indices:     []rdbmstool.IndexKeyDefinition{},
+		UniqueKeys: []rdbmstool.UniqueKeyDefinition{
+			rdbmstool.UniqueKeyDefinition{
+				ColumnNames: []string{"account_id", "role_id"},
+			},
+		},
+		Indices: []rdbmstool.IndexKeyDefinition{},
 	}
 
 	def.Columns = append(def.Columns, rdbmstool.ColumnDefinition{
@@ -329,7 +333,7 @@ func validateAccountRoleTable(db *sql.DB, dbName string) error {
 	})
 
 	if err := validateTable(db, dbName, &def); err != nil {
-		return fmt.Errorf("Failed on validate role db table: %s", err.Error())
+		return fmt.Errorf("Failed on validate account_role db table: %s", err.Error())
 	}
 
 	return nil

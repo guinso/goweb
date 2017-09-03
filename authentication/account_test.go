@@ -70,8 +70,8 @@ func TestGetAccountByName(t *testing.T) {
 func TestGetAccountByID(t *testing.T) {
 	db := util.GetTestDB()
 
-	//TODO: change this hardcorded user ID where tally with database
-	account, err := GetAccountByID(db, "b60cc6e27b96817396a2ebcb557b8204")
+	//TODO: replace this hardcorded user ID from database
+	account, err := GetAccountByID(db, "2bb693c569f962aeaade0453f872bbff")
 	if err != nil {
 		t.Error(err.Error())
 	}
