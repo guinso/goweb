@@ -1,8 +1,31 @@
+<!DOCTYPE html>
 <html>
-
+<head>
+    <meta charset="utf-8" />
+    <title>Single Page w/o framework :)</title>
+</head>
 <body>
-    <h1>This is auto generated home page</h1>
-    <p>To customize content, plase go to ./static-files</p>
+    <!-- https://tutorialzine.com/2015/02/single-page-app-without-a-framework -->
+    <div class="main-content">
+        <div class="toolbar"></div>
+        <div class="side-bar"></div>
+        <div class="dynamic-content"></div>
+
+        <div class="content-loading">please wait...</div>
+    </div>
+
+    <div class="full-loading">
+        <spa>loading...</spa>
+    </div>
+
+    <div class="full-error">
+        <h3>Sorry, something went wrong :(</h3>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <!-- script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script-->
+    <script src="js/user.js"></script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>
