@@ -5,10 +5,15 @@ var JxHelper = {
         return $('.loading-panel');
     },
     showLoadingPanel : function() {
-        $('.loading-panel').addClass('visible');
+        $('.loading-panel').addClass('visible-panel');
     },
     hideLoadingPanel : function() {
-        $('.loading-panel').removeClass('visible');
+        $('.loading-panel').removeClass('visible-panel');
+    },
+
+    //content panel
+    getContentPanel : function() {
+        return $('.content-panel');
     },
 
     //hide all content

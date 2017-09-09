@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- [NOTE]      Bootstrap library is optional, all you need is JQuery library -->
+    <!-- [reference] https://tutorialzine.com/2015/02/single-page-app-without-a-framework -->      
+    
     <meta charset="utf-8" />
-    <title>Single Page w/o framework :)</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/panel.css">
-    <script src="js/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap specifiec metadata -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Single Page Appplication with minimum libraries dependency</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/jquery-3.2.1.min.js"></script>
 </head>
 <body>
-    <!-- https://tutorialzine.com/2015/02/single-page-app-without-a-framework -->
-
+    
     <!-- this is regular placeholder with topbar, side panel, and dynamic content size -->
-    <div class="main-content page">
+    <div class="main-content">
         <div class="top-panel">top</div>
         <div class="side-panel">side</div>
         <div class="content-panel">content</div>
+
+        <!-- this is regular content loading overlay -->
         <div class="loading-panel">please wait...</div> 
     </div>
 
@@ -28,11 +35,10 @@
         <span>loading...</span>
     </div>
 
-    <!-- this is major failed placeholder, e.g. 404 page not found -->
+    <!-- this is major error message placeholder, e.g. 404 page not found -->
     <div class="special-error page">
         <h3>Sorry, something went wrong :(</h3>
     </div>
-
     
     <!-- script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script-->
 
@@ -41,11 +47,25 @@
         $('.special-loading').addClass('visible');
     </script>
 
-    <script src="js/jxhelper.js"></script>
-    <script src="js/user.js"></script>
-    <script src="js/router.js"></script>
+    <!-- [START Import 3rd party library(s)] --> 
+    <!-- Bootstrap CSS (optional) -->
+    <link rel="stylesheet" 
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
+        integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" 
+        crossorigin="anonymous">
+    <!-- JS Propper (optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" 
+            integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" 
+            crossorigin="anonymous"></script>
+    <!-- Boostrap JS files (optional) -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" 
+            integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" 
+            crossorigin="anonymous"></script>
+    <!-- [DONE Import 3rd party library(s)] -->
 
-    <script src="js/script.js"></script>
+    <script src="/js/jxhelper.js"></script>
+    <script src="/js/router.js"></script>
+    <script src="/js/script.js"></script>
 </body>
  
 </html>

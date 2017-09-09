@@ -57,9 +57,9 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 
 	//sample return JSON
 	if strings.HasPrefix(trimURL, "meals") {
-		w.Header().Set("Content-Type", "application/json") //MIME to application/json
-		w.WriteHeader(http.StatusOK)                       //status code 200, OK
-		w.Write([]byte("{ msg: \"this is meal A \" }"))    //body text
+		w.Header().Set("Content-Type", "application/json")  //MIME to application/json
+		w.WriteHeader(http.StatusOK)                        //status code 200, OK
+		w.Write([]byte("{ \"msg\": \"this is meal A \" }")) //body text
 		return
 	}
 
