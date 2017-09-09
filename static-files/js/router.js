@@ -43,6 +43,8 @@ function Router() {
             JxHelper.showMainContent();
         } else if (paths[0] === "user"){
             renderPageFromJS('user', '/js/user/user.js');
+        } else if (paths[0] === "note") {
+            renderPageFromJS('note', '/js/note/note.js');
         } else {
             renderPageNotFound();
         }
