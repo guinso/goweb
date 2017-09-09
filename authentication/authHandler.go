@@ -93,13 +93,6 @@ func Logout(db rdbmstool.DbHandlerProxy, hashKey string) (bool, error) {
 //GetCurrentUser get current active session's user ID
 //anonymous user will return nil object
 func GetCurrentUser(db *sql.DB, hashKey string) (*AccountInfo, error) {
-	/*
-		cookie, _ := r.Cookie(cookieKey)
-		if cookie == nil {
-			//cookie not found; either timeout or logged out
-			return nil, nil
-		}
-	*/
 
 	loginSession, err := getLoginSessionByHashKey(db, hashKey)
 	if err != nil {

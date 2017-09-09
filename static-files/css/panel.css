@@ -1,0 +1,33 @@
+/* Panels */
+.top-panel {
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 40px;
+}
+
+.side-panel {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100px;
+    height: calc(100% - 40px);
+}
+
+.content-panel {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    margin-left: 100px;
+    height: calc(100% - 40px);
+    width: calc(100% - 100px);
+}
+
+.loading-panel {
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

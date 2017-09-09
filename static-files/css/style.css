@@ -1,0 +1,44 @@
+.main-content {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
+
+.special-content {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
+
+.special-loading {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
+
+.special-error {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+}
+
+.visible {
+    visibility: visible;
+}
+

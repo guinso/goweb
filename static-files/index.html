@@ -3,29 +3,49 @@
 <head>
     <meta charset="utf-8" />
     <title>Single Page w/o framework :)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/panel.css">
+    <script src="js/jquery-3.2.1.min.js"></script>
 </head>
 <body>
     <!-- https://tutorialzine.com/2015/02/single-page-app-without-a-framework -->
-    <div class="main-content">
-        <div class="toolbar"></div>
-        <div class="side-bar"></div>
-        <div class="dynamic-content"></div>
 
-        <div class="content-loading">please wait...</div>
+    <!-- this is regular placeholder with topbar, side panel, and dynamic content size -->
+    <div class="main-content page">
+        <div class="top-panel">top</div>
+        <div class="side-panel">side</div>
+        <div class="content-panel">content</div>
+        <div class="loading-panel">please wait...</div> 
     </div>
 
-    <div class="full-loading">
-        <spa>loading...</spa>
+    <!-- this is special case content placeholder, e.g. login page -->
+    <div class="special-content page">
+
     </div>
 
-    <div class="full-error">
+    <!-- this is special loading placeholder, e.g. page intialize loading -->
+    <div class="special-loading page">
+        <span>loading...</span>
+    </div>
+
+    <!-- this is major failed placeholder, e.g. 404 page not found -->
+    <div class="special-error page">
         <h3>Sorry, something went wrong :(</h3>
     </div>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    
     <!-- script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script-->
+
+    <script type="text/javascript">
+        //pre-loading script
+        $('.special-loading').addClass('visible');
+    </script>
+
+    <script src="js/jxhelper.js"></script>
     <script src="js/user.js"></script>
+    <script src="js/router.js"></script>
+
     <script src="js/script.js"></script>
 </body>
-
+ 
 </html>
