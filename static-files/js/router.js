@@ -47,6 +47,8 @@ function Router() {
             renderPageFromJS('user', '/js/user/user.js');
         } else if (paths[0] === "note") {
             renderPageFromJS('note', '/js/note/note.js');
+        } else if (paths[0] === "login") {
+            renderPageFromJS('login', '/js/login/login.js');
         } else {
             renderPageNotFound();
         }

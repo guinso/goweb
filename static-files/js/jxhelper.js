@@ -34,12 +34,23 @@ var JxHelper = {
 
     //special error
     getSpecialError : function() {
-        return $('.special-content');
+        return $('.special-error');
     },
     showSpecialError : function() {
-        $('.special-content').addClass('visible');
+        $('.special-error').addClass('visible');
     },
     hideSpecialError : function() {
+        $('.special-error').removeClass('visible');
+    },
+
+    //special content
+    getSpecialContent : function() {
+        return $('.special-content');
+    },
+    showSpecialContent : function() {
+        $('.special-content').addClass('visible');
+    },
+    hideSpecialContent : function() {
         $('.special-content').removeClass('visible');
     },
 
