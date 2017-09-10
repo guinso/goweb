@@ -1,28 +1,35 @@
 function Note() {
     this.renderPage = function() {
-        var contentPanel = document.getElementsByClassName('content-panel')[0];
-        contentPanel.innerHTML = "";
-        contentPanel.appendChild(_render({}));
+        JxHelper.showLoadingPanel();
+        
+        var partial = $.get({url:"/js/note/partial.html", cache:true});
+
+        $.when(partial)
+            .done(function(data){
+                var tmp =  _render(data);
+
+                JxHelper.getContentPanel()
+                    .empty()
+                    .append(tmp);
+            })
+            .fail(function(xhr, statusCode, error){
+                JxHelper.getSpecialError()
+                    .html("<h2>Opps, something wrong happen :(")
+                    .addClass("visible");
+            })
+            .always(function(){
+                JxHelper.hideLoadingPanel();
+            });
     }
 
-    var _render = function(data) {
-        todos = _generateToDoItem("buy lunch") 
-            + _generateToDoItem("mop floor")
-            + _generateToDoItem("clean dishes");
+    var _render = function(partial) {
 
-        var element = document.createElement('div');
-        element.className = "container";
-        element.innerHTML = 
-        '<div class="row">\
-            <div class="col">\
-                <h2>TODO</h2>\
-            </div>\
-        </div>\
-        <div class="row">\
-            <div class="col-md-2">\
-                <ul>' + todos + '</ul>\
-            </div>\
-        </div>';
+        var element = $(partial);
+
+        element.find('.todo-holder')
+            .append(_generateToDoItem("buy lunch"))
+            .append(_generateToDoItem("mop floor"))
+            .append(_generateToDoItem("clean dishes"));
 
         //TODO: bind event for each todo item
 
@@ -30,6 +37,6 @@ function Note() {
     }
 
     var _generateToDoItem = function(message) {
-        return '<li class="todo-item">' + message + '</li>';
+        return $('<li class="todo-item">' + message + '</li>');
     }
 }

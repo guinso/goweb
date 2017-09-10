@@ -10,55 +10,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <title>Single Page Appplication with minimum libraries dependency</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/jquery-3.2.1.min.js"></script>
 </head>
 <body>
-    
     <!-- this is regular placeholder with topbar, side panel, and dynamic content size -->
-    <div class="main-content">
-        <div class="top-panel">top</div>
-        <div class="side-panel">
-            <a href="#user">User</a><br/>
-            <a href="#note">TODO</a><br/>
-            <a href="#qwe">Qwe</a><br/>
-            <a href="#asd">Asd</a><br/>
-        </div>
-        <div class="content-panel">content</div>
-
-        <!-- this is regular content loading overlay -->
-        <div class="loading-panel">please wait...</div> 
-    </div>
+    <div class="main-content"></div>
 
     <!-- this is special case content placeholder, e.g. login page -->
-    <div class="special-content page">
-
-    </div>
+    <div class="special-content page"></div>
 
     <!-- this is special loading placeholder, e.g. page intialize loading -->
     <div class="special-loading page">
-        <span>loading...</span>
+        Loading...
     </div>
 
     <!-- this is major error message placeholder, e.g. 404 page not found -->
-    <div class="special-error page">
-        <h3>Sorry, something went wrong :(</h3>
-    </div>
+    <div class="special-error page"></div>
     
+    <link rel="stylesheet" href="/css/style.css"></link>
     
-
-    <script type="text/javascript">
-        //pre-loading script
-        $('.special-loading').addClass('visible');
-    </script>
 
     <!-- [START Import 3rd party library(s)] --> 
+    <!---->
+    <!---->
     <!-- Bootstrap -->
-    <link rel="stylesheet" link="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="/css/bootstrap-grid.min.css"></link>
+    <link rel="stylesheet" href="/css/bootstrap-reboot.min.css"></link>
+
+    <script src="/js/jquery-3.2.1.min.js"></script>
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-    <!--
-    <link rel="stylesheet" 
+    
+    <!--link rel="stylesheet" 
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
         integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" 
         crossorigin="anonymous">
@@ -67,9 +50,11 @@
             crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" 
             integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" 
-            crossorigin="anonymous"></script>-->
+            crossorigin="anonymous"></script-->
     <!-- Handlebar -->
     <!-- script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script-->
+    <!---->
+    <!---->
     <!-- [DONE Import 3rd party library(s)] -->
 
     <script src="/js/jxhelper.js"></script>

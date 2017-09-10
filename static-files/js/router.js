@@ -26,7 +26,9 @@ function Router() {
         //hide whatever page is currently shown
         JxHelper.hideAllContent();
 
-        if (paths[0] === "asd") {
+        if (paths[0] === "") {
+            location.href="#user"; //redirect to user page...
+        } else if (paths[0] === "asd") {
             var mainContent = JxHelper.getContentPanel();
 
             mainContent.html('<a href="#qwe" class="aaa">QWE</a>');
@@ -67,7 +69,8 @@ function Router() {
                     cache[key] = (new Function("return new " + data))();
 
                     JxHelper.hideSpecialLoading();
-                    cache[key].renderPage();
+                    var tmp = cache[key];
+                    tmp.renderPage();
                 })
                 .fail(function(xhr, statusCode, error){
                     JxHelper.getSpecialError()
