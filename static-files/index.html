@@ -66,27 +66,37 @@
                                 popperRes, jxHelperRes, routerRes){
                     var body = document.getElementsByTagName("body")[0];
 
+                    //3. add base tyle CSS
                     appendElement(body, "style", styleRes[0]);
                     $(".special-loading").addClass("visible");
                     
+                    //# add Bootstrap CSS (optional)
                     appendElement(body, "style", bsMainRes[0]);
                     appendElement(body, "style", bsGridRes[0]);
                     appendElement(body, "style", bsRebotRes[0]);
 
+                    //# add popperJS (optional)
                     appendElement(body, "script", popperRes[0]);
+
+                    //4. add JxHelper, and router javascript
                     appendElement(body, "script", jxHelperRes[0]);
                     appendElement(body, "script", routerRes[0]);
 
                     return $.get({url:"/js/bootstrap.min.js", cache:true});
                 })
                 .then(function(boostrapJS){
+
+                    //# add bootstrap javascript (optional)
                     appendElement(
                         document.getElementsByTagName("body")[0], 
                         "script", 
                         boostrapJS);
+
                     return $.get({url:"/js/script.js",mathod:"GET", cache:true});
                 })
                 .then(function(scriptRes){
+
+                    //5. add and run post-script
                     appendElement(
                         document.getElementsByTagName("body")[0], 
                         "script", 
@@ -113,44 +123,5 @@
         }
     })();
     </script>
-
-
 </body>
- 
 </html>
-
-<!--link rel="stylesheet" href="/css/style.css"></link-->
-
-
-<!-- [START Import 3rd party library(s)] --> 
-<!-- Bootstrap 
-<link rel="stylesheet" href="/css/bootstrap.min.css"></link>
-<link rel="stylesheet" href="/css/bootstrap-grid.min.css"></link>
-<link rel="stylesheet" href="/css/bootstrap-reboot.min.css"></link>
-
-<script src="/js/jquery-3.2.1.min.js"></script>
-<script src="/js/popper.min.js"></script>
-<script src="/js/bootstrap.min.js"></script-->
-<!-- [DONE Import 3rd party library(s)] -->
-
-<!--
-<script src="/js/jxhelper.js"></script>
-<script src="/js/router.js"></script>
-<script src="/js/script.js"></script>
--->
-
-
-
-
-<!--link rel="stylesheet" 
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
-        integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" 
-        crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" 
-            integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" 
-            crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" 
-            integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" 
-            crossorigin="anonymous"></script-->
-    <!-- Handlebar -->
-    <!-- script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script-->
