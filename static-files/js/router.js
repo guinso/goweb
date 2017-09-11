@@ -5,13 +5,13 @@ function Router() {
     var cache = {};
 
     this.registerEventListener = function() {
-        window.onhashchange = function(){
-            
+        window.onhashchange = function() {
+
             //on every change the render function is called with the new hash
             //this is how the navigation of our app happends.
             that.resolve(decodeURI(window.location.hash));
-        }
-    }
+        };
+    };
 
     this.resolve = function(url) {
         //This function decides what type of page to show
@@ -26,10 +26,13 @@ function Router() {
         //hide whatever page is currently shown
         JxHelper.hideAllContent();
 
+        //TODO: render side panel menu items
+
+        var mainContent = JxHelper.getContentPanel();
+
         if (paths[0] === "") {
-            location.href="#user"; //redirect to user page...
+            location.href = "#user"; //redirect to user page...
         } else if (paths[0] === "asd") {
-            var mainContent = JxHelper.getContentPanel();
 
             mainContent.html('<a href="#qwe" class="aaa">QWE</a>');
             mainContent.find('.aaa').css("color", "green");
@@ -37,22 +40,31 @@ function Router() {
             JxHelper.showMainContent();
 
         } else if (paths[0] === "qwe") {
-            var mainContent = JxHelper.getContentPanel();
 
             mainContent.html('<a href="#asd">ASD</a><br/>' +
                 '<a href="#user">User</a>');
 
             JxHelper.showMainContent();
-        } else if (paths[0] === "user"){
-            renderPageFromJS('user', '/js/user/user.js');
+        } else if (paths[0] === "user") {
+            getModule('user', '/js/user/user.js', function(user) {
+                user.renderPage();
+            });
         } else if (paths[0] === "note") {
-            renderPageFromJS('note', '/js/note/note.js');
+            getModule('note', '/js/note/note.js', function(note) {
+                note.renderPage();
+            });
         } else if (paths[0] === "login") {
-            renderPageFromJS('login', '/js/login/login.js');
+            getModule('login', '/js/login/login.js', function(login) {
+                login.renderPage();
+            });
+        } else if (paths[0] === "logout") {
+            getModule('login', '/js/note/login.js', function(login) {
+                login.logout();
+            });
         } else {
             renderPageNotFound();
         }
-    }
+    };
 
     function renderPageNotFound() {
         JxHelper.getSpecialError()
@@ -60,27 +72,26 @@ function Router() {
             .addClass('visible');
     }
 
-    function renderPageFromJS(key, URL) {
+    function getModule(key, url, execFn) {
         if (!cache[key]) {
-            
             JxHelper.showSpecialLoading();
 
-            $.getScript({url:URL, cache:true})
-                .done(function(data){
+            $.getScript({ url: URL, cache: true })
+                .done(function(data) {
                     var code = "return new " + data;
                     cache[key] = (new Function("return new " + data))();
 
                     JxHelper.hideSpecialLoading();
                     var tmp = cache[key];
-                    tmp.renderPage();
+                    execFn(tmp);
                 })
-                .fail(function(xhr, statusCode, error){
+                .fail(function(xhr, statusCode, error) {
                     JxHelper.getSpecialError()
                         .html('<h1>There is problem try to connect to server</h1>')
                         .addClass('visible');
                 });
         } else {
-            cache[key].renderPage();
+            execFn(cache[key]);
         }
     }
 

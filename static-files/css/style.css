@@ -9,7 +9,7 @@ body {
     top: 0;
     bottom: 0;
     width: 100%;
-    background-color:transparent;
+    background-color: transparent;
 }
 
 .special-content {
@@ -43,44 +43,5 @@ body {
 }
 
 .visible {
-    visibility: visible;
-}
-
-/* Panels */
-.top-panel {
-    width: 100%;
-    top: 0;
-    left: 0;
-    height: auto;
-}
-
-.side-panel {
-    position: absolute;
-    top: 56px;
-    left: 0;
-    width: 100px;
-    height: calc(100% - 56px);
-}
-
-.content-panel {
-    position: absolute;
-    top: 56px;
-    left: 0;
-    margin-left: 100px;
-    height: calc(100% - 56px);
-    width: calc(100% - 100px);
-}
-
-.loading-panel {
-    visibility: hidden;
-    position: absolute;
-    top: 56px;
-    left: 0;
-    width: 100%;
-    height: calc(100% - 56px);
-    background-color: white;
-}
-
-.visible-panel {
     visibility: visible;
 }

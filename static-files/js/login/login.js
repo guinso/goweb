@@ -4,8 +4,8 @@ function Login() {
             .html('redirecting to login page...')
             .addClass('visible');
 
-        $.get({url:"/js/login/partial.html", cache:true})
-            .done(function(partial){
+        $.get({ url: "/js/login/partial.html", cache: true })
+            .done(function(partial) {
                 JxHelper.getSpecialContent().html(partial);
 
                 //setup event handler
@@ -14,11 +14,11 @@ function Login() {
                 JxHelper.showSpecialContent();
                 JxHelper.hideSpecialLoading();
 
-                setTimeout(function(){
+                setTimeout(function() {
                     $('.login-placeholder').addClass('show-login');
                 }, 100);
             })
-            .fail(function(xhr, statusCode, error){
+            .fail(function(xhr, statusCode, error) {
                 JxHelper.getSpecialError()
                     .html("<h2>Opps, there's problem to load login page from server</h2>");
                 JxHelper.showSpecialError();
@@ -27,5 +27,15 @@ function Login() {
 
     var setupEventHandler = function() {
         //TODO: implement event handler
+    };
+
+    this.logout = function() {
+        //TODO: handle logout
+        location.href = "#login";
+    };
+
+    this.login = function(username, password) {
+        //TODO: handler login
+        location.href = '#';
     };
 }
