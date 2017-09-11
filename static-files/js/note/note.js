@@ -40,3 +40,4 @@ function Note() {
         return $('<li class="todo-item">' + message + '</li>');
     }
 }
+//# sourceURL=note.js

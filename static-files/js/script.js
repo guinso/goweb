@@ -22,3 +22,4 @@ $(function() {
             JxHelper.showSpecialError();
         });
 });
+//# sourceURL=script.js

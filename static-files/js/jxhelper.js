@@ -42,6 +42,11 @@ var JxHelper = {
     hideSpecialError : function() {
         $('.special-error').removeClass('visible');
     },
+    showServerErrorMessage :function() {
+        JxHelper.getSpecialError()
+            .html("<h2>Opps, there's problem try to connect to server</h2>");
+        JxHelper.showSpecialError();
+    },
 
     //special content
     getSpecialContent : function() {
@@ -65,3 +70,4 @@ var JxHelper = {
         $('.special-loading').removeClass('visible');
     }
 }
+//# sourceURL=jxhelper.js

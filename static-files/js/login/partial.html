@@ -46,6 +46,16 @@ div .login {
 
 .login-placeholder .login-btn {
     float: right;
+    margin-top: -30px;
+}
+
+#loginFailMsg {
+    opacity: 1;
+}
+
+.show-login-msg {
+    opacity: 1;
+    transition: 1s;
 }
 </style>
 <div class="login">
@@ -58,7 +68,7 @@ div .login {
                     <h2 class="display-4 text-center">Login</h2>
                 </div>
             </div>
-            <form>
+            <form id="loginForm">
                 <div class="form-group">
                     <input  type="text" class="form-control" 
                             id="usernameCtl" aria-describedby="usernameHelp"
@@ -68,6 +78,7 @@ div .login {
                     <input type="password" class="form-control"
                             id="pwdCtl" aria-describedby="passwordHelp"
                             placeholder="password" />
+                            <small id="loginFailMsg" class="form-text ">please fill in your credential</small>
                 </div>
                 <div class="form-row">
                     <div class="col">

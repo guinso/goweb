@@ -19,23 +19,70 @@ function Login() {
                 }, 100);
             })
             .fail(function(xhr, statusCode, error) {
-                JxHelper.getSpecialError()
-                    .html("<h2>Opps, there's problem to load login page from server</h2>");
-                JxHelper.showSpecialError();
+                JxHelper.showServerErrorMessage();
             });
     };
 
     var setupEventHandler = function() {
-        //TODO: implement event handler
+        //implement event handler
+        $('#loginForm').submit(function(e){
+            console.log('entering login form submit handler...');
+
+            var jsonData = {
+                username: $('#usernameCtl').val(),
+                pwd: $('#pwdCtl').val()
+            };
+
+            var username =  $('#usernameCtl').val();
+
+            var loginMsg = $('#loginFailMsg');
+            loginMsg.removeClass('text-danger');
+            loginMsg.html("try login...");
+
+            console.log('start send POST request');
+            $.post({
+                url:'/api/login', 
+                contentType:'application/json', 
+                data: JSON.stringify(jsonData)})
+                .done(function(data){
+                    response = JSON.parse(data);
+
+                    if (response.statusCode === 0) {
+                        loginMsg.html("login success");
+                        
+                        window.location = "/"; //redirect to default page
+                    } else {
+                        loginMsg.html(response.statusMsg);
+                        loginMsg.addClass('text-danger');
+                    }
+                })
+                .fail(function(xhr, statusCode, error){
+                    JxHelper.showServerErrorMessage();
+                });
+
+            e.preventDefault();
+        });
     };
 
     this.logout = function() {
-        //TODO: handle logout
-        location.href = "#login";
-    };
+        //handle logout
+        $.post({url:"api/logout"})
+            .done(function(response){
+                var data = JSON.parse(response);
 
-    this.login = function(username, password) {
-        //TODO: handler login
-        location.href = '#';
+                if(data.statusCode === 0) {
+                    //logout success
+                    window.location = "/#login";
+                } else {
+                    //logout failed
+                    JxHelper.getSpecialError()
+                        .html("<h3>opps, failed to logout...</h3><p>" + data.statusMsg + "</p>")
+                        .addClass('visible');
+                }
+            })
+            .fail(function(xhr, statusCode, error){
+                JxHelper.showServerErrorMessage();
+            });
     };
 }
+//# sourceURL=login.js

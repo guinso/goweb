@@ -14,13 +14,13 @@ import (
 //AccountInfo account info from database
 type AccountInfo struct {
 	//AccountId account ID
-	AccountID string
+	AccountID string `json:"id"`
 	//Username username
-	Username string
+	Username string `json:"username"`
 	//SaltedPwd pasword that had been hashed
-	SaltedPwd string
+	SaltedPwd string `json:"-"`
 
-	Roles []string
+	Roles []string `json:"-"`
 }
 
 //AddAccount insert new account record into database

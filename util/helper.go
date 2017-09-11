@@ -76,7 +76,7 @@ func SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, j
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(fmt.Sprintf(
-		"{statusCode:%d, statusMsg:\"%s\", response:%s}",
+		"{\"statusCode\":%d, \"statusMsg\":\"%s\", \"response\":%s}",
 		statusCode, statusMsg, json)))
 }
 

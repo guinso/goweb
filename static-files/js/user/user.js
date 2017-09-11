@@ -22,3 +22,4 @@ function User() {
             });
     }
 }
+//# sourceURL=user.js

@@ -17,6 +17,33 @@ function Router() {
         //This function decides what type of page to show
         //depending on the current url hash value.
 
+        //check current login ID
+        $.get('/api/current-user')
+            .done(function(response){
+                var data = JSON.parse(response);
+                if (data.statusCode === 0) {
+                    if(data.response.id === "-") {
+                         //show login page
+                        getModule('login', '/js/login/login.js', function(login) {
+                            login.renderPage();
+                        });
+                    } else {
+                        $('#usernameHolder').html(data.response.username); //TODO: get full name
+                        actualRouting(url);
+                    }
+                } else {
+                    //show login page
+                    getModule('login', '/js/login/login.js', function(login) {
+                        login.renderPage();
+                    });
+                }
+            })
+            .fail(function(){
+                JxHelper.showServerErrorMessage();
+            });
+    };
+
+    function actualRouting(url) {
         //get the keyword from the url
         if (url[0] === "#") {
             url = url.substring(1);
@@ -58,13 +85,13 @@ function Router() {
                 login.renderPage();
             });
         } else if (paths[0] === "logout") {
-            getModule('login', '/js/note/login.js', function(login) {
+            getModule('login', '/js/login/login.js', function(login) {
                 login.logout();
             });
         } else {
             renderPageNotFound();
         }
-    };
+    }
 
     function renderPageNotFound() {
         JxHelper.getSpecialError()
@@ -72,11 +99,11 @@ function Router() {
             .addClass('visible');
     }
 
-    function getModule(key, url, execFn) {
+    function getModule(key, urlVal, execFn) {
         if (!cache[key]) {
             JxHelper.showSpecialLoading();
 
-            $.getScript({ url: URL, cache: true })
+            $.getScript({ url: urlVal, cache: true })
                 .done(function(data) {
                     var code = "return new " + data;
                     cache[key] = (new Function("return new " + data))();
@@ -86,9 +113,7 @@ function Router() {
                     execFn(tmp);
                 })
                 .fail(function(xhr, statusCode, error) {
-                    JxHelper.getSpecialError()
-                        .html('<h1>There is problem try to connect to server</h1>')
-                        .addClass('visible');
+                    JxHelper.showServerErrorMessage();
                 });
         } else {
             execFn(cache[key]);
@@ -99,3 +124,4 @@ function Router() {
         return strCompare.indexOf(prefix) === 0;
     }
 }
+//# sourceURL=router.js

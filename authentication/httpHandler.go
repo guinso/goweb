@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,9 +18,48 @@ func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimU
 		return handleHTTPLogin(db, w, r)
 	} else if strings.HasPrefix(trimURL, "logout") && util.IsPOST(r) {
 		return handleHTTPLogout(db, w, r)
+	} else if strings.Compare(trimURL, "current-user") == 0 && util.IsGET(r) {
+		return handleCurrentUser(db, w, r)
 	}
 
 	return false
+}
+
+func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
+
+	var user *AccountInfo
+
+	cookie, err := r.Cookie(cookieKey)
+	if cookie == nil {
+		//cookie not found; either timeout or logged out
+		user = nil
+	} else {
+		hashKey := cookie.Value
+		user, err = GetCurrentUser(db, hashKey)
+		if err != nil {
+			util.SendHTTPErrorResponse(w)
+			return true
+		}
+	}
+
+	if user == nil {
+		user = &AccountInfo{
+			AccountID: "-",
+			Username:  "",
+			SaltedPwd: "",
+			Roles:     []string{}}
+	}
+
+	jsonStr, jsonErr := json.Marshal(user)
+	if jsonErr != nil {
+		util.SendHTTPErrorResponse(w)
+		fmt.Printf("[current-user] fail to encode JSON: %s\n", jsonErr.Error())
+		return true
+	}
+
+	util.SendHTTPResponse(w, 0, "", string(jsonStr))
+
+	return true
 }
 
 func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
@@ -64,19 +104,19 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 		}
 		http.SetCookie(w, &cookie)
 
-		util.SendHTTPResponse(w, 0, "login success", "")
+		util.SendHTTPResponse(w, 0, "login success", "{}")
 		break
 	case LoginFailed:
 		util.SendHTTPResponse(w, -1, "username or password not match", "{}")
 		return true
 	case AlreadyLoggedIn:
 		msg := fmt.Sprintf(
-			"user <%s> already logged in. Please logout and try again\n",
+			"user [%s] already logged in. Please logout and try it again",
 			loginReq.Username)
 		util.SendHTTPResponse(w, -1, msg, "{}")
 		break
 	default:
-		fmt.Printf("[login] unknown login status: %d\n", loginStatus)
+		fmt.Printf("[login] unknown login status: %d", loginStatus)
 		util.SendHTTPErrorResponse(w)
 		break
 	}
