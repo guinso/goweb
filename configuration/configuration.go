@@ -1,13 +1,19 @@
-package main
+package configuration
 
 import (
+	"os"
 	"strconv"
 	"strings"
 
 	ini "gopkg.in/ini.v1"
 )
 
-type configInfo struct {
+const (
+	configFilename = "config.ini"
+)
+
+//ConfigInfo configuration file information
+type ConfigInfo struct {
 	DbAddress   string //database address; e.g. localhost
 	DbName      string //database name
 	DbUsername  string //database username
@@ -20,7 +26,8 @@ type configInfo struct {
 	StaticDir  string //directory where store direct access physical files; e.g. index.html
 }
 
-func initializeConfiguration() (*configInfo, error) {
+//InitializeConfiguration init .ini file
+func InitializeConfiguration() (*ConfigInfo, error) {
 	//check INI file exists or not; otherwise create one
 	if !isFileExists(configFilename) {
 		cfg := ini.Empty()
@@ -64,11 +71,12 @@ func initializeConfiguration() (*configInfo, error) {
 		}
 	}
 
-	return loadConfiguration(configFilename)
+	return LoadConfiguration()
 }
 
-func loadConfiguration(filename string) (*configInfo, error) {
-	cfg, err := ini.InsensitiveLoad(filename) //ignore capital letter key, all keys is small letter
+//LoadConfiguration load .ini file
+func LoadConfiguration() (*ConfigInfo, error) {
+	cfg, err := ini.InsensitiveLoad(configFilename) //ignore capital letter key, all keys is small letter
 
 	//save configuration to physical INI file before exit
 	defer cfg.SaveTo(configFilename)
@@ -77,7 +85,7 @@ func loadConfiguration(filename string) (*configInfo, error) {
 		return nil, err
 	}
 
-	config := configInfo{}
+	config := ConfigInfo{}
 
 	dbSection, err := cfg.GetSection("database")
 	if err != nil {
@@ -141,4 +149,26 @@ func getConfigInt(section *ini.Section, key string, defaultValue string) (int, e
 
 	section.NewKey(key, defaultValue)
 	return strconv.Atoi(defaultValue)
+}
+
+func isFileExists(filename string) bool {
+	if _, err := os.Stat(filename); err != nil {
+		if os.IsNotExist(err) {
+			return false //file not found
+		}
+
+		return false //stat command error
+	}
+
+	return true //file exists
+}
+
+func isDirectoryExists(directoryName string) (bool, error) {
+	stat, err := os.Stat(directoryName)
+
+	if err != nil {
+		return false, nil //other errors
+	}
+
+	return stat.IsDir(), nil
 }

@@ -24,16 +24,13 @@ import (
 
 	//explicitly include GO mysql library
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/guinso/goweb/configuration"
 	"github.com/guinso/goweb/util"
-)
-
-const (
-	configFilename = "config.ini"
 )
 
 func main() {
 	//read configuration file; create if not found
-	config, configErr := initializeConfiguration()
+	config, configErr := configuration.InitializeConfiguration()
 	if configErr != nil {
 		fmt.Printf("Failed to load configuration: %s", configErr.Error())
 		return
@@ -81,7 +78,7 @@ func startWebServer(port int) error {
 	//x http.ListenAndServeTLS("/", "abc.crt", "abc.key", handler)
 }
 
-func checkDbConnection(config *configInfo) (*sql.DB, error) {
+func checkDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 	//TODO:  handle various database vendor
 	dbx, err := sql.Open("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8",
@@ -103,7 +100,7 @@ func checkDbConnection(config *configInfo) (*sql.DB, error) {
 	return dbx, nil
 }
 
-func initFilesAndDirs(config *configInfo) error {
+func initFilesAndDirs(config *configuration.ConfigInfo) error {
 	exists, err := isDirectoryExists(config.LogicDir)
 	if err != nil {
 		fmt.Printf("Failed to check logical directory: %s", err.Error())

@@ -33,6 +33,7 @@ func GetDB() *sql.DB {
 //GetTestDB get database handler for unit test
 //WARNING: don't use it in source code other than unit test!
 func GetTestDB() *sql.DB {
+
 	if dbb == nil {
 		dbTest, dbErr := sql.Open("mysql", fmt.Sprintf(
 			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
@@ -40,7 +41,7 @@ func GetTestDB() *sql.DB {
 			"",          //password
 			"localhost", //server location
 			3306,        //database port number
-			"test"))     //database name
+			"goweb"))    //database name
 
 		if dbErr != nil {
 			panic(dbErr)
