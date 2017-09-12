@@ -9,6 +9,7 @@ import (
 )
 
 /*
+//NOTE: Remember go to util/helper.go modify GetTestDB() content
 func TestGenerateRecords(t *testing.T) {
 	//generate all database records
 	db := util.GetTestDB()
