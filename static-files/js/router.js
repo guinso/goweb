@@ -18,13 +18,13 @@ function Router() {
         //depending on the current url hash value.
 
         //check current login ID
-        $.get('/api/current-user')
+        $.get('api/current-user')
             .done(function(response){
                 var data = JSON.parse(response);
                 if (data.statusCode === 0) {
                     if(data.response.id === "-") {
                          //show login page
-                        getModule('login', '/js/login/login.js', function(login) {
+                        getModule('login', 'js/login/login.js', function(login) {
                             login.renderPage();
                         });
                     } else {
@@ -33,7 +33,7 @@ function Router() {
                     }
                 } else {
                     //show login page
-                    getModule('login', '/js/login/login.js', function(login) {
+                    getModule('login', 'js/login/login.js', function(login) {
                         login.renderPage();
                     });
                 }
@@ -73,19 +73,19 @@ function Router() {
 
             JxHelper.showMainContent();
         } else if (paths[0] === "user") {
-            getModule('user', '/js/user/user.js', function(user) {
+            getModule('user', 'js/user/user.js', function(user) {
                 user.renderPage();
             });
         } else if (paths[0] === "note") {
-            getModule('note', '/js/note/note.js', function(note) {
+            getModule('note', 'js/note/note.js', function(note) {
                 note.renderPage();
             });
         } else if (paths[0] === "login") {
-            getModule('login', '/js/login/login.js', function(login) {
+            getModule('login', 'js/login/login.js', function(login) {
                 login.renderPage();
             });
         } else if (paths[0] === "logout") {
-            getModule('login', '/js/login/login.js', function(login) {
+            getModule('login', 'js/login/login.js', function(login) {
                 login.logout();
             });
         } else {

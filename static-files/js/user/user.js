@@ -3,9 +3,9 @@ function User() {
     this.renderPage = function() {
         JxHelper.showLoadingPanel();
 
-        var partial = $.get({url:"/js/user/partial.html", cache:true});
-        var userData = $.get({url:"/js/user/dummy.json", cache: false});
-        var optionalDemo = $.get({url:"/api/meals", cache:false});
+        var partial = $.get({url:"js/user/partial.html", cache:true});
+        var userData = $.get({url:"js/user/dummy.json", cache: false});
+        var optionalDemo = $.get({url:"api/meals", cache:false});
 
         $.when(partial, userData, optionalDemo)
             .done(function(partialResponse, userDataResponse, demoResponse) {
@@ -22,4 +22,4 @@ function User() {
             });
     }
 }
-//# sourceURL=user.js
+//# sourceURL=user/user.js

@@ -71,7 +71,7 @@ func TestGetAccountByID(t *testing.T) {
 	db := util.GetTestDB()
 
 	//TODO: replace this hardcorded user ID from database
-	account, err := GetAccountByID(db, "feb5f981c02336a46f35fea5fd9aa2c7")
+	account, err := GetAccountByID(db, "f9dc047dee9e82f2e441c5a7f6141b7a")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -89,5 +89,24 @@ func TestGetAccountByID(t *testing.T) {
 		t.Error(err.Error())
 	} else if account != nil {
 		t.Error("Account 'sucy' shouldn't be found in account datatable")
+	}
+}
+
+func TestGetAccount(t *testing.T) {
+	db := util.GetTestDB()
+
+	accs, accErr := GetAccount(db, AccountSearchParam{
+		PageSize:  10,
+		PageIndex: 0,
+		Keyword:   "mary",
+	})
+
+	if accErr != nil {
+		t.Error(accErr)
+		return
+	}
+
+	if len(accs) != 1 {
+		t.Errorf("Expect return one record (mary), but get %d instead", len(accs))
 	}
 }

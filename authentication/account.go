@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/guinso/goweb/util"
+	"github.com/guinso/rdbmstool/query"
 	"github.com/guinso/stringtool"
 
 	"github.com/guinso/rdbmstool"
@@ -21,6 +22,13 @@ type AccountInfo struct {
 	SaltedPwd string `json:"-"`
 
 	Roles []string `json:"-"`
+}
+
+//AccountSearchParam search account parameter
+type AccountSearchParam struct {
+	PageSize  int
+	PageIndex int
+	Keyword   string
 }
 
 //AddAccount insert new account record into database
@@ -60,7 +68,14 @@ func GetAccountByName(db rdbmstool.DbHandlerProxy, username string) (*AccountInf
 		return nil, err
 	}
 
-	return formatAccountInfo(db, rows)
+	if rows.Next() {
+		result, resultErr := formatAccountInfo(db, rows)
+		rows.Close()
+
+		return result, resultErr
+	}
+
+	return nil, nil
 }
 
 //GetAccountByID get account information by user ID
@@ -72,34 +87,89 @@ func GetAccountByID(db rdbmstool.DbHandlerProxy, userID string) (*AccountInfo, e
 		return nil, err
 	}
 
-	return formatAccountInfo(db, rows)
+	if rows.Next() {
+		result, resultErr := formatAccountInfo(db, rows)
+		rows.Close()
+
+		return result, resultErr
+	}
+
+	return nil, nil
+}
+
+//GetAccount get account
+func GetAccount(db rdbmstool.DbHandlerProxy, parameter AccountSearchParam) ([]AccountInfo, error) {
+	//sanatize parameter
+	parameter.Keyword = strings.TrimSpace(parameter.Keyword)
+
+	if parameter.PageIndex < 0 {
+		parameter.PageIndex = 0
+	}
+
+	if parameter.PageSize < 1 {
+		parameter.PageSize = 10
+	}
+
+	result := []AccountInfo{}
+	sqlStr, err := query.NewSelectSQLBuilder().
+		Select("*", "").
+		From("account", "").
+		WhereOR(query.LIKE, "username", "?").
+		Limit(parameter.PageSize, parameter.PageIndex*parameter.PageSize).
+		SQL()
+
+	if err != nil {
+		return nil, err
+	}
+
+	stmt, stmtErr := db.Prepare(sqlStr)
+	if stmtErr != nil {
+		return nil, stmtErr
+	}
+	rows, queryErr := stmt.Query(parameter.Keyword)
+	if queryErr != nil {
+		return nil, queryErr
+	}
+
+	for rows.Next() {
+		accInfo, accErr := formatAccountInfo(db, rows)
+		if accErr != nil {
+			rows.Close()
+			return nil, accErr
+		}
+
+		result = append(result, *accInfo)
+	}
+	rows.Close()
+
+	return result, nil
 }
 
 func formatAccountInfo(db rdbmstool.DbHandlerProxy, rows *sql.Rows) (*AccountInfo, error) {
 	//defer rows.Close()
 
-	if rows.Next() {
-		var tmpID, tmpUsername, tmpPwd string
-		if err := rows.Scan(&tmpID, &tmpUsername, &tmpPwd); err != nil {
-			rows.Close()
-			return nil, err
-		}
-
-		rows.Close()
-
-		//get all related roles
-		roles, err := getRolesByAccountID(db, tmpID)
-		if err != nil {
-			return nil, err
-		}
-
-		return &AccountInfo{
-			AccountID: tmpID,
-			Username:  tmpUsername,
-			SaltedPwd: tmpPwd,
-			Roles:     roles,
-		}, nil
+	//if rows.Next() {
+	var tmpID, tmpUsername, tmpPwd string
+	if err := rows.Scan(&tmpID, &tmpUsername, &tmpPwd); err != nil {
+		//rows.Close()
+		return nil, err
 	}
 
-	return nil, nil
+	//rows.Close()
+
+	//get all related roles
+	roles, err := getRolesByAccountID(db, tmpID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AccountInfo{
+		AccountID: tmpID,
+		Username:  tmpUsername,
+		SaltedPwd: tmpPwd,
+		Roles:     roles,
+	}, nil
+	//}
+
+	//return nil, nil
 }

@@ -4,7 +4,7 @@ function Login() {
             .html('redirecting to login page...')
             .addClass('visible');
 
-        $.get({ url: "/js/login/partial.html", cache: true })
+        $.get({ url: "js/login/partial.html", cache: true })
             .done(function(partial) {
                 JxHelper.getSpecialContent().html(partial);
 
@@ -41,7 +41,7 @@ function Login() {
 
             console.log('start send POST request');
             $.post({
-                url:'/api/login', 
+                url:'api/login', 
                 contentType:'application/json', 
                 data: JSON.stringify(jsonData)})
                 .done(function(data){
@@ -72,7 +72,7 @@ function Login() {
 
                 if(data.statusCode === 0) {
                     //logout success
-                    window.location = "/#login";
+                    window.location = "#login";
                 } else {
                     //logout failed
                     JxHelper.getSpecialError()
@@ -85,4 +85,4 @@ function Login() {
             });
     };
 }
-//# sourceURL=login.js
+//# sourceURL=login/login.js

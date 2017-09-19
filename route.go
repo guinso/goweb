@@ -13,8 +13,14 @@ import (
 
 // WebHandler HTTP request to either static file server or REST server (URL start with "api/")
 func WebHandler(w http.ResponseWriter, r *http.Request) {
-	//remove first "/" character
-	urlPath := r.URL.Path[1:]
+
+	var urlPath = r.URL.Path
+	if strings.HasPrefix(urlPath, "/") {
+		//remove first "/" character
+		urlPath = r.URL.Path[1:]
+	}
+
+	log.Println("Serving URL: " + r.URL.Path)
 
 	//if start with "api/" direct to REST handler
 	if strings.HasPrefix(urlPath, "api/") {
@@ -29,7 +35,7 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 
 		routePath(w, r, trimmedURL)
 	} else {
-		log.Print("Entering static file handler: " + urlPath)
+		//log.Print("Entering static file handler: " + urlPath)
 
 		// define your static file directory
 		staticFilePath := "./static-files/"

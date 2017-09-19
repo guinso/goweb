@@ -6,6 +6,7 @@
 
     <!-- Bootstrap specifiec metadata -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- this is regular placeholder with topbar, side panel, and dynamic content size -->
@@ -40,24 +41,24 @@
         };
 
         //step 1: load and attach JQuery
-        xHttpRequest.open("GET", "/js/jquery-3.2.1.min.js", true);
+        xHttpRequest.open("GET", "js/jquery-3.2.1.min.js", true);
         xHttpRequest.send();
 
         //step 2: load subsequence dependencies
         function loadDependency() {
-            var style = $.get({url:"/css/style.css", cache:true});
+            var style = $.get({url:"css/style.css", cache:true});
 
             //bootstrap libraries
-            var bootstrapMain = $.get({url:"/css/bootstrap.min.css", cache:true});
-            var bootstrapGrid = $.get({url:"/css/bootstrap-grid.min.css", cache:true});
-            var bootstrapReboot = $.get({url:"/css/bootstrap-reboot.min.css", cache:true});
-            var popper = $.getScript({url:"/js/popper.min.js", cache:true});
+            var bootstrapMain = $.get({url:"css/bootstrap.min.css", cache:true});
+            var bootstrapGrid = $.get({url:"css/bootstrap-grid.min.css", cache:true});
+            var bootstrapReboot = $.get({url:"css/bootstrap-reboot.min.css", cache:true});
+            var popper = $.getScript({url:"js/popper.min.js", cache:true});
 
             
 
             //core functions
-            var jxHelper = $.getScript({url:"/js/jxhelper.js", cahce:true});
-            var router = $.getScript({url:"/js/router.js", cache:true});
+            var jxHelper = $.getScript({url:"js/jxhelper.js", cahce:true});
+            var router = $.getScript({url:"js/router.js", cache:true});
             //var script = $.getScript({url:"/js/script.js", cache:true});
 
             $.when(style, bootstrapMain, bootstrapGrid, bootstrapReboot, 
@@ -82,7 +83,7 @@
                     appendElement(body, "script", jxHelperRes[0]);
                     appendElement(body, "script", routerRes[0]);
 
-                    return $.get({url:"/js/bootstrap.min.js", cache:true});
+                    return $.get({url:"js/bootstrap.min.js", cache:true});
                 })
                 .then(function(boostrapJS){
 
@@ -92,7 +93,7 @@
                         "script", 
                         boostrapJS);
 
-                    return $.get({url:"/js/script.js",mathod:"GET", cache:true});
+                    return $.get({url:"js/script.js",mathod:"GET", cache:true});
                 })
                 .then(function(scriptRes){
 

@@ -44,15 +44,15 @@ func registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo,
 
 		return LoginSuccess, hashKey, nil
 
-	} else if !currentLoginSession.IsStillActive() {
-		//renew login session
-		hashKey, err := renewLoginSession(db, accountInfo.AccountID, hashKey, logTime)
-		if err != nil {
-			return LoginFailed, "", err
-		}
-
-		return LoginSuccess, hashKey, nil
 	}
+
+	//renew login session
+	hashKey, renewErr := renewLoginSession(db, accountInfo.AccountID, hashKey, logTime)
+	if renewErr != nil {
+		return LoginFailed, "", renewErr
+	}
+
+	return LoginSuccess, hashKey, nil
 
 	//reject login attempt as there is an active login session
 	return AlreadyLoggedIn, "", nil

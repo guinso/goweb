@@ -2,7 +2,7 @@ function Note() {
     this.renderPage = function() {
         JxHelper.showLoadingPanel();
         
-        var partial = $.get({url:"/js/note/partial.html", cache:true});
+        var partial = $.get({url:"js/note/partial.html", cache:true});
 
         $.when(partial)
             .done(function(data){
@@ -40,4 +40,4 @@ function Note() {
         return $('<li class="todo-item">' + message + '</li>');
     }
 }
-//# sourceURL=note.js
+//# sourceURL=note/note.js

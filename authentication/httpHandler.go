@@ -35,6 +35,7 @@ func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool 
 		user = nil
 	} else {
 		hashKey := cookie.Value
+
 		user, err = GetCurrentUser(db, hashKey)
 		if err != nil {
 			util.SendHTTPErrorResponse(w)
@@ -49,6 +50,8 @@ func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool 
 			SaltedPwd: "",
 			Roles:     []string{}}
 	}
+
+	//TODO: end session if session expired and return anonymous user account
 
 	jsonStr, jsonErr := json.Marshal(user)
 	if jsonErr != nil {

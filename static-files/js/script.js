@@ -1,6 +1,6 @@
 $(function() {
 
-    $.get({ url: "/js/mainContent/partial.html", cache: true })
+    $.get({ url: "js/mainContent/partial.html", cache: true })
         .done(function(data) {
             JxHelper.getMainContent().html(data);
 
