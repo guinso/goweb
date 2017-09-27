@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -56,7 +57,7 @@ func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool 
 	jsonStr, jsonErr := json.Marshal(user)
 	if jsonErr != nil {
 		util.SendHTTPErrorResponse(w)
-		fmt.Printf("[current-user] fail to encode JSON: %s\n", jsonErr.Error())
+		log.Printf("[current-user] fail to encode JSON: %s\n", jsonErr.Error())
 		return true
 	}
 
@@ -70,14 +71,14 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 
 	err := util.DecodeJSON(r, &loginReq)
 	if err != nil {
-		fmt.Printf("[login] error to read user input: %s", err.Error())
+		log.Printf("[login] error to read user input: %s", err.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	trx, trxErr := db.Begin()
 	if trxErr != nil {
-		fmt.Printf("[login] error to begin SQL transaction: %s", trxErr.Error())
+		log.Printf("[login] error to begin SQL transaction: %s", trxErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
@@ -85,13 +86,13 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 	loginStatus, hashKey, loginErr := Login(trx, loginReq.Username, loginReq.Password)
 	if loginErr != nil {
 		trx.Rollback()
-		fmt.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
+		log.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	if err = trx.Commit(); err != nil {
-		fmt.Printf("[login] error to commit SQL transaction: %s", trxErr.Error())
+		log.Printf("[login] error to commit SQL transaction: %s", trxErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
@@ -119,7 +120,7 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 		util.SendHTTPResponse(w, -1, msg, "{}")
 		break
 	default:
-		fmt.Printf("[login] unknown login status: %d", loginStatus)
+		log.Printf("[login] unknown login status: %d", loginStatus)
 		util.SendHTTPErrorResponse(w)
 		break
 	}
@@ -137,20 +138,20 @@ func handleHTTPLogout(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 
 	trx, trxErr := db.Begin()
 	if trxErr != nil {
-		fmt.Printf("[logout] failed to begin SQL transaction: %s\n", trxErr.Error())
+		log.Printf("[logout] failed to begin SQL transaction: %s\n", trxErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
 	result, err := Logout(trx, cookie.Value)
 	if err != nil {
 		trx.Rollback()
-		fmt.Printf("[logout] error on Logout: %s\n", err.Error())
+		log.Printf("[logout] error on Logout: %s\n", err.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	if err = trx.Commit(); err != nil {
-		fmt.Printf("[logout] failed to commit SQL transaction: %s\n", trxErr.Error())
+		log.Printf("[logout] failed to commit SQL transaction: %s\n", trxErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return true
 	}

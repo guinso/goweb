@@ -68,14 +68,26 @@ func GetAccountByName(db rdbmstool.DbHandlerProxy, username string) (*AccountInf
 		return nil, err
 	}
 
-	if rows.Next() {
-		result, resultErr := formatAccountInfo(db, rows)
-		rows.Close()
+	var result *AccountInfo
+	var rowErr error
 
-		return result, resultErr
+	if rows.Next() {
+		result, rowErr = formatAccountInfo(rows)
 	}
 
-	return nil, nil
+	rows.Close()
+
+	if rowErr != nil {
+		return nil, rowErr
+	}
+
+	if result != nil {
+		if addErr := addUserRoles(db, result); addErr != nil {
+			return nil, addErr
+		}
+	}
+
+	return result, nil
 }
 
 //GetAccountByID get account information by user ID
@@ -87,14 +99,26 @@ func GetAccountByID(db rdbmstool.DbHandlerProxy, userID string) (*AccountInfo, e
 		return nil, err
 	}
 
-	if rows.Next() {
-		result, resultErr := formatAccountInfo(db, rows)
-		rows.Close()
+	var result *AccountInfo
+	var rowErr error
 
-		return result, resultErr
+	if rows.Next() {
+		result, rowErr = formatAccountInfo(rows)
 	}
 
-	return nil, nil
+	rows.Close()
+
+	if rowErr != nil {
+		return nil, rowErr
+	}
+
+	if result != nil {
+		if addErr := addUserRoles(db, result); addErr != nil {
+			return nil, addErr
+		}
+	}
+
+	return result, nil
 }
 
 //GetAccount get account
@@ -132,7 +156,7 @@ func GetAccount(db rdbmstool.DbHandlerProxy, parameter AccountSearchParam) ([]Ac
 	}
 
 	for rows.Next() {
-		accInfo, accErr := formatAccountInfo(db, rows)
+		accInfo, accErr := formatAccountInfo(rows)
 		if accErr != nil {
 			rows.Close()
 			return nil, accErr
@@ -142,24 +166,19 @@ func GetAccount(db rdbmstool.DbHandlerProxy, parameter AccountSearchParam) ([]Ac
 	}
 	rows.Close()
 
+	for _, acc := range result {
+		if err := addUserRoles(db, &acc); err != nil {
+			return nil, err
+		}
+	}
+
 	return result, nil
 }
 
-func formatAccountInfo(db rdbmstool.DbHandlerProxy, rows *sql.Rows) (*AccountInfo, error) {
-	//defer rows.Close()
+func formatAccountInfo(rows *sql.Rows) (*AccountInfo, error) {
 
-	//if rows.Next() {
 	var tmpID, tmpUsername, tmpPwd string
 	if err := rows.Scan(&tmpID, &tmpUsername, &tmpPwd); err != nil {
-		//rows.Close()
-		return nil, err
-	}
-
-	//rows.Close()
-
-	//get all related roles
-	roles, err := getRolesByAccountID(db, tmpID)
-	if err != nil {
 		return nil, err
 	}
 
@@ -167,9 +186,19 @@ func formatAccountInfo(db rdbmstool.DbHandlerProxy, rows *sql.Rows) (*AccountInf
 		AccountID: tmpID,
 		Username:  tmpUsername,
 		SaltedPwd: tmpPwd,
-		Roles:     roles,
+		Roles:     []string{},
+		//Roles:     roles,
 	}, nil
-	//}
+}
 
-	//return nil, nil
+func addUserRoles(db rdbmstool.DbHandlerProxy, account *AccountInfo) error {
+	//get all related roles
+	roles, err := getRolesByAccountID(db, account.AccountID)
+	if err != nil {
+		return err
+	}
+
+	account.Roles = roles
+
+	return nil
 }

@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
+	//"github.com/go-sql-driver/mysql"
 	"github.com/guinso/rdbmstool"
 	"github.com/guinso/stringtool"
+	mysql "gopkg.in/go-sql-driver/mysql.v1"
 )
 
 //LoginSession login session store at database

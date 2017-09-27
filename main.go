@@ -19,16 +19,21 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
 	//explicitly include GO mysql library
-	_ "github.com/go-sql-driver/mysql"
+	//_ "github.com/go-sql-driver/mysql"
 	"github.com/guinso/goweb/configuration"
 	"github.com/guinso/goweb/util"
+	_ "gopkg.in/go-sql-driver/mysql.v1"
 )
 
 func main() {
+	log.Println("Starting GO web")
+
+	log.Println("Loading configuration...")
 	//read configuration file; create if not found
 	config, configErr := configuration.InitializeConfiguration()
 	if configErr != nil {
@@ -42,6 +47,7 @@ func main() {
 		return
 	}
 
+	log.Println("Try connect to MySQL database")
 	//check database connection
 	db, err := checkDbConnection(config)
 	if err != nil {
@@ -51,6 +57,7 @@ func main() {
 
 	//initialize database if requested
 	if config.DbInitTable {
+		log.Println("Initialize data table")
 		if err := initDbTable(db, config.DbName); err != nil {
 			fmt.Printf("Failed to initialize database table: %s", err.Error())
 			return

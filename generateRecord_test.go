@@ -1,13 +1,5 @@
 package main
 
-import (
-	"database/sql"
-	"testing"
-
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/authorization"
-)
-
 /*
 //NOTE: Remember go to util/helper.go modify GetTestDB() content
 func TestGenerateRecords(t *testing.T) {
@@ -57,7 +49,6 @@ func TestGenerateRecords(t *testing.T) {
 
 	trx.Commit()
 }
-*/
 
 func addAccounts(trx *sql.Tx, t *testing.T) error {
 	//add accounts
@@ -186,3 +177,4 @@ func addRoleAccess(trx *sql.Tx, t *testing.T) error {
 
 	return nil
 }
+*/

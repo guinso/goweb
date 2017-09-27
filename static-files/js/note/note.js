@@ -37,7 +37,10 @@ function Note() {
     }
 
     var _generateToDoItem = function(message) {
-        return $('<li class="todo-item">' + message + '</li>');
+        var jqueryElement =  $('<li class="todo-item">' + message + '</li>');
+        var domElement = jqueryElement[0];
+
+        return jqueryElement;
     }
 }
 //# sourceURL=note/note.js

@@ -10,18 +10,20 @@ func getRolesByAccountID(db rdbmstool.DbHandlerProxy, accountID string) ([]strin
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	result := []string{}
 	for rows.Next() {
 		var tmpStr string
 		if err = rows.Scan(&tmpStr); err != nil {
-			rows.Close()
+			//rows.Close()
 			return nil, err
 		}
 
 		result = append(result, tmpStr)
 	}
 
-	rows.Close()
+	//rows.Close()
 
 	return result, nil
 }

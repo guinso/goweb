@@ -13,7 +13,8 @@ import (
 	"github.com/guinso/stringtool"
 
 	//explicitly include GO mysql library
-	_ "github.com/go-sql-driver/mysql"
+	//_ "github.com/go-sql-driver/mysql"
+	_ "gopkg.in/go-sql-driver/mysql.v1"
 )
 
 var dbb *sql.DB
