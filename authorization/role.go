@@ -1,11 +1,21 @@
 package authorization
 
 import (
+	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
 )
+
+//Role user role
+type Role struct {
+	//Id role record id
+	ID string `json:"id"`
+	//Name role record name
+	Name string `json:"name"`
+}
 
 //AddRole add role into database
 func AddRole(db rdbmstool.DbHandlerProxy, roleName string) error {
@@ -66,4 +76,36 @@ func AddAccountRole(db rdbmstool.DbHandlerProxy, accountID, roleName string) err
 		roleID)
 
 	return err
+}
+
+//GetRole get role records
+func GetRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageIndex int) ([]Role, error) {
+	var rows *sql.Rows
+	var dbErr error
+	if strings.Compare(keyword, "") == 0 {
+		rows, dbErr = db.Query("SELECT id, name FROM role LIMIT ? OFFSET ?",
+			pageSize, pageIndex*pageSize)
+	} else {
+		rows, dbErr = db.Query("SELECT id, name FROM role WHERE name LIKE ? LIMIT ? OFFSET ?",
+			"%"+keyword+"%", pageSize, pageIndex*pageSize)
+	}
+
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	result := []Role{}
+	for rows.Next() {
+		tmp := Role{}
+
+		if scanErr := rows.Scan(&tmp.ID, &tmp.Name); scanErr != nil {
+			rows.Close()
+			return nil, scanErr
+		}
+
+		result = append(result, tmp)
+	}
+	rows.Close()
+
+	return result, nil
 }

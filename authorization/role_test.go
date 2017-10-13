@@ -44,6 +44,37 @@ func TestGetRoleIDByName(t *testing.T) {
 	}
 }
 
+func TestGetRole(t *testing.T) {
+	db := util.GetTestDB()
+
+	roles, err := GetRole(db, "", 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(roles) != 3 {
+		t.Errorf("Expect to have 3 records, but found %d", len(roles))
+	}
+
+	if strings.Compare(roles[0].Name, "") == 0 {
+		t.Error("Expect role has name, but found empty string instead")
+	}
+
+	//test to get manager role
+	manager, queryErr := GetRole(db, "manager", 10, 0)
+	if queryErr != nil {
+		t.Fatal(queryErr)
+	}
+
+	if len(manager) != 1 {
+		t.Errorf("Expect will get one role record (manager) but get %d instead", len(manager))
+	}
+
+	if strings.Compare(manager[0].Name, "manager") != 0 {
+		t.Errorf("Expect will get manager record but get %s instead", manager[0].Name)
+	}
+}
+
 func TestAddAccountRole(t *testing.T) {
 	db := util.GetTestDB()
 	trx, err := db.Begin()

@@ -1,4 +1,4 @@
-package main
+package route
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/guinso/goweb/authorization"
 
 	"github.com/guinso/goweb/authentication"
 	"github.com/guinso/goweb/util"
@@ -20,7 +22,7 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 		urlPath = r.URL.Path[1:]
 	}
 
-	log.Println("Serving URL: " + r.URL.Path)
+	log.Println("Serving API URL: " + r.URL.Path)
 
 	//if start with "api/" direct to REST handler
 	if strings.HasPrefix(urlPath, "api/") {
@@ -35,7 +37,7 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 
 		routePath(w, r, trimmedURL)
 	} else {
-		//log.Print("Entering static file handler: " + urlPath)
+		log.Println("Serving static file URL: " + r.URL.Path)
 
 		// define your static file directory
 		staticFilePath := "./static-files/"
@@ -53,13 +55,17 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 	/**********************************************/
 
 	//handle authentication web API
-	//1. /login
-	//2. /logout
+	//1. /login (POST)
+	//2. /logout (POST)
 	if authentication.HandleHTTPRequest(util.GetDB(), w, r, trimURL) {
 		return
 	}
 
 	//TODO: handle authorization web API
+	//1. /role (GET + POST)
+	if authorization.HandleHTTPRequest(util.GetDB(), w, r, trimURL) {
+		return
+	}
 
 	//sample return JSON
 	if strings.HasPrefix(trimURL, "meals") {
