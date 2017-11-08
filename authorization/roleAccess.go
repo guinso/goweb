@@ -1,11 +1,23 @@
 package authorization
 
 import (
+	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
 )
+
+//RoleAccess access description for related role
+type RoleAccess struct {
+	ID          string `json:"id"`
+	Role        string `json:"role"`
+	RoleID      string `json:"roleID"`
+	Access      string `json:"access"`
+	AccessID    string `json:"accessID"`
+	IsAuthorize bool   `json:"isAuthorize"`
+}
 
 //IsAuthorize check provided user is eligible to access specified subject
 func IsAuthorize(db rdbmstool.DbHandlerProxy, accountID, accessName string) (bool, error) {
@@ -58,6 +70,7 @@ func isAuthorize(db rdbmstool.DbHandlerProxy, accountID string, accessID string)
 	if rows.Next() {
 		var tmpCount int
 		if err := rows.Scan(&tmpCount); err != nil {
+			rows.Close()
 			return false, err
 		}
 
@@ -120,4 +133,45 @@ func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
 		roleID)
 
 	return err
+}
+
+//GetAccessRole get access role records
+func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageIndex int) ([]RoleAccess, error) {
+	var rows *sql.Rows
+	var dbErr error
+	if strings.Compare(keyword, "") != 0 {
+		rows, dbErr = db.Query("SELECT a.id, a.role_id, a.access_id, b.name AS role, c.name AS access"+
+			" FROM role_access a "+
+			"LEFT JOIN role b ON a.role_id = b.id "+
+			"LEFT JOIN access c ON a.access_id = c.id "+
+			"WHERE b.name LIKE ? OR c.name LIKE ? "+
+			"LIMIT ? OFFSET ?",
+			"%"+keyword+"%", "%"+keyword+"%", pageSize, pageSize*pageIndex)
+	} else {
+		rows, dbErr = db.Query("SELECT a.id, a.role_id, a.access_id, b.name AS role, c.name AS access"+
+			" FROM role_access a "+
+			"LEFT JOIN role b ON a.role_id = b.id "+
+			"LEFT JOIN access c ON a.access_id = c.id "+
+			"LIMIT ? OFFSET ?",
+			pageSize, pageSize*pageIndex)
+	}
+
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	result := []RoleAccess{}
+	for rows.Next() {
+		tmp := RoleAccess{}
+
+		if err := rows.Scan(&tmp.ID, &tmp.RoleID, &tmp.AccessID, &tmp.Role, &tmp.Access); err != nil {
+			rows.Close()
+			return nil, err
+		}
+
+		result = append(result, tmp)
+	}
+	rows.Close()
+
+	return result, nil
 }

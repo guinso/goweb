@@ -11,7 +11,8 @@ printf "3.   Start goweb web service ( $> ./goweb )\r\n\r\n"
 read -p "Press <enter> to proceed"
 
 printf "\r\n### Reinitialize database ###\r\n"
-
+go test -run ^TestClearDatabase$
+go test -run ^TestGenerateRecords$
 
 printf "\r\n####### Run Unit Tests ######\r\n"
 go test $packageName/authentication

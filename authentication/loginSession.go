@@ -54,9 +54,6 @@ func registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo,
 	}
 
 	return LoginSuccess, hashKey, nil
-
-	//reject login attempt as there is an active login session
-	return AlreadyLoggedIn, "", nil
 }
 
 //AddLoginSessionRecord add login session record

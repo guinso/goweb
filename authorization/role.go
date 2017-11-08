@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -29,6 +30,7 @@ func AddRole(db rdbmstool.DbHandlerProxy, roleName string) error {
 }
 
 //GetRoleIDByName get role ID by providing role name
+//if return value is empty string means no record found
 func GetRoleIDByName(db rdbmstool.DbHandlerProxy, roleName string) (string, error) {
 	rows, err := db.Query("SELECT id FROM role WHERE name = ?", roleName)
 	if err != nil {
@@ -56,7 +58,7 @@ func GetRoleIDByName(db rdbmstool.DbHandlerProxy, roleName string) (string, erro
 	}
 
 	if count == 0 {
-		return "", fmt.Errorf("Role <%s> not found in database", roleName)
+		return "", nil //fmt.Errorf("Role <%s> not found in database", roleName)
 	}
 
 	return roleID, nil
@@ -108,4 +110,34 @@ func GetRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageInde
 	rows.Close()
 
 	return result, nil
+}
+
+//UpdateRole change role name
+func UpdateRole(db rdbmstool.DbHandlerProxy, roleName string, newRoleName string) error {
+
+	//check role exists or not
+	roleID, err := GetRoleIDByName(db, roleName)
+	if err != nil {
+		return err
+	}
+	if strings.Compare(roleID, "") == 0 {
+		return errors.New("Role " + roleName + " not found")
+	}
+
+	//confirm new role not register into database yet
+	dumbID, dumbErr := GetRoleIDByName(db, newRoleName)
+	if err != nil {
+		return dumbErr
+	}
+	if strings.Compare(dumbID, "") != 0 {
+		return errors.New("Targeted new role name " + newRoleName + " already registered")
+	}
+
+	//update role
+	_, execErr := db.Exec("UPDATE role SET name = ? WHERE id = ?", newRoleName, roleID)
+	if execErr != nil {
+		return execErr
+	}
+
+	return nil
 }

@@ -4,10 +4,30 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/guinso/rdbmstool"
+
 	"github.com/guinso/goweb/authentication"
 	"github.com/guinso/goweb/authorization"
 	"github.com/guinso/goweb/util"
 )
+
+func TestClearDatabase(t *testing.T) {
+	db := util.GetTestDB()
+
+
+	//tableName := []string{"login_session", "role_access", "role", "access", "access_group", }
+	
+
+	if err := initDbTable(db, util.TestDatabaseName); err != nil {
+		t.Fatalf("Failed to create tables: %s", err.Error())
+	}
+}
+
+func dropTable(db rdbmstool.DbHandlerProxy, tableName string) error {
+	_, err := db.Exec("DROP table ?", tableName)
+
+	return err
+}
 
 //NOTE: Remember go to util/helper.go modify GetTestDB() content
 func TestGenerateRecords(t *testing.T) {

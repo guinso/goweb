@@ -39,8 +39,8 @@ func TestGetRoleIDByName(t *testing.T) {
 
 	//test non-exists role
 	roleID, err = GetRoleIDByName(db, "supervisor")
-	if err == nil {
-		t.Error("Non exists role 'supervisor' should return error")
+	if strings.Compare(roleID, "") != 0 {
+		t.Error("Non exists role 'supervisor' should return empty string, but get " + roleID)
 	}
 }
 
@@ -103,4 +103,29 @@ func addAccRoleXXX(trx *sql.Tx, username string, roleName string) error {
 	}
 
 	return AddAccountRole(trx, accInfo.AccountID, roleName)
+}
+
+func TestUpdateRole(t *testing.T) {
+	db := util.GetTestDB()
+
+	trx, err := db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = UpdateRole(trx, "manager", "managerJJ")
+	if err != nil {
+		t.Error(err)
+	}
+	trx.Rollback()
+
+	trx, err = db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = UpdateRole(trx, "manager-not-exist", "abc")
+	if err == nil {
+		t.Error("manager-not-exist shouldn't allow to update as it is not existed")
+	}
+	trx.Rollback()
 }

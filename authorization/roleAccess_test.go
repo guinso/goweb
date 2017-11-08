@@ -62,3 +62,26 @@ func TestAddRoleAccess(t *testing.T) {
 
 	trx.Rollback() //no need to commit changes
 }
+
+func TestGetRoleAccess(t *testing.T) {
+	db := util.GetTestDB()
+
+	roles, err := GetAccessRole(db, "", 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(roles) != 9 {
+		t.Errorf("Expect to get 9 access role records but get %d instead", len(roles))
+	}
+
+	//test filter
+	roles, err = GetAccessRole(db, "manager", 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(roles) != 3 {
+		t.Errorf("Expect to get 3 access role records for manager but get %d instead", len(roles))
+	}
+}

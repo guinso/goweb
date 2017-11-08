@@ -1,6 +1,7 @@
 package util
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,34 @@ type HTTPMsg struct {
 	StatusCode    int         `json:"statusCode"`
 	StatusMessage string      `json:"statusMsg"`
 	Response      interface{} `json:"response,omitempty"`
+}
+
+const (
+	TestDatabaseName = "goweb"
+)
+
+//GetTestDB get database handler for unit test
+//WARNING: don't use it in source code other than unit test!
+//       : make sure it is pointed to non-production database for testing purpose
+func GetTestDB() *sql.DB {
+
+	if dbb == nil {
+		dbTest, dbErr := sql.Open("mysql", fmt.Sprintf(
+			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
+			"root",            //unit test username
+			"",                //unit test password
+			"localhost",       //unit test server location
+			3306,              //unit test database port number
+			TestDatabaseName)) //unit test database name
+
+		if dbErr != nil {
+			panic(dbErr)
+		}
+
+		dbb = dbTest
+	}
+
+	return dbb
 }
 
 //RestRequestForTest tool to send REST request to goweb server
