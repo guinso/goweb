@@ -1,5 +1,10 @@
 function Login() {
     this.renderPage = function() {
+        //empty main-content child elements
+        var mainContent = document.querySelector(".main-content");
+        while(mainContent.firstChild)
+            mainContent.removeChild(mainContent.firstChild);
+
         JxHelper.getSpecialLoading()
             .html('redirecting to login page...')
             .addClass('visible');

@@ -7,6 +7,7 @@ import (
 
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
+	"github.com/guinso/sqlqueryhelper"
 )
 
 //RoleAccess access description for related role
@@ -136,26 +137,43 @@ func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
 }
 
 //GetAccessRole get access role records
-func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageIndex int) ([]RoleAccess, error) {
+func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
+	accessIDFilter string, roleIDFilter string,
+	pageSize int, pageIndex int) ([]RoleAccess, error) {
 	var rows *sql.Rows
 	var dbErr error
+
+	sqlQuery := sqlqueryhelper.NewSelectSQLBuilder()
+	sqlQuery.From("role_access", "a").
+		Select("a.id", "").
+		Select("a.role_id", "").
+		Select("a.access_id", "").
+		Select("b.name", "role").
+		Select("c.name", "access").
+		Select("a.is_authorize", "").
+		JoinSimple("role", "b", sqlqueryhelper.LEFT_JOIN, "a.role_id", "b.id", sqlqueryhelper.EQUAL).
+		JoinSimple("access", "c", sqlqueryhelper.LEFT_JOIN, "a.access_id", "c.id", sqlqueryhelper.EQUAL).
+		Limit(pageSize, pageIndex)
+
 	if strings.Compare(keyword, "") != 0 {
-		rows, dbErr = db.Query("SELECT a.id, a.role_id, a.access_id, b.name AS role, c.name AS access"+
-			" FROM role_access a "+
-			"LEFT JOIN role b ON a.role_id = b.id "+
-			"LEFT JOIN access c ON a.access_id = c.id "+
-			"WHERE b.name LIKE ? OR c.name LIKE ? "+
-			"LIMIT ? OFFSET ?",
-			"%"+keyword+"%", "%"+keyword+"%", pageSize, pageSize*pageIndex)
-	} else {
-		rows, dbErr = db.Query("SELECT a.id, a.role_id, a.access_id, b.name AS role, c.name AS access"+
-			" FROM role_access a "+
-			"LEFT JOIN role b ON a.role_id = b.id "+
-			"LEFT JOIN access c ON a.access_id = c.id "+
-			"LIMIT ? OFFSET ?",
-			pageSize, pageSize*pageIndex)
+		sqlQuery.WhereOR(sqlqueryhelper.LIKE, "b.name", "'%"+keyword+"%'").
+			WhereOR(sqlqueryhelper.LIKE, "c.name", "'%"+keyword+"%'")
 	}
 
+	if strings.Compare(accessIDFilter, "") != 0 {
+		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.access_id", "'"+accessIDFilter+"'")
+	}
+
+	if strings.Compare(roleIDFilter, "") != 0 {
+		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.role_id", "'"+roleIDFilter+"'")
+	}
+
+	sqlStr, sqlErr := sqlQuery.SQL()
+	if sqlErr != nil {
+		return nil, sqlErr
+	}
+
+	rows, dbErr = db.Query(sqlStr)
 	if dbErr != nil {
 		return nil, dbErr
 	}
@@ -164,7 +182,7 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pa
 	for rows.Next() {
 		tmp := RoleAccess{}
 
-		if err := rows.Scan(&tmp.ID, &tmp.RoleID, &tmp.AccessID, &tmp.Role, &tmp.Access); err != nil {
+		if err := rows.Scan(&tmp.ID, &tmp.RoleID, &tmp.AccessID, &tmp.Role, &tmp.Access, &tmp.IsAuthorize); err != nil {
 			rows.Close()
 			return nil, err
 		}
@@ -174,4 +192,53 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pa
 	rows.Close()
 
 	return result, nil
+}
+
+//GetAccessRoleCount get access role records
+func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
+	accessIDFilter string, roleIDFilter string) (int, error) {
+	var rows *sql.Rows
+	var dbErr error
+
+	sqlQuery := sqlqueryhelper.NewSelectSQLBuilder()
+	sqlQuery.From("role_access", "a").
+		Select("COUNT(a.id)", "cnt").
+		JoinSimple("role", "b", sqlqueryhelper.LEFT_JOIN, "a.role_id", "b.id", sqlqueryhelper.EQUAL).
+		JoinSimple("access", "c", sqlqueryhelper.LEFT_JOIN, "a.access_id", "c.id", sqlqueryhelper.EQUAL)
+
+	if strings.Compare(keyword, "") != 0 {
+		sqlQuery.WhereOR(sqlqueryhelper.LIKE, "b.name", "'%"+keyword+"%'").
+			WhereOR(sqlqueryhelper.LIKE, "c.name", "'%"+keyword+"%'")
+	}
+
+	if strings.Compare(accessIDFilter, "") != 0 {
+		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.access_id", "'"+accessIDFilter+"'")
+	}
+
+	if strings.Compare(roleIDFilter, "") != 0 {
+		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.role_id", "'"+roleIDFilter+"'")
+	}
+
+	sqlStr, sqlErr := sqlQuery.SQL()
+	if sqlErr != nil {
+		return 0, sqlErr
+	}
+
+	rows, dbErr = db.Query(sqlStr)
+	if dbErr != nil {
+		return 0, dbErr
+	}
+
+	var tmp int
+	for rows.Next() {
+
+		if err := rows.Scan(&tmp); err != nil {
+			rows.Close()
+			return 0, err
+		}
+
+		rows.Close()
+	}
+
+	return tmp, nil
 }

@@ -1,11 +1,21 @@
 package authorization
 
 import (
+	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
 )
+
+//Access access record
+type Access struct {
+	//Id access record id
+	ID string `json:"id"`
+	//Name access record name
+	Name string `json:"name"`
+}
 
 //AddAccessGroup insert access group record into database
 func AddAccessGroup(db rdbmstool.DbHandlerProxy, groupName string) error {
@@ -96,4 +106,36 @@ func GetAccessIDByName(db rdbmstool.DbHandlerProxy, accessName string) (string, 
 	}
 
 	return accessID, nil
+}
+
+//GetAccess get access record(s)
+func GetAccess(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageIndex int) ([]Access, error) {
+	var rows *sql.Rows
+	var dbErr error
+	if strings.Compare(keyword, "") == 0 {
+		rows, dbErr = db.Query("SELECT id, name FROM access LIMIT ? OFFSET ?",
+			pageSize, pageIndex*pageSize)
+	} else {
+		rows, dbErr = db.Query("SELECT id, name FROM access WHERE name LIKE ? LIMIT ? OFFSET ?",
+			"%"+keyword+"%", pageSize, pageIndex*pageSize)
+	}
+
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	result := []Access{}
+	for rows.Next() {
+		tmp := Access{}
+
+		if scanErr := rows.Scan(&tmp.ID, &tmp.Name); scanErr != nil {
+			rows.Close()
+			return nil, scanErr
+		}
+
+		result = append(result, tmp)
+	}
+	rows.Close()
+
+	return result, nil
 }

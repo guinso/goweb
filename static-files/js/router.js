@@ -88,6 +88,10 @@ function Router() {
             getModule('login', 'js/login/login.js', function(login) {
                 login.logout();
             });
+        } else if (paths[0] === "role-access") {
+            getModule('role', 'js/roleAccess/roleAccess.js', function(role){
+                role.renderPage();
+            });
         } else {
             renderPageNotFound();
         }

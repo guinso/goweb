@@ -66,7 +66,7 @@ func TestAddRoleAccess(t *testing.T) {
 func TestGetRoleAccess(t *testing.T) {
 	db := util.GetTestDB()
 
-	roles, err := GetAccessRole(db, "", 10, 0)
+	roles, err := GetAccessRole(db, "", "", "", 10, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,12 +76,35 @@ func TestGetRoleAccess(t *testing.T) {
 	}
 
 	//test filter
-	roles, err = GetAccessRole(db, "manager", 10, 0)
+	roles, err = GetAccessRole(db, "manager", "", "", 10, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(roles) != 3 {
 		t.Errorf("Expect to get 3 access role records for manager but get %d instead", len(roles))
+	}
+}
+
+func TestGetRoleAccessCount(t *testing.T) {
+	db := util.GetTestDB()
+
+	cnt, err := GetAccessRoleCount(db, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if cnt != 9 {
+		t.Errorf("Expect to get 9 access role records but get %d instead", cnt)
+	}
+
+	//test filter
+	cnt, err = GetAccessRoleCount(db, "manager", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if cnt != 3 {
+		t.Errorf("Expect to get 3 access role records for manager but get %d instead", cnt)
 	}
 }

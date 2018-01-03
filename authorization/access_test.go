@@ -102,3 +102,26 @@ func TestGetAccessIDByName(t *testing.T) {
 
 	trx.Rollback() //no need to commit changes
 }
+
+func TestGetAccess(t *testing.T) {
+	db := util.GetTestDB()
+
+	items, err := GetAccess(db, "", 10, 0)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	if len(items) < 1 {
+		t.Errorf("Expect access record has more than 1 record but get zero")
+	}
+
+	items, err = GetAccess(db, "", 3, 0)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	if len(items) != 3 {
+		t.Errorf("Expect get 3 records, but get %d instead", len(items))
+	}
+
+}

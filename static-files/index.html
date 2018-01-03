@@ -61,10 +61,12 @@
             var router = $.getScript({url:"js/router.js", cache:true});
             //var script = $.getScript({url:"/js/script.js", cache:true});
 
+            var btsHelper = $.getScript({url:"js/btsHelper.js", cache:true});
+
             $.when(style, bootstrapMain, bootstrapGrid, bootstrapReboot, 
-                    popper, jxHelper, router)
+                    popper, jxHelper, router, btsHelper)
                 .then(function(styleRes, bsMainRes, bsGridRes, bsRebotRes,
-                                popperRes, jxHelperRes, routerRes){
+                                popperRes, jxHelperRes, routerRes, btsHelperRes){
                     var body = document.getElementsByTagName("body")[0];
 
                     //3. add base tyle CSS
@@ -82,6 +84,9 @@
                     //4. add JxHelper, and router javascript
                     appendElement(body, "script", jxHelperRes[0]);
                     appendElement(body, "script", routerRes[0]);
+
+                    //5. additional helper libraries
+                    appendElement(body, "script", btsHelperRes[0]);
 
                     return $.get({url:"js/bootstrap.min.js", cache:true});
                 })

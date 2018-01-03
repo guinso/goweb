@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/guinso/goweb/util"
@@ -14,14 +15,27 @@ type addRole struct {
 	Name string `json:"name"`
 }
 
+type rowCount struct {
+	Count int `json:"count"`
+}
+
 //HandleHTTPRequest handle incoming http request
 //return true if request URL match and process
 func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
-	if strings.HasPrefix(trimURL, "role") && util.IsPOST(r) {
+	if strings.Compare(trimURL, "role") == 0 && util.IsPOST(r) {
 		handleAddRole(db, w, r)
 		return true
-	} else if strings.HasPrefix(trimURL, "role") && util.IsGET(r) {
+	} else if strings.Compare(trimURL, "role") == 0 && util.IsGET(r) {
 		handleGetRole(db, w, r)
+		return true
+	} else if strings.Compare(trimURL, "role-access") == 0 && util.IsGET(r) {
+		handleGetAccessRole(db, w, r)
+		return true
+	} else if strings.Compare(trimURL, "role-access-count") == 0 && util.IsGET(r) {
+		handleGetAccessRoleCount(db, w, r)
+		return true
+	} else if strings.Compare(trimURL, "access") == 0 && util.IsGET(r) {
+		handleGetAccess(db, w, r)
 		return true
 	}
 
@@ -58,6 +72,112 @@ func handleGetRole(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	jsonStr, jsonErr := json.Marshal(roles)
 	if jsonErr != nil {
 		log.Printf("[role] Encounter error to encode roles record: %s", jsonErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	util.SendHTTPResponse(w, 0, "", string(jsonStr))
+}
+
+func handleGetAccessRole(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+
+	pgSize := 10
+	pgIndex := 0
+	accessID := ""
+	roleID := ""
+
+	query := r.URL.Query()
+	if strings.Compare(query.Get("pgSize"), "") != 0 {
+		if size, err := strconv.Atoi(query.Get("pgSize")); err == nil {
+			pgSize = size
+		}
+	}
+	if strings.Compare(query.Get("pgIndex"), "") != 0 {
+		if index, err := strconv.Atoi(query.Get("pgIndex")); err == nil {
+			pgIndex = index
+		}
+	}
+	if strings.Compare(query.Get("accessID"), "") != 0 {
+		accessID = query.Get("accessID")
+	}
+	if strings.Compare(query.Get("roleID"), "") != 0 {
+		roleID = query.Get("roleID")
+	}
+
+	accessRole, err := GetAccessRole(db, "", accessID, roleID, pgSize, pgIndex)
+	if err != nil {
+		log.Printf("[access role] Encounter error to get access role record: %s", err.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	jsonStr, jsonErr := json.Marshal(accessRole)
+	if jsonErr != nil {
+		log.Printf("[access role] Encounter error to encode access role record: %s", jsonErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	util.SendHTTPResponse(w, 0, "", string(jsonStr))
+}
+
+func handleGetAccessRoleCount(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+
+	accessID := ""
+	roleID := ""
+
+	query := r.URL.Query()
+	if strings.Compare(query.Get("accessID"), "") != 0 {
+		accessID = query.Get("accessID")
+	}
+	if strings.Compare(query.Get("roleID"), "") != 0 {
+		roleID = query.Get("roleID")
+	}
+
+	count, err := GetAccessRoleCount(db, "", accessID, roleID)
+	if err != nil {
+		log.Printf("[access role] Encounter error to get access role record: %s", err.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	jsonStr, jsonErr := json.Marshal(rowCount{Count: count})
+	if jsonErr != nil {
+		log.Printf("[access role] Encounter error to encode access role record: %s", jsonErr.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	util.SendHTTPResponse(w, 0, "", string(jsonStr))
+}
+
+func handleGetAccess(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+
+	pgSize := 10
+	pgIndex := 0
+
+	query := r.URL.Query()
+	if strings.Compare(query.Get("pgSize"), "") != 0 {
+		if size, err := strconv.Atoi(query.Get("pgSize")); err == nil {
+			pgSize = size
+		}
+	}
+	if strings.Compare(query.Get("pgIndex"), "") != 0 {
+		if index, err := strconv.Atoi(query.Get("pgIndex")); err == nil {
+			pgIndex = index
+		}
+	}
+
+	access, err := GetAccess(db, "", pgSize, pgIndex)
+	if err != nil {
+		log.Printf("[access] Encounter error to get access record: %s", err.Error())
+		util.SendHTTPErrorResponse(w)
+		return
+	}
+
+	jsonStr, jsonErr := json.Marshal(access)
+	if jsonErr != nil {
+		log.Printf("[access] Encounter error to encode access record: %s", jsonErr.Error())
 		util.SendHTTPErrorResponse(w)
 		return
 	}

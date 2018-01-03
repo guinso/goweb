@@ -34,13 +34,15 @@ import (
 func main() {
 	log.Println("Starting GO web")
 
-	log.Println("Loading configuration...")
+	log.Print("Loading configuration...")
 	//read configuration file; create if not found
 	config, configErr := configuration.InitializeConfiguration()
 	if configErr != nil {
+		fmt.Println("[failed]")
 		fmt.Printf("Failed to load configuration: %s", configErr.Error())
 		return
 	}
+	fmt.Println("[done]")
 
 	//create basic files and directories if not found
 	if err := initFilesAndDirs(config); err != nil {
@@ -48,21 +50,25 @@ func main() {
 		return
 	}
 
-	log.Println("Try connect to MySQL database")
+	log.Print("Try connect to MySQL database...")
 	//check database connection
 	db, err := checkDbConnection(config)
 	if err != nil {
+		fmt.Println("[failed]")
 		fmt.Printf("Failed to check database connection: %s", err.Error())
 		return
 	}
+	fmt.Println("[done]")
 
 	//initialize database if requested
 	if config.DbInitTable {
-		log.Println("Initialize data table")
+		log.Print("Initialize data table...")
 		if err := initDbTable(db, config.DbName); err != nil {
+			fmt.Println("[failed]")
 			fmt.Printf("Failed to initialize database table: %s", err.Error())
 			return
 		}
+		fmt.Println("[done]")
 	}
 
 	util.SetDB(db)
