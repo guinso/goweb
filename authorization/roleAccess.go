@@ -7,7 +7,6 @@ import (
 
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
-	"github.com/guinso/sqlqueryhelper"
 )
 
 //RoleAccess access description for related role
@@ -143,7 +142,7 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 	var rows *sql.Rows
 	var dbErr error
 
-	sqlQuery := sqlqueryhelper.NewSelectSQLBuilder()
+	sqlQuery := rdbmstool.NewQueryBuilder()
 	sqlQuery.From("role_access", "a").
 		Select("a.id", "").
 		Select("a.role_id", "").
@@ -151,21 +150,21 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 		Select("b.name", "role").
 		Select("c.name", "access").
 		Select("a.is_authorize", "").
-		JoinSimple("role", "b", sqlqueryhelper.LEFT_JOIN, "a.role_id", "b.id", sqlqueryhelper.EQUAL).
-		JoinSimple("access", "c", sqlqueryhelper.LEFT_JOIN, "a.access_id", "c.id", sqlqueryhelper.EQUAL).
+		Join("role", "b", rdbmstool.LeftJoin, "a.role_id = b.id").
+		Join("access", "c", rdbmstool.LeftJoin, "a.access_id = c.id").
 		Limit(pageSize, pageIndex)
 
 	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereOR(sqlqueryhelper.LIKE, "b.name", "'%"+keyword+"%'").
-			WhereOR(sqlqueryhelper.LIKE, "c.name", "'%"+keyword+"%'")
+		sqlQuery.WhereAddOr("b.name LIKE '%" + keyword + "%'").
+			WhereAddOr("c.name LIKE '%" + keyword + "%'")
 	}
 
 	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.access_id", "'"+accessIDFilter+"'")
+		sqlQuery.WhereAddAnd("a.access_id = '" + accessIDFilter + "'")
 	}
 
 	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.role_id", "'"+roleIDFilter+"'")
+		sqlQuery.WhereAddAnd("a.role_id = '" + roleIDFilter + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()
@@ -200,23 +199,23 @@ func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
 	var rows *sql.Rows
 	var dbErr error
 
-	sqlQuery := sqlqueryhelper.NewSelectSQLBuilder()
+	sqlQuery := rdbmstool.NewQueryBuilder()
 	sqlQuery.From("role_access", "a").
 		Select("COUNT(a.id)", "cnt").
-		JoinSimple("role", "b", sqlqueryhelper.LEFT_JOIN, "a.role_id", "b.id", sqlqueryhelper.EQUAL).
-		JoinSimple("access", "c", sqlqueryhelper.LEFT_JOIN, "a.access_id", "c.id", sqlqueryhelper.EQUAL)
+		Join("role", "b", rdbmstool.LeftJoin, "a.role_id = b.id").
+		Join("access", "c", rdbmstool.LeftJoin, "a.access_id = c.id")
 
 	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereOR(sqlqueryhelper.LIKE, "b.name", "'%"+keyword+"%'").
-			WhereOR(sqlqueryhelper.LIKE, "c.name", "'%"+keyword+"%'")
+		sqlQuery.WhereAddOr("b.name LIKE '%" + keyword + "%'").
+			WhereAddOr("c.name LIKE '%" + keyword + "%'")
 	}
 
 	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.access_id", "'"+accessIDFilter+"'")
+		sqlQuery.WhereAddAnd("a.access_id = '" + accessIDFilter + "'")
 	}
 
 	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAnd(sqlqueryhelper.EQUAL, "a.role_id", "'"+roleIDFilter+"'")
+		sqlQuery.WhereAddAnd("a.role_id = '" + roleIDFilter + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()

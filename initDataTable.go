@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guinso/mysqlmetaquery"
 	"github.com/guinso/rdbmstool"
-	"github.com/guinso/rdbmstool/metaquery/mysql"
 )
 
 func initDbTable(db *sql.DB, dbName string) error {
@@ -437,7 +437,7 @@ func validateAccountTable(db *sql.DB, dbName string) error {
 
 func validateTable(db *sql.DB, dbName string, tableDef *rdbmstool.TableDefinition) error {
 
-	query := mysql.MetaQuery{}
+	query := mysqlmetaquery.MySQLMetaQuery{}
 
 	tables, err := query.GetTableNames(db, dbName, tableDef.Name)
 	if err != nil {
@@ -454,7 +454,7 @@ func validateTable(db *sql.DB, dbName string, tableDef *rdbmstool.TableDefinitio
 		return nil
 	}
 
-	sql, err := rdbmstool.GenerateTableSQL(tableDef)
+	sql, err := tableDef.SQL()
 	if err != nil {
 		return err
 	}

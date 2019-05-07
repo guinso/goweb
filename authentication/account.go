@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/guinso/goweb/util"
-	"github.com/guinso/rdbmstool/query"
+	//"github.com/guinso/rdbmstool/query"
 	"github.com/guinso/stringtool"
 
 	"github.com/guinso/rdbmstool"
@@ -135,10 +135,10 @@ func GetAccount(db rdbmstool.DbHandlerProxy, parameter AccountSearchParam) ([]Ac
 	}
 
 	result := []AccountInfo{}
-	sqlStr, err := query.NewSelectSQLBuilder().
+	sqlStr, err := rdbmstool.NewQueryBuilder().
 		Select("*", "").
 		From("account", "").
-		WhereOR(query.LIKE, "username", "?").
+		WhereAddOr("username LIKE ?").
 		Limit(parameter.PageSize, parameter.PageIndex*parameter.PageSize).
 		SQL()
 

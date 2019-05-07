@@ -28,7 +28,8 @@ import (
 	"github.com/guinso/goweb/configuration"
 	"github.com/guinso/goweb/route"
 	"github.com/guinso/goweb/util"
-	_ "gopkg.in/go-sql-driver/mysql.v1"
+	//x _ "gopkg.in/go-sql-driver/mysql.v1"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -50,9 +51,9 @@ func main() {
 		return
 	}
 
-	log.Print("Try connect to MySQL database...")
+	log.Print("Try connect to SQLITE database...")
 	//check database connection
-	db, err := checkDbConnection(config)
+	db, err := checkSQLITEConnection(config)
 	if err != nil {
 		fmt.Println("[failed]")
 		fmt.Printf("Failed to check database connection: %s", err.Error())
@@ -92,7 +93,7 @@ func startWebServer(port int) error {
 	//x http.ListenAndServeTLS("/", "abc.crt", "abc.key", handler)
 }
 
-func checkDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
+func checkMySQLDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 	//TODO:  handle various database vendor
 	dbx, err := sql.Open("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8",
@@ -109,6 +110,16 @@ func checkDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 	//check connection is valid or not
 	if pingErr := dbx.Ping(); pingErr != nil {
 		return nil, pingErr
+	}
+
+	return dbx, nil
+}
+
+func checkSQLITEConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
+	dbx, err := sql.Open("sqlite3", config.DbName)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return dbx, nil
