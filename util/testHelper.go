@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //HTTPMsg return message format for goweb REST API
@@ -23,23 +25,30 @@ const (
 //WARNING: don't use it in source code other than unit test!
 //       : make sure it is pointed to non-production database for testing purpose
 func GetTestDB() *sql.DB {
+	/*
+		if dbb == nil {
+			dbTest, dbErr := sql.Open("mysql", fmt.Sprintf(
+				"%s:%s@tcp(%s:%d)/%s?charset=utf8",
+				"root",            //unit test username
+				"",                //unit test password
+				"localhost",       //unit test server location
+				3306,              //unit test database port number
+				TestDatabaseName)) //unit test database name
 
+			if dbErr != nil {
+				panic(dbErr)
+			}
+			dbb = dbTest
+		}
+	*/
 	if dbb == nil {
-		dbTest, dbErr := sql.Open("mysql", fmt.Sprintf(
-			"%s:%s@tcp(%s:%d)/%s?charset=utf8",
-			"root",            //unit test username
-			"",                //unit test password
-			"localhost",       //unit test server location
-			3306,              //unit test database port number
-			TestDatabaseName)) //unit test database name
+		dbTest, dbErr := sql.Open("sqlite3", "/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db")
 
 		if dbErr != nil {
 			panic(dbErr)
 		}
-
 		dbb = dbTest
 	}
-
 	return dbb
 }
 

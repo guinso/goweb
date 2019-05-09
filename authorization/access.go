@@ -19,6 +19,13 @@ type Access struct {
 
 //AddAccessGroup insert access group record into database
 func AddAccessGroup(db rdbmstool.DbHandlerProxy, groupName string) error {
+	accessGroupID, gErr := GetAccessGroupIDByName(db, groupName)
+	if gErr != nil {
+		return gErr
+	} else if len(accessGroupID) > 0 {
+		return fmt.Errorf("Access Group '%s' already exists", groupName)
+	}
+
 	SQL := "INSERT INTO access_group (id, name) VALUES (?, ?)"
 
 	_, err := db.Exec(SQL, util.GetRandomRunningNumber("access_group"), groupName)
@@ -51,9 +58,9 @@ func GetAccessGroupIDByName(db rdbmstool.DbHandlerProxy, groupName string) (stri
 		return "", fmt.Errorf("Access group <%s> has more than one, found %d", groupName, count)
 	}
 
-	if count == 0 {
-		return "", fmt.Errorf("Access Group <%s> not found in database", groupName)
-	}
+	//if count == 0 {
+	//	return "", fmt.Errorf("Access Group <%s> not found in database", groupName)
+	//}
 
 	return groupID, nil
 }
@@ -63,6 +70,15 @@ func AddAccess(db rdbmstool.DbHandlerProxy, accessName, groupName string) error 
 	groupID, err := GetAccessGroupIDByName(db, groupName)
 	if err != nil {
 		return err
+	} else if len(groupID) == 0 {
+		return fmt.Errorf("Access Group '%s' not found in database", groupName)
+	}
+
+	accessID, err := GetAccessIDByName(db, accessName)
+	if err != nil {
+		return err
+	} else if len(accessID) > 0 {
+		return fmt.Errorf("Access '%s' already exists", accessName)
 	}
 
 	_, err = db.Exec("INSERT  INTO access (id, name, group_id) VALUES (?, ?, ?)",
@@ -101,9 +117,9 @@ func GetAccessIDByName(db rdbmstool.DbHandlerProxy, accessName string) (string, 
 			accessID, count)
 	}
 
-	if count == 0 {
-		return "", fmt.Errorf("Access <%s> not found in database", accessName)
-	}
+	// if count == 0 {
+	// 	return "", fmt.Errorf("Access <%s> not found in database", accessName)
+	// }
 
 	return accessID, nil
 }

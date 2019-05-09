@@ -15,14 +15,14 @@ func TestAddAccount(t *testing.T) {
 		return
 	}
 
-	err = AddAccount(trx, "john", "123456789")
+	err = AddAccount(trx, "koko", "123456789")
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	err = AddAccount(trx, "john", "123456789")
+	err = AddAccount(trx, "dick", "123456789")
 	if err == nil {
-		t.Error("Duplicate account 'john' should be triggered")
+		t.Error("Duplicate account 'dick' should be triggered")
 	}
 
 	trx.Rollback() //rollback transaction no need create new record
@@ -71,7 +71,7 @@ func TestGetAccountByID(t *testing.T) {
 	db := util.GetTestDB()
 
 	//TODO: replace this hardcorded user ID from database
-	account, err := GetAccountByID(db, "bf8d178108d124044dd591e29d4038c9")
+	account, err := GetAccountByID(db, "d636d00ba6caa312590d0d2f0f838a29")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -98,7 +98,7 @@ func TestGetAccount(t *testing.T) {
 	accs, accErr := GetAccount(db, AccountSearchParam{
 		PageSize:  10,
 		PageIndex: 0,
-		Keyword:   "mary",
+		Keyword:   "dick",
 	})
 
 	if accErr != nil {
@@ -107,6 +107,6 @@ func TestGetAccount(t *testing.T) {
 	}
 
 	if len(accs) != 1 {
-		t.Errorf("Expect return one record (mary), but get %d instead", len(accs))
+		t.Errorf("Expect return one record (dick), but get %d instead", len(accs))
 	}
 }

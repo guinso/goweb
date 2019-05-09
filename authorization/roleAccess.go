@@ -86,11 +86,28 @@ func AddRoleAccess(db rdbmstool.DbHandlerProxy, roleName, accessName string, isA
 	roleID, roleErr := GetRoleIDByName(db, roleName)
 	if roleErr != nil {
 		return roleErr
+	} else if len(roleID) == 0 {
+		return fmt.Errorf("Role '%s' not exists in database", roleName)
 	}
 
 	accessID, accessErr := GetAccessIDByName(db, accessName)
 	if accessErr != nil {
 		return accessErr
+	} else if len(accessID) == 0 {
+		return fmt.Errorf("Access '%s' not exists in database", accessName)
+	}
+
+	rows, rErr := db.Query("SELECT * FROM role_access WHERE role_id = ? AND access_id = ?", roleID, accessID)
+	if rErr != nil {
+		return rErr
+	}
+	defer rows.Close()
+	count := 0
+	for rows.Next() {
+		count++
+	}
+	if count > 0 {
+		return fmt.Errorf("Role Access '%s'(role), '%s'(access) already exists in database", roleName, accessName)
 	}
 
 	authValue := 0
@@ -143,28 +160,28 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 	var dbErr error
 
 	sqlQuery := rdbmstool.NewQueryBuilder()
-	sqlQuery.From("role_access", "a").
-		Select("a.id", "").
-		Select("a.role_id", "").
-		Select("a.access_id", "").
-		Select("b.name", "role").
-		Select("c.name", "access").
-		Select("a.is_authorize", "").
-		Join("role", "b", rdbmstool.LeftJoin, "a.role_id = b.id").
-		Join("access", "c", rdbmstool.LeftJoin, "a.access_id = c.id").
+	sqlQuery.From("role_access", "").
+		Select("role_access.id", "").
+		Select("role_access.role_id", "").
+		Select("role_access.access_id", "").
+		Select("role.name", "role").
+		Select("access.name", "access").
+		Select("role_access.is_authorize", "").
+		JoinAdd("role", "", rdbmstool.LeftJoin, "role_access.role_id = role.id").
+		JoinAdd("access", "", rdbmstool.LeftJoin, "role_access.access_id = access.id").
 		Limit(pageSize, pageIndex)
 
 	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereAddOr("b.name LIKE '%" + keyword + "%'").
-			WhereAddOr("c.name LIKE '%" + keyword + "%'")
+		sqlQuery.WhereAddOr("role.name LIKE '%" + keyword + "%'").
+			WhereAddOr("access.name LIKE '%" + keyword + "%'")
 	}
 
 	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("a.access_id = '" + accessIDFilter + "'")
+		sqlQuery.WhereAddAnd("role_access.access_id = '" + accessIDFilter + "'")
 	}
 
 	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("a.role_id = '" + roleIDFilter + "'")
+		sqlQuery.WhereAddAnd("role_access.role_id = '" + roleIDFilter + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()
@@ -200,22 +217,22 @@ func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
 	var dbErr error
 
 	sqlQuery := rdbmstool.NewQueryBuilder()
-	sqlQuery.From("role_access", "a").
-		Select("COUNT(a.id)", "cnt").
-		Join("role", "b", rdbmstool.LeftJoin, "a.role_id = b.id").
-		Join("access", "c", rdbmstool.LeftJoin, "a.access_id = c.id")
+	sqlQuery.From("role_access", "").
+		Select("COUNT(role_access.id)", "cnt").
+		JoinAdd("role", "", rdbmstool.LeftJoin, "role_access.role_id = role.id").
+		JoinAdd("access", "", rdbmstool.LeftJoin, "role_access.access_id = access.id")
 
 	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereAddOr("b.name LIKE '%" + keyword + "%'").
-			WhereAddOr("c.name LIKE '%" + keyword + "%'")
+		sqlQuery.WhereAddOr("role.name LIKE '%" + keyword + "%'").
+			WhereAddOr("access.name LIKE '%" + keyword + "%'")
 	}
 
 	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("a.access_id = '" + accessIDFilter + "'")
+		sqlQuery.WhereAddAnd("role_access.access_id = '" + accessIDFilter + "'")
 	}
 
 	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("a.role_id = '" + roleIDFilter + "'")
+		sqlQuery.WhereAddAnd("role_access.role_id = '" + roleIDFilter + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()

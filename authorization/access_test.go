@@ -45,8 +45,10 @@ func TestGetAccessGroupIDByName(t *testing.T) {
 	}
 
 	groupID, grpErr = GetAccessGroupIDByName(trx, "koringa")
-	if grpErr == nil {
-		t.Error("koringa is not existed in database but no error being throw")
+	if grpErr != nil {
+		t.Error(grpErr)
+	} else if len(groupID) > 0 {
+		t.Error("Group Access 'koringa' shouldn't exist in database")
 	}
 
 	trx.Rollback() //no need to commit changes
@@ -96,8 +98,10 @@ func TestGetAccessIDByName(t *testing.T) {
 	}
 
 	accessID, accessErr = GetAccessIDByName(trx, "delete account")
-	if accessErr == nil {
-		t.Error("System should return error as <delete account> is not exists in database")
+	if accessErr != nil {
+		t.Error(accessErr)
+	} else if len(accessID) > 0 {
+		t.Error("Access 'delete account' should not exists in database")
 	}
 
 	trx.Rollback() //no need to commit changes
@@ -123,5 +127,4 @@ func TestGetAccess(t *testing.T) {
 	if len(items) != 3 {
 		t.Errorf("Expect get 3 records, but get %d instead", len(items))
 	}
-
 }

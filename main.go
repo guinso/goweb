@@ -62,15 +62,17 @@ func main() {
 	fmt.Println("[done]")
 
 	//initialize database if requested
-	if config.DbInitTable {
-		log.Print("Initialize data table...")
-		if err := initDbTable(db, config.DbName); err != nil {
-			fmt.Println("[failed]")
-			fmt.Printf("Failed to initialize database table: %s", err.Error())
-			return
+	/*
+		if config.DbInitTable {
+			log.Print("Initialize data table...")
+			if err := initDbTable(db, config.DbName); err != nil {
+				fmt.Println("[failed]")
+				fmt.Printf("Failed to initialize database table: %s", err.Error())
+				return
+			}
+			fmt.Println("[done]")
 		}
-		fmt.Println("[done]")
-	}
+	*/
 
 	util.SetDB(db)
 

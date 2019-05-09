@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -31,15 +32,15 @@ func TestGetRoleIDByName(t *testing.T) {
 	roleID, err := GetRoleIDByName(db, "manager")
 	if err != nil {
 		t.Error(err)
-	}
-
-	if strings.Compare(roleID, "") == 0 {
+	} else if len(roleID) == 0 {
 		t.Error("Role manager should exists in database")
 	}
 
 	//test non-exists role
 	roleID, err = GetRoleIDByName(db, "supervisor")
-	if strings.Compare(roleID, "") != 0 {
+	if err != nil {
+		t.Error(err)
+	} else if len(roleID) > 0 {
 		t.Error("Non exists role 'supervisor' should return empty string, but get " + roleID)
 	}
 }
@@ -83,7 +84,12 @@ func TestAddAccountRole(t *testing.T) {
 		return
 	}
 
-	err = addAccRoleXXX(trx, "harry", "manager")
+	err = addAccRoleXXX(trx, "jojo", "user")
+	if err == nil {
+		t.Error("non exists user 'Jojo' should failed to add account role")
+	}
+
+	err = addAccRoleXXX(trx, "john", "manager")
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,6 +106,8 @@ func addAccRoleXXX(trx *sql.Tx, username string, roleName string) error {
 	accInfo, err := authentication.GetAccountByName(trx, username)
 	if err != nil {
 		return err
+	} else if accInfo == nil {
+		return fmt.Errorf("Account '%s' not found in database", username)
 	}
 
 	return AddAccountRole(trx, accInfo.AccountID, roleName)

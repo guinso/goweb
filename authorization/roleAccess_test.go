@@ -13,6 +13,8 @@ func TestIsAuthorize(t *testing.T) {
 	accInfo, err := authentication.GetAccountByName(db, "dick")
 	if err != nil {
 		t.Error(err)
+	} else if accInfo == nil {
+		t.Error("Account 'dick' should exists in database")
 	}
 
 	isAuthorize, authErr := IsAuthorize(db, accInfo.AccountID, "view account")

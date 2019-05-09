@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guinso/goweb/authentication"
+
 	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
 )
@@ -57,9 +59,9 @@ func GetRoleIDByName(db rdbmstool.DbHandlerProxy, roleName string) (string, erro
 			roleName, count)
 	}
 
-	if count == 0 {
-		return "", nil //fmt.Errorf("Role <%s> not found in database", roleName)
-	}
+	// if count == 0 {
+	// 	return "", nil //fmt.Errorf("Role <%s> not found in database", roleName)
+	// }
 
 	return roleID, nil
 }
@@ -69,6 +71,28 @@ func AddAccountRole(db rdbmstool.DbHandlerProxy, accountID, roleName string) err
 	roleID, err := GetRoleIDByName(db, roleName)
 	if err != nil {
 		return err
+	} else if len(roleID) == 0 {
+		return fmt.Errorf("Role '%s' not exists in database", roleName)
+	}
+
+	accountInfo, err := authentication.GetAccountByID(db, accountID)
+	if err != nil {
+		return err
+	} else if accountInfo == nil {
+		return fmt.Errorf("Account ID '%s' not exists in database", accountID)
+	}
+
+	rows, err := db.Query("SELECT * FROM account_role WHERE account_id = ? AND role_id = ?", accountID, roleID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	count := 0
+	for rows.Next() {
+		count++
+	}
+	if count > 0 {
+		return fmt.Errorf("Account Role with '%s'(Account) , '%s'(role) already exists", accountInfo.Username, roleName)
 	}
 
 	_, err = db.Exec(
