@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/mysqlmetaquery"
 	"github.com/guinso/rdbmstool"
+	"github.com/guinso/sqlitemetaquery"
 )
 
 func initDbTable(db *sql.DB, dbName string) error {
@@ -32,11 +32,7 @@ func initDbTable(db *sql.DB, dbName string) error {
 		return err
 	}
 
-	if err := validateLoginSessionTable(db, dbName); err != nil {
-		return err
-	}
-
-	return nil
+	return validateLoginSessionTable(db, dbName)
 }
 
 func validateLoginSessionTable(db *sql.DB, dbName string) error {
@@ -437,7 +433,8 @@ func validateAccountTable(db *sql.DB, dbName string) error {
 
 func validateTable(db *sql.DB, dbName string, tableDef *rdbmstool.TableDefinition) error {
 
-	query := mysqlmetaquery.MySQLMetaQuery{}
+	//query := mysqlmetaquery.MySQLMetaQuery{}
+	query := sqlitemetaquery.SQLITEMetaQuery{}
 
 	tables, err := query.GetTableNames(db, dbName, tableDef.Name)
 	if err != nil {
@@ -466,9 +463,5 @@ func validateTable(db *sql.DB, dbName string, tableDef *rdbmstool.TableDefinitio
 	if _, err = trx.Exec(sql); err != nil {
 		return err
 	}
-	if err := trx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return trx.Commit()
 }

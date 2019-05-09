@@ -116,7 +116,7 @@ func checkMySQLDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 }
 
 func checkSQLITEConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
-	dbx, err := sql.Open("sqlite3", config.DbName)
+	dbx, err := sql.Open("sqlite3", config.DbAddress)
 
 	if err != nil {
 		return nil, err
