@@ -2,32 +2,93 @@ package main
 
 import (
 	"database/sql"
+	"os"
 	"testing"
-
-	"github.com/guinso/rdbmstool"
 
 	"github.com/guinso/goweb/authentication"
 	"github.com/guinso/goweb/authorization"
 	"github.com/guinso/goweb/util"
 )
 
+const createSQLite3DBScript = `
+CREATE TABLE account(
+    id TEXT PRIMARY KEY,
+    username TEXT UNIQUE,
+    pwd TEXT
+);
+
+CREATE TABLE role(
+    id TEXT PRIMARY KEY,
+    name TEXT
+);
+
+create TABLE account_role(
+    id TEXT PRIMARY KEY,
+    account_id TEXT,
+    role_id TEXT,
+    FOREIGN KEY (account_id) REFERENCES account (id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES role (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE access_group(
+    id TEXT PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE access(
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    group_id TEXT,
+    FOREIGN KEY (group_id) REFERENCES access_group (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE role_access(
+    id TEXT PRIMARY KEY,
+    access_id TEXT,
+    role_id TEXT,
+    is_authorize INTEGER,
+    FOREIGN KEY (access_id) REFERENCES access (id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES role (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE login_session(
+    id TEXT PRIMARY KEY,
+    account_id TEXT,
+    hash_key TEXT,
+    login TEXT,
+    logout TEXT,
+    last_seen TEXT,
+    FOREIGN KEY (account_id) REFERENCES account (id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);`
+
 func TestClearDatabase(t *testing.T) {
-	db := util.GetTestDB()
-
-
-	//tableName := []string{"login_session", "role_access", "role", "access", "access_group", }
-	
-
-	if err := initDbTable(db, util.TestDatabaseName); err != nil {
-		t.Fatalf("Failed to create tables: %s", err.Error())
+	//SQLITE3
+	if util.FileExists(util.SQLiteFilePath) {
+		os.Remove(util.SQLiteFilePath)
 	}
+
+	db := util.GetTestDB()
+	if _, err := db.Exec(createSQLite3DBScript, nil); err != nil {
+		t.Error(err)
+	}
+
+	//appliable for MYSQL
+	// if err := initDbTable(db, util.TestDatabaseName); err != nil {
+	// 	t.Fatalf("Failed to create tables: %s", err.Error())
+	// }
 }
 
-func dropTable(db rdbmstool.DbHandlerProxy, tableName string) error {
-	_, err := db.Exec("DROP table ?", tableName)
+// func dropTable(db rdbmstool.DbHandlerProxy, tableName string) error {
+// 	_, err := db.Exec("DROP table ?", tableName)
 
-	return err
-}
+// 	return err
+// }
 
 //NOTE: Remember go to util/helper.go modify GetTestDB() content
 func TestGenerateRecords(t *testing.T) {

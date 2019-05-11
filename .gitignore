@@ -15,3 +15,6 @@ goweb
 .glide/
 config.ini
 debug
+
+# Databases
+sample.db

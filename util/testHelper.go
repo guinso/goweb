@@ -18,7 +18,8 @@ type HTTPMsg struct {
 }
 
 const (
-	TestDatabaseName = "goweb"
+	TestDatabaseName = "main"
+	SQLiteFilePath   = "/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db"
 )
 
 //GetTestDB get database handler for unit test
@@ -42,7 +43,7 @@ func GetTestDB() *sql.DB {
 		}
 	*/
 	if dbb == nil {
-		dbTest, dbErr := sql.Open("sqlite3", "/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db")
+		dbTest, dbErr := sql.Open("sqlite3", SQLiteFilePath)
 
 		if dbErr != nil {
 			panic(dbErr)

@@ -97,7 +97,7 @@ func TestGetRoleAccessCount(t *testing.T) {
 	}
 
 	if cnt != 9 {
-		t.Errorf("Expect to get 9 access role records but get %d instead", cnt)
+		t.Errorf("Expect to get 9 access role rec                                                                                                                                                                                                                                                                                            ords but get %d instead", cnt)
 	}
 
 	//test filter

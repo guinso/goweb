@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -84,4 +85,14 @@ func IsPUT(r *http.Request) bool {
 //IsDELETE check request HTTP is DELETE method
 func IsDELETE(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "delete") == 0
+}
+
+// FileExists reports whether the named file or directory exists.
+func FileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }

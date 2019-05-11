@@ -89,7 +89,7 @@ func TestAddAccountRole(t *testing.T) {
 		t.Error("non exists user 'Jojo' should failed to add account role")
 	}
 
-	err = addAccRoleXXX(trx, "john", "manager")
+	err = addAccRoleXXX(trx, "harry", "manager")
 	if err != nil {
 		t.Error(err)
 	}

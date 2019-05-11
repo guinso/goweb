@@ -71,7 +71,7 @@ func TestGetAccountByID(t *testing.T) {
 	db := util.GetTestDB()
 
 	//TODO: replace this hardcorded user ID from database
-	account, err := GetAccountByID(db, "d636d00ba6caa312590d0d2f0f838a29")
+	account, err := GetAccountByID(db, "220c86dd0f5ad6322a4e2d94a7d925cf")
 	if err != nil {
 		t.Error(err.Error())
 	}
