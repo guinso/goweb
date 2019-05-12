@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Single Page Appplication with minimum libraries dependency</title>
     <meta charset="utf-8" />
@@ -8,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <!-- this is regular placeholder with topbar, side panel, and dynamic content size -->
     <div class="main-content"></div>
@@ -16,118 +18,14 @@
     <div class="special-content page"></div>
 
     <!-- this is special loading placeholder, e.g. page intialize loading -->
-    <div class="special-loading page">
+    <div class="special-loading page visible">
         Loading...
     </div>
 
     <!-- this is major error message placeholder, e.g. 404 page not found -->
     <div class="special-error page"></div>
-    
-    <script>
-    (function(){
-        var xHttpRequest = new XMLHttpRequest();
-        xHttpRequest.onreadystatechange = function() {
-            if(this.readyState == 4) {
-                if(this.status == 200) {
-                    var jquery = document.createElement("script");
-                    jquery.innerHTML = this.responseText;
-                    document.getElementsByTagName("body")[0].appendChild(jquery);
 
-                    loadDependency();
-                } else {
-                    triggerFailMessage();
-                }
-            }
-        };
-
-        //step 1: load and attach JQuery
-        xHttpRequest.open("GET", "js/jquery-3.2.1.min.js", true);
-        xHttpRequest.send();
-
-        //step 2: load subsequence dependencies
-        function loadDependency() {
-            var style = $.get({url:"css/style.css", cache:true});
-
-            //bootstrap libraries
-            var bootstrapMain = $.get({url:"css/bootstrap.min.css", cache:true});
-            var bootstrapGrid = $.get({url:"css/bootstrap-grid.min.css", cache:true});
-            var bootstrapReboot = $.get({url:"css/bootstrap-reboot.min.css", cache:true});
-            var popper = $.getScript({url:"js/popper.min.js", cache:true});
-
-            
-
-            //core functions
-            var jxHelper = $.getScript({url:"js/jxhelper.js", cahce:true});
-            var router = $.getScript({url:"js/router.js", cache:true});
-            //var script = $.getScript({url:"/js/script.js", cache:true});
-
-            var btsHelper = $.getScript({url:"js/btsHelper.js", cache:true});
-
-            $.when(style, bootstrapMain, bootstrapGrid, bootstrapReboot, 
-                    popper, jxHelper, router, btsHelper)
-                .then(function(styleRes, bsMainRes, bsGridRes, bsRebotRes,
-                                popperRes, jxHelperRes, routerRes, btsHelperRes){
-                    var body = document.getElementsByTagName("body")[0];
-
-                    //3. add base tyle CSS
-                    appendElement(body, "style", styleRes[0]);
-                    $(".special-loading").addClass("visible");
-                    
-                    //# add Bootstrap CSS (optional)
-                    appendElement(body, "style", bsMainRes[0]);
-                    appendElement(body, "style", bsGridRes[0]);
-                    appendElement(body, "style", bsRebotRes[0]);
-
-                    //# add popperJS (optional)
-                    appendElement(body, "script", popperRes[0]);
-
-                    //4. add JxHelper, and router javascript
-                    appendElement(body, "script", jxHelperRes[0]);
-                    appendElement(body, "script", routerRes[0]);
-
-                    //5. additional helper libraries
-                    appendElement(body, "script", btsHelperRes[0]);
-
-                    return $.get({url:"js/bootstrap.min.js", cache:true});
-                })
-                .then(function(boostrapJS){
-
-                    //# add bootstrap javascript (optional)
-                    appendElement(
-                        document.getElementsByTagName("body")[0], 
-                        "script", 
-                        boostrapJS);
-
-                    return $.get({url:"js/script.js",mathod:"GET", cache:true});
-                })
-                .then(function(scriptRes){
-
-                    //5. add and run post-script
-                    appendElement(
-                        document.getElementsByTagName("body")[0], 
-                        "script", 
-                        scriptRes);
-                    
-                    console.log("Load dependencies success");
-                })
-                .fail(function(xhr, statusCode, error){
-                    triggerFailMessage();
-                });
-        }
-
-        function appendElement(body, tagName, innerHTML) {
-            var element = document.createElement(tagName);
-            element.innerHTML = innerHTML;
-
-            body.appendChild(element);
-        }
-
-        function triggerFailMessage()  {
-            //handle error exception
-            document.getElementsByClassName("special-loading")[0].innerHTML = 
-                "<p>Ops, something going wrong when try connect to server</p>";
-        }
-    })();
-    </script>
+    <script type="text/javascript" src="js/index.js"></script>
 </body>
+
 </html>

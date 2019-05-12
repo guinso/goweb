@@ -1,73 +1,75 @@
-var JxHelper = {
+class JxHelper {
 
     //loading panel
-    getLoadingPanel : function() {
-        return $('.loading-panel');
-    },
-    showLoadingPanel : function() {
-        $('.loading-panel').addClass('visible-panel');
-    },
-    hideLoadingPanel : function() {
-        $('.loading-panel').removeClass('visible-panel');
-    },
+    static getLoadingPanel() {
+        return $('.loading-panel')
+    }
+    static showLoadingPanel() {
+        $('.loading-panel').addClass('visible-panel')
+    }
+    static hideLoadingPanel() {
+        $('.loading-panel').removeClass('visible-panel')
+    }
 
     //content panel
-    getContentPanel : function() {
-        return $('.content-panel');
-    },
+    static getContentPanel() {
+        return $('.content-panel')
+    }
 
     //hide all content
-    hideAllContent : function() {
-        $('body page').removeClass('visible');
-    },
+    static hideAllContent() {
+        $('body page').removeClass('visible')
+    }
 
     //main content
-    getMainContent : function() {
-        return $('.main-content');
-    },
-    showMainContent : function() {
-        $('.main-content').addClass('visible');
-    },
-    hideMainContain : function() {
-        $('.main-content').removeClass('visible');
-    },
+    static getMainContent() {
+        return $('.main-content')
+    }
+    static showMainContent() {
+        $('.main-content').addClass('visible')
+    }
+    static hideMainContain() {
+        $('.main-content').removeClass('visible')
+    }
 
     //special error
-    getSpecialError : function() {
-        return $('.special-error');
-    },
-    showSpecialError : function() {
-        $('.special-error').addClass('visible');
-    },
-    hideSpecialError : function() {
-        $('.special-error').removeClass('visible');
-    },
-    showServerErrorMessage :function() {
+    static getSpecialError() {
+        return $('.special-error')
+    }
+    static showSpecialError() {
+        $('.special-error').addClass('visible')
+    }
+    static hideSpecialError() {
+        $('.special-error').removeClass('visible')
+    }
+    static showServerErrorMessage() {
         JxHelper.getSpecialError()
-            .html("<h2>Opps, there's problem try to connect to server</h2>");
+            .html("<h2>Opps, there's problem try to connect to server</h2>")
         JxHelper.showSpecialError();
-    },
+    }
 
     //special content
-    getSpecialContent : function() {
-        return $('.special-content');
-    },
-    showSpecialContent : function() {
-        $('.special-content').addClass('visible');
-    },
-    hideSpecialContent : function() {
-        $('.special-content').removeClass('visible');
-    },
+    static getSpecialContent() {
+        return $('.special-content')
+    }
+    static showSpecialContent() {
+        $('.special-content').addClass('visible')
+    }
+    static hideSpecialContent() {
+        $('.special-content').removeClass('visible')
+    }
 
     //special loading
-    getSpecialLoading : function() {
-        return $('.special-loading');
-    },
-    showSpecialLoading : function() {
-        $('.special-loading').addClass('visible');
-    },
-    hideSpecialLoading : function() {
-        $('.special-loading').removeClass('visible');
+    static getSpecialLoading() {
+        return $('.special-loading')
+    }
+    static showSpecialLoading() {
+        $('.special-loading').addClass('visible')
+    }
+    static hideSpecialLoading() {
+        $('.special-loading').removeClass('visible')
     }
 }
+
+export { JxHelper }
 //# sourceURL=jxhelper.js

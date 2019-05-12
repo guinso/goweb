@@ -1,13 +1,16 @@
-$(function() {
+import { JxHelper } from '/js/jxhelper.js'
+import { Router } from '/js/router.js'
 
-    $.get({ url: "js/mainContent/partial.html", cache: true })
+(function() {
+    //listen URL hash(#) change and swap content accordingly
+    let router = new Router()
+    window.onhashchange = () => {
+        router.resolve(decodeURI(window.location.hash))
+    }
+
+    $.get({ url: "/js/mainContent/partial.html", cache: true })
         .done(function(data) {
             JxHelper.getMainContent().html(data);
-
-            var router = new Router();
-
-            //start listen URL hash(#) change and swap content accordingly
-            router.registerEventListener();
 
             //hide loading page
             JxHelper.hideSpecialLoading();
@@ -21,5 +24,5 @@ $(function() {
 
             JxHelper.showSpecialError();
         });
-});
+})()
 //# sourceURL=script.js
