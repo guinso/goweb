@@ -1,46 +1,43 @@
-function Note() {
-    this.renderPage = function() {
+import { JxHelper } from '/js/jxhelper.js'
+class Note {
+    static renderPage() {
         JxHelper.showLoadingPanel();
-        
-        var partial = $.get({url:"js/note/partial.html", cache:true});
+
+        var partial = $.get({ url: "js/note/partial.html", cache: true });
 
         $.when(partial)
-            .done(function(data){
-                var tmp =  _render(data);
+            .done(function(data) {
+                let element = $(partial);
+
+                element.find('.todo-holder')
+                    .append(Note.generateToDoItem("buy lunch"))
+                    .append(Note.generateToDoItem("mop floor"))
+                    .append(Note.generateToDoItem("clean dishes"));
+
+                //TODO: bind event for each todo item
+
 
                 JxHelper.getContentPanel()
                     .empty()
-                    .append(tmp);
+                    .append(element);
             })
-            .fail(function(xhr, statusCode, error){
+            .fail(function(xhr, statusCode, error) {
                 JxHelper.getSpecialError()
                     .html("<h2>Opps, something wrong happen :(")
                     .addClass("visible");
             })
-            .always(function(){
+            .always(function() {
                 JxHelper.hideLoadingPanel();
             });
     }
 
-    var _render = function(partial) {
-
-        var element = $(partial);
-
-        element.find('.todo-holder')
-            .append(_generateToDoItem("buy lunch"))
-            .append(_generateToDoItem("mop floor"))
-            .append(_generateToDoItem("clean dishes"));
-
-        //TODO: bind event for each todo item
-
-        return element;
-    }
-
-    var _generateToDoItem = function(message) {
-        var jqueryElement =  $('<li class="todo-item">' + message + '</li>');
+    static generateToDoItem(message) {
+        var jqueryElement = $('<li class="todo-item">' + message + '</li>');
         var domElement = jqueryElement[0];
 
         return jqueryElement;
     }
 }
+
+export { Note }
 //# sourceURL=note/note.js

@@ -1,4 +1,6 @@
 import { JxHelper } from '/js/jxhelper.js'
+import { Login } from '/js/login/login.js'
+import { Note } from '/js/note/note.js'
 
 //this module is solely handle swaping content based on URL hash value
 class Router {
@@ -17,18 +19,20 @@ class Router {
                 if (data.statusCode === 0) {
                     if (data.response.id === "-") {
                         //show login page
-                        Router.getModule('js/login/login.js', function(login) {
-                            login.renderPage();
-                        });
+                        // Router.getModule('js/login/login.js', function(login) {
+                        //     login.renderPage();
+                        // });
+                        Login.renderPage()
                     } else {
                         $('#usernameHolder').html(data.response.username); //TODO: get full name
                         this.actualRouting(url);
                     }
                 } else {
                     //show login page
-                    Router.getModule('js/login/login.js', function(login) {
-                        login.renderPage();
-                    });
+                    // Router.getModule('js/login/login.js', function(login) {
+                    //     login.renderPage();
+                    // });
+                    Login.renderPage()
                 }
             })
             .fail(function() {

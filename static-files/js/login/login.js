@@ -1,8 +1,11 @@
-function Login() {
-    this.renderPage = function() {
+import { JxHelper } from '/js/jxhelper.js'
+
+class Login {
+
+    static renderPage() {
         //empty main-content child elements
         var mainContent = document.querySelector(".main-content");
-        while(mainContent.firstChild)
+        while (mainContent.firstChild)
             mainContent.removeChild(mainContent.firstChild);
 
         JxHelper.getSpecialLoading()
@@ -14,7 +17,7 @@ function Login() {
                 JxHelper.getSpecialContent().html(partial);
 
                 //setup event handler
-                setupEventHandler();
+                Login.setupEventHandler();
 
                 JxHelper.showSpecialContent();
                 JxHelper.hideSpecialLoading();
@@ -28,9 +31,9 @@ function Login() {
             });
     };
 
-    var setupEventHandler = function() {
+    static setupEventHandler() {
         //implement event handler
-        $('#loginForm').submit(function(e){
+        $('#loginForm').submit(function(e) {
             console.log('entering login form submit handler...');
 
             var jsonData = {
@@ -38,7 +41,7 @@ function Login() {
                 pwd: $('#pwdCtl').val()
             };
 
-            var username =  $('#usernameCtl').val();
+            var username = $('#usernameCtl').val();
 
             var loginMsg = $('#loginFailMsg');
             loginMsg.removeClass('text-danger');
@@ -46,22 +49,23 @@ function Login() {
 
             console.log('start send POST request');
             $.post({
-                url:'api/login', 
-                contentType:'application/json', 
-                data: JSON.stringify(jsonData)})
-                .done(function(data){
+                    url: 'api/login',
+                    contentType: 'application/json',
+                    data: JSON.stringify(jsonData)
+                })
+                .done(function(data) {
                     response = JSON.parse(data);
 
                     if (response.statusCode === 0) {
                         loginMsg.html("login success");
-                        
+
                         window.location = "/"; //redirect to default page
                     } else {
                         loginMsg.html(response.statusMsg);
                         loginMsg.addClass('text-danger');
                     }
                 })
-                .fail(function(xhr, statusCode, error){
+                .fail(function(xhr, statusCode, error) {
                     JxHelper.showServerErrorMessage();
                 });
 
@@ -69,13 +73,13 @@ function Login() {
         });
     };
 
-    this.logout = function() {
+    static logout() {
         //handle logout
-        $.post({url:"api/logout"})
-            .done(function(response){
+        $.post({ url: "api/logout" })
+            .done(function(response) {
                 var data = JSON.parse(response);
 
-                if(data.statusCode === 0) {
+                if (data.statusCode === 0) {
                     //logout success
                     window.location = "#login";
                 } else {
@@ -85,9 +89,11 @@ function Login() {
                         .addClass('visible');
                 }
             })
-            .fail(function(xhr, statusCode, error){
+            .fail(function(xhr, statusCode, error) {
                 JxHelper.showServerErrorMessage();
             });
     };
 }
+
+export { Login }
 //# sourceURL=login/login.js
