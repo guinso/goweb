@@ -1,19 +1,18 @@
-import { JxHelper } from '/js/jxhelper.js'
+import { JxHelper } from '/js/helper/jxhelper.js'
 
 export class Login {
 
     static renderPage() {
         //empty main-content child elements
-        var mainContent = document.querySelector(".main-content");
-        while (mainContent.firstChild)
-            mainContent.removeChild(mainContent.firstChild);
+        const mainContent = JxHelper.getMainContent()
+        JxHelper.emptyElementChildren(mainContent)
 
         JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
-        JxHelper.getSpecialLoading().classList.add('visible')
+        JxHelper.showSpecialLoading()
 
-        $.get({ url: "js/login/partial.html", cache: true })
-            .done(function(partial) {
-                JxHelper.getSpecialContent().innerHTML = partial
+        JxHelper.fetchText('/js/login/partial.html')
+            .then(text => {
+                JxHelper.getSpecialContent().innerHTML = text
 
                 //setup event handler
                 Login.setupEventHandler();
@@ -26,9 +25,10 @@ export class Login {
                     xx.classList.add('show-login')
                 }, 100);
             })
-            .fail(function(xhr, statusCode, error) {
+            .catch(err => {
+                console.error(err)
                 JxHelper.showServerErrorMessage();
-            });
+            })
     };
 
     static setupEventHandler() {

@@ -1,38 +1,29 @@
-import { JxHelper } from '/js/jxhelper.js'
-import { Login } from '/js/login/login.js'
+import { JxHelper } from '/js/helper/jxhelper.js'
 
 //this module is solely handle swaping content based on URL hash value
 export class Router {
-    static resolve(url) {
+    static async resolve(url) {
         //This function decides what type of page to show
         //depending on the current url hash value.
 
-        //check current login ID
-        $.get('api/current-user')
-            .done(function(response) {
-                let data = JSON.parse(response);
-                if (data.statusCode === 0) {
-                    if (data.response.id === "-") {
-                        //show login page
-                        Router.getModule('/js/login/login.js', function(module) {
-                            module.Login.renderPage()
-                        })
-                    } else {
-                        document.getElementById('usernameHolder').innerHTML = data.response.username //TODO: get full name
-                        
-                        Router.actualRouting(url);
-                    }
-                } else {
-                    //show login page
-                    // Router.getModule('js/login/login.js', function(login) {
-                    //     login.renderPage();
-                    // });
-                    Login.renderPage()
-                }
+        const currentUser = await fetch('/api/current-user')
+        if (!currentUser.ok) {
+            throw Error(currentUser.statusText)
+        }
+
+        const data = await currentUser.json()
+        if (data.statusCode !== 0 && data.response.id != '-') {
+            //show login page
+            Router.getModule('/js/login/login.js', function(module) {
+                module.Login.renderPage()
             })
-            .fail(function() {
-                JxHelper.showServerErrorMessage();
-            });
+        } else {
+            //update current login username
+            document.getElementById('usernameHolder').innerHTML = data.response.username //TODO: get full name
+
+            //route to actual URL
+            Router.actualRouting(url);
+        }
     }
 
     static actualRouting(url) {
@@ -53,7 +44,7 @@ export class Router {
             location.href = "#user"; //redirect to user page...
         } else if (paths[0] === "asd") {
 
-            mainContent.innerHTML ='<a href="#qwe" class="aaa">QWE</a>';
+            mainContent.innerHTML = '<a href="#qwe" class="aaa">QWE</a>';
             const aaa = mainContent.querySelector('.aaa')
             aaa.classList.add('color')
             aaa.classList.add('green')
@@ -62,7 +53,7 @@ export class Router {
 
         } else if (paths[0] === "qwe") {
 
-            mainContent.innerHTML = 
+            mainContent.innerHTML =
                 '<a href="#asd">ASD</a><br/>' +
                 '<a href="#user">User</a>';
 
@@ -95,23 +86,23 @@ export class Router {
     static renderPageNotFound() {
         const placeHolder = JxHelper.getSpecialError()
         placeHolder.innerHTML = "<h2>Opps, can't find the page you are looking for</h2>"
-        placeHolder.classList.add('visible');
+
+        JxHelper.showSpecialLoading()
     }
 
     static getModule(urlVal, execFn) {
         JxHelper.showSpecialLoading()
 
-        import(urlVal)
+        import (urlVal)
         .then(module => {
-            JxHelper.hideSpecialLoading()
-
-            execFn(module)
-        })
-        .catch(err => {
-            console.error("failed to load module: " + urlVal)
-            console.error(err)
-            JxHelper.showServerErrorMessage()
-        })
+                execFn(module)
+                JxHelper.hideSpecialLoading()
+            })
+            .catch(err => {
+                console.error("failed to load module: " + urlVal)
+                console.error(err)
+                JxHelper.showServerErrorMessage()
+            })
     }
 
     static strPrefixMatch(strCompare, prefix) {

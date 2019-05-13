@@ -19,7 +19,7 @@ export class JxHelper {
     //hide all content
     static hideAllContent() {
         const pages = document.getElementsByClassName('page')
-        for (let i =0; i < pages.length; i++) {
+        for (let i = 0; i < pages.length; i++) {
             pages[i].classList.remove('visible')
         }
     }

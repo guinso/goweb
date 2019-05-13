@@ -1,4 +1,4 @@
-import { JxHelper } from '/js/jxhelper.js'
+import { JxHelper } from '/js/helper/jxhelper.js'
 
 export class Note {
     static placeHolder = null
@@ -8,52 +8,51 @@ export class Note {
 
         (new Promise(Note.fetchPartial))
         .then(fragment => {
-            const todoPlaceHolder = fragment.querySelector('.todo-holder')
+                const todoPlaceHolder = fragment.querySelector('.todo-holder')
 
-            return Note.reloadTodoList(todoPlaceHolder)
-                .then(todoList => {return fragment})
-        })
-        .then(fragment => {
-            const contentPanel = JxHelper.getContentPanel()
-            JxHelper.emptyElementChildren(contentPanel)
+                return Note.reloadTodoList(todoPlaceHolder)
+                    .then(todoList => { return fragment })
+            })
+            .then(fragment => {
+                const contentPanel = JxHelper.getContentPanel()
+                JxHelper.emptyElementChildren(contentPanel)
 
-            contentPanel.appendChild(fragment)
-        })
-        .catch(err => {
-            console.error(err)
-            JxHelper.getSpecialError()
-            .html("<h2>Opps, something wrong happen :(</h2>")
-            .addClass("visible");
-        })
-        .then(() => {
-            JxHelper.hideLoadingPanel();
-        })
+                contentPanel.appendChild(fragment)
+            })
+            .catch(err => {
+                console.error(err)
+                JxHelper.getSpecialError()
+                    .html("<h2>Opps, something wrong happen :(</h2>")
+                    .addClass("visible");
+            })
+            .then(() => {
+                JxHelper.hideLoadingPanel();
+            })
     }
 
     static fetchPartial(resolve, reject) {
-        if (!Note.placeHolder)
-        {
+        if (!Note.placeHolder) {
             fetch('/js/note/partial.html')
-            .then(response => {
-                if (!response.ok) {
-                    reject(response.statusText)
-                } 
-    
-                return response.text()
-            })
-            .then(htmlText => {
-                Note.placeHolder = JxHelper.parseHTMLString(htmlText)
-    
-                resolve(Note.placeHolder)
-            })
+                .then(response => {
+                    if (!response.ok) {
+                        reject(response.statusText)
+                    }
+
+                    return response.text()
+                })
+                .then(htmlText => {
+                    Note.placeHolder = JxHelper.parseHTMLString(htmlText)
+
+                    resolve(Note.placeHolder)
+                })
         } else {
             resolve(Note.placeHolder)
         }
     }
 
     static reloadTodoList(todoPlaceHolder) {
-        
-        return new Promise(function(resolve, reject){
+
+        return new Promise(function(resolve, reject) {
             JxHelper.emptyElementChildren(todoPlaceHolder)
 
             todoPlaceHolder.appendChild(Note.generateToDoItem("buy lunch"))
@@ -62,7 +61,7 @@ export class Note {
 
             resolve(todoPlaceHolder)
         })
-        
+
         //TODO: bind event for each todo item
     }
 
