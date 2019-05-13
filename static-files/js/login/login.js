@@ -1,4 +1,5 @@
 import { JxHelper } from '/js/helper/jxhelper.js'
+import { FetchHelper } from '/js/helper/fetchHelper.js'
 
 export class Login {
 
@@ -10,7 +11,7 @@ export class Login {
         JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
         JxHelper.showSpecialLoading()
 
-        JxHelper.fetchText('/js/login/partial.html')
+        FetchHelper.fetchText('/js/login/partial.html')
             .then(text => {
                 JxHelper.getSpecialContent().innerHTML = text
 

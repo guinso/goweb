@@ -1,21 +1,22 @@
 import { JxHelper } from '/js/helper/jxhelper.js'
+import { FetchHelper } from '/js/helper/fetchHelper.js'
 import { Router } from '/js/router.js'
 
 //run script
 (async function() {
     try {
         //1. load dependencies
-        const jsfiles = await JxHelper.fetchTexts(
+        const jsfiles = await FetchHelper.fetchTexts(
             ['/libs/jquery-3.2.1.min.js', '/libs/popper.min.js', '/libs/bootstrap.min.js'])
         jsfiles.forEach(file => addJSTag(file))
 
-        const cssFiles = await JxHelper.fetchTexts(
+        const cssFiles = await FetchHelper.fetchTexts(
             ['/css/bootstrap.min.css', '/css/bootstrap-grid.min.css', '/css/bootstrap-reboot.min.css'])
         cssFiles.forEach(file => addCSSTag(file))
 
 
         //2. load webpage layout
-        const partial = await JxHelper.fetchText('/js/mainContent/partial.html')
+        const partial = await FetchHelper.fetchText('/js/mainContent/partial.html')
         JxHelper.getMainContent().innerHTML = partial
 
 

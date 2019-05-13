@@ -1,4 +1,4 @@
-export class fetchHelper {
+export class FetchHelper {
     static async fetchJson(url) {
         const response = await fetch(url)
         if (!response.ok) {
