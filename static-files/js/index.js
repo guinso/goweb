@@ -1,20 +1,18 @@
-(() => {
-    const kk = new Promise(loadDependency2)
+import { JxHelper } from '/js/jxhelper.js'
+import { Router } from '/js/router.js'
 
-    kk.then(() => fetch('js/script.js'))
-        .then(response => response.text())
-        .then(text => {
-            const element = document.createElement('script')
-            element.type = 'module'
-            element.innerHTML = text
+(function() {
+    (new Promise(loadDependency))
+    .then(response => response.text())
+    .catch(() =>
+        triggerFailMessage())
+    .then(text => {
+        RunScript()
+    })
 
-            document.getElementsByTagName("body")[0].appendChild(element)
-        })
-        .catch(() =>
-            triggerFailMessage())
 })()
 
-function loadDependency2(resolve, reject) {
+function loadDependency(resolve, reject) {
     const jquery = fetch('js/jquery-3.2.1.min.js')
     const popper = fetch('js/popper.min.js')
     const bootstrapJS = fetch('js/bootstrap.min.js')
@@ -59,6 +57,30 @@ function loadDependency2(resolve, reject) {
         .catch(err => {
             reject(err)
         })
+}
+
+function RunScript() {
+    //listen URL hash(#) change and swap content accordingly
+    window.onhashchange = () => {
+        Router.resolve(decodeURI(window.location.hash))
+    }
+
+    $.get({ url: "/js/mainContent/partial.html", cache: true })
+        .done(function(data) {
+            JxHelper.getMainContent().innerHTML = data;
+
+            //hide loading page
+            JxHelper.hideSpecialLoading();
+
+            //start resolve path
+            Router.resolve(decodeURI(window.location.hash));
+        })
+        .fail(function(xhr, statusCode, error) {
+            JxHelper.getSpecialError()
+                .html("<h1>Opps, something something wrong happen with server :(</h1>");
+
+            JxHelper.showSpecialError();
+        });
 }
 
 function addCSSTag(source) {

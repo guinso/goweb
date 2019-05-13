@@ -1,14 +1,9 @@
 import { JxHelper } from '/js/jxhelper.js'
 import { Login } from '/js/login/login.js'
-import { Note } from '/js/note/note.js'
 
 //this module is solely handle swaping content based on URL hash value
-class Router {
-    constructor() {
-
-    }
-
-    resolve(url) {
+export class Router {
+    static resolve(url) {
         //This function decides what type of page to show
         //depending on the current url hash value.
 
@@ -19,13 +14,13 @@ class Router {
                 if (data.statusCode === 0) {
                     if (data.response.id === "-") {
                         //show login page
-                        // Router.getModule('js/login/login.js', function(login) {
-                        //     login.renderPage();
-                        // });
-                        Login.renderPage()
+                        Router.getModule('/js/login/login.js', function(module) {
+                            module.Login.renderPage()
+                        })
                     } else {
-                        $('#usernameHolder').html(data.response.username); //TODO: get full name
-                        this.actualRouting(url);
+                        document.getElementById('usernameHolder').innerHTML = data.response.username //TODO: get full name
+                        
+                        Router.actualRouting(url);
                     }
                 } else {
                     //show login page
@@ -40,7 +35,7 @@ class Router {
             });
     }
 
-    actualRouting(url) {
+    static actualRouting(url) {
         //get the keyword from the url
         if (url[0] === "#") {
             url = url.substring(1);
@@ -58,36 +53,39 @@ class Router {
             location.href = "#user"; //redirect to user page...
         } else if (paths[0] === "asd") {
 
-            mainContent.html('<a href="#qwe" class="aaa">QWE</a>');
-            mainContent.find('.aaa').css("color", "green");
+            mainContent.innerHTML ='<a href="#qwe" class="aaa">QWE</a>';
+            const aaa = mainContent.querySelector('.aaa')
+            aaa.classList.add('color')
+            aaa.classList.add('green')
 
             JxHelper.showMainContent();
 
         } else if (paths[0] === "qwe") {
 
-            mainContent.html('<a href="#asd">ASD</a><br/>' +
-                '<a href="#user">User</a>');
+            mainContent.innerHTML = 
+                '<a href="#asd">ASD</a><br/>' +
+                '<a href="#user">User</a>';
 
             JxHelper.showMainContent();
         } else if (paths[0] === "user") {
-            Router.getModule('/js/user/user.js', function(user) {
-                user.renderPage();
+            Router.getModule('/js/user/user.js', function(module) {
+                module.User.renderPage();
             });
         } else if (paths[0] === "note") {
-            Router.getModule('/js/note/note.js', function(note) {
-                note.renderPage();
+            Router.getModule('/js/note/note.js', function(module) {
+                module.Note.renderPage()
             });
         } else if (paths[0] === "login") {
-            Router.getModule('/js/login/login.js', function(login) {
-                login.renderPage();
+            Router.getModule('/js/login/login.js', function(module) {
+                module.Login.renderPage();
             });
         } else if (paths[0] === "logout") {
-            Router.getModule('/js/login/login.js', function(login) {
-                login.logout();
+            Router.getModule('/js/login/login.js', function(module) {
+                module.Login.logout();
             });
         } else if (paths[0] === "role-access") {
-            Router.getModule('/js/roleAccess/roleAccess.js', function(role) {
-                role.renderPage();
+            Router.getModule('/js/roleAccess/roleAccess.js', function(module) {
+                module.Role.renderPage();
             });
         } else {
             Router.renderPageNotFound();
@@ -95,60 +93,29 @@ class Router {
     }
 
     static renderPageNotFound() {
-        JxHelper.getSpecialError()
-            .html("<h2>Opps, can't find the page you are looking for</h2>")
-            .addClass('visible');
+        const placeHolder = JxHelper.getSpecialError()
+        placeHolder.innerHTML = "<h2>Opps, can't find the page you are looking for</h2>"
+        placeHolder.classList.add('visible');
     }
 
     static getModule(urlVal, execFn) {
-        JxHelper.showSpecialLoading();
+        JxHelper.showSpecialLoading()
 
-        fetch(urlVal)
-            .then(response => {
-                if (!response.ok) {
-                    return Error(response.statusText)
-                } else {
-                    return response.text()
-                }
-            })
-            .then(text => {
-                JxHelper.hideSpecialLoading();
+        import(urlVal)
+        .then(module => {
+            JxHelper.hideSpecialLoading()
 
-                execFn((new Function("return new " + text))());
-            })
-            .catch(err => {
-                console.log(err)
-                JxHelper.showServerErrorMessage()
-            })
+            execFn(module)
+        })
+        .catch(err => {
+            console.error("failed to load module: " + urlVal)
+            console.error(err)
+            JxHelper.showServerErrorMessage()
+        })
     }
-
-    /*
-    if (!this._cache[key]) {
-        JxHelper.showSpecialLoading();
-
-        let tmpCache = this._cache
-
-        $.getScript({ url: urlVal, cache: true })
-            .done(function(data) {
-                var code = "return new " + data;
-                tmpCache[key] = (new Function("return new " + data))();
-
-                JxHelper.hideSpecialLoading();
-                var tmp = tmpCache[key];
-                execFn(tmp);
-            })
-            .fail(function(xhr, statusCode, error) {
-                JxHelper.showServerErrorMessage();
-            });
-    } else {
-        execFn(this._cache[key]);
-    }
-    */
 
     static strPrefixMatch(strCompare, prefix) {
         return strCompare.indexOf(prefix) === 0;
     }
 }
-
-export { Router }
 //# sourceURL=router.js

@@ -1,75 +1,89 @@
-class JxHelper {
+export class JxHelper {
 
     //loading panel
     static getLoadingPanel() {
-        return $('.loading-panel')
+        return document.querySelector('.loading-panel')
     }
     static showLoadingPanel() {
-        $('.loading-panel').addClass('visible-panel')
+        JxHelper.getLoadingPanel().classList.add('visible-panel');
     }
     static hideLoadingPanel() {
-        $('.loading-panel').removeClass('visible-panel')
+        JxHelper.getLoadingPanel().classList.remove('visible-panel');
     }
 
     //content panel
     static getContentPanel() {
-        return $('.content-panel')
+        return document.querySelector('.content-panel')
     }
 
     //hide all content
     static hideAllContent() {
-        $('body page').removeClass('visible')
+        const pages = document.getElementsByClassName('page')
+        for (let i =0; i < pages.length; i++) {
+            pages[i].classList.remove('visible')
+        }
     }
 
     //main content
     static getMainContent() {
-        return $('.main-content')
+        return document.querySelector('.main-content')
     }
     static showMainContent() {
-        $('.main-content').addClass('visible')
+        JxHelper.getMainContent().classList.add('visible')
     }
     static hideMainContain() {
-        $('.main-content').removeClass('visible')
+        JxHelper.getMainContent().classList.remove('visible')
     }
 
     //special error
     static getSpecialError() {
-        return $('.special-error')
+        return document.querySelector('.special-error')
     }
     static showSpecialError() {
-        $('.special-error').addClass('visible')
+        JxHelper.getSpecialError().classList.add('visible')
     }
     static hideSpecialError() {
-        $('.special-error').removeClass('visible')
+        JxHelper.getSpecialError().classList.remove('visible')
     }
     static showServerErrorMessage() {
         JxHelper.getSpecialError()
-            .html("<h2>Opps, there's problem try to connect to server</h2>")
+            .innerHTML = "<h2>Opps, there's problem try to connect to server</h2>"
         JxHelper.showSpecialError();
     }
 
     //special content
     static getSpecialContent() {
-        return $('.special-content')
+        return document.querySelector('.special-content')
     }
     static showSpecialContent() {
-        $('.special-content').addClass('visible')
+        JxHelper.getSpecialContent().classList.add('visible')
     }
     static hideSpecialContent() {
-        $('.special-content').removeClass('visible')
+        JxHelper.getSpecialContent().classList.remove('visible')
     }
 
     //special loading
     static getSpecialLoading() {
-        return $('.special-loading')
+        return document.querySelector('.special-loading')
     }
     static showSpecialLoading() {
-        $('.special-loading').addClass('visible')
+        JxHelper.getSpecialLoading().classList.add('visible')
     }
     static hideSpecialLoading() {
-        $('.special-loading').removeClass('visible')
+        JxHelper.getSpecialLoading().classList.remove('visible')
+    }
+
+    static emptyElementChildren(element) {
+        while (element.firstChild) {
+            element.firstChild.remove()
+        }
+    }
+
+    static parseHTMLString(htmlString) {
+        let x = document.createElement('div')
+        x.innerHTML = htmlString
+
+        return x
     }
 }
-
-export { JxHelper }
 //# sourceURL=jxhelper.js

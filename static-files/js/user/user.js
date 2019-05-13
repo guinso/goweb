@@ -1,6 +1,8 @@
-function User() {
+import { JxHelper } from '/js/jxhelper.js'
 
-    this.renderPage = function() {
+export class User {
+
+    static renderPage = function() {
         JxHelper.showLoadingPanel();
 
         var partial = $.get({url:"js/user/partial.html", cache:true});
@@ -9,12 +11,11 @@ function User() {
 
         $.when(partial, userData, optionalDemo)
             .done(function(partialResponse, userDataResponse, demoResponse) {
-                JxHelper.getContentPanel()
-                    .html(partialResponse[0]);
+                JxHelper.getContentPanel().innerHtml = partialResponse[0]
             })
             .fail(function(jsXHR, statusCode, error){
                 JxHelper.getSpecialError()
-                    .html("<h2>Opps, something wrong happen :(")
+                    .html("<h2>Opps, something wrong happen :(</h2>")
                     .addClass("visible");
             })
             .always(function(xhr, statusCode, error){

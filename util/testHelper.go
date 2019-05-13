@@ -19,7 +19,7 @@ type HTTPMsg struct {
 
 const (
 	TestDatabaseName = "main"
-	SQLiteFilePath   = "/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db"
+	SQLiteFilePath   = "C:\\Users\\Benjamin\\go\\src\\github.com\\guinso\\goweb\\sample.db" //"/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db"
 )
 
 //GetTestDB get database handler for unit test

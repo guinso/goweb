@@ -1,6 +1,6 @@
 import { JxHelper } from '/js/jxhelper.js'
 
-class Login {
+export class Login {
 
     static renderPage() {
         //empty main-content child elements
@@ -8,13 +8,12 @@ class Login {
         while (mainContent.firstChild)
             mainContent.removeChild(mainContent.firstChild);
 
-        JxHelper.getSpecialLoading()
-            .html('redirecting to login page...')
-            .addClass('visible');
+        JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
+        JxHelper.getSpecialLoading().classList.add('visible')
 
         $.get({ url: "js/login/partial.html", cache: true })
             .done(function(partial) {
-                JxHelper.getSpecialContent().html(partial);
+                JxHelper.getSpecialContent().innerHTML = partial
 
                 //setup event handler
                 Login.setupEventHandler();
@@ -23,7 +22,8 @@ class Login {
                 JxHelper.hideSpecialLoading();
 
                 setTimeout(function() {
-                    $('.login-placeholder').addClass('show-login');
+                    const xx = document.querySelector('.login-placeholder')
+                    xx.classList.add('show-login')
                 }, 100);
             })
             .fail(function(xhr, statusCode, error) {
@@ -54,7 +54,7 @@ class Login {
                     data: JSON.stringify(jsonData)
                 })
                 .done(function(data) {
-                    response = JSON.parse(data);
+                    const response = JSON.parse(data);
 
                     if (response.statusCode === 0) {
                         loginMsg.html("login success");
@@ -94,6 +94,4 @@ class Login {
             });
     };
 }
-
-export { Login }
 //# sourceURL=login/login.js

@@ -1,43 +1,77 @@
 import { JxHelper } from '/js/jxhelper.js'
-class Note {
+
+export class Note {
+    static placeHolder = null
+
     static renderPage() {
         JxHelper.showLoadingPanel();
 
-        var partial = $.get({ url: "js/note/partial.html", cache: true });
+        (new Promise(Note.fetchPartial))
+        .then(fragment => {
+            const todoPlaceHolder = fragment.querySelector('.todo-holder')
 
-        $.when(partial)
-            .done(function(data) {
-                let element = $(partial);
+            return Note.reloadTodoList(todoPlaceHolder)
+                .then(todoList => {return fragment})
+        })
+        .then(fragment => {
+            const contentPanel = JxHelper.getContentPanel()
+            JxHelper.emptyElementChildren(contentPanel)
 
-                element.find('.todo-holder')
-                    .append(Note.generateToDoItem("buy lunch"))
-                    .append(Note.generateToDoItem("mop floor"))
-                    .append(Note.generateToDoItem("clean dishes"));
+            contentPanel.appendChild(fragment)
+        })
+        .catch(err => {
+            console.error(err)
+            JxHelper.getSpecialError()
+            .html("<h2>Opps, something wrong happen :(</h2>")
+            .addClass("visible");
+        })
+        .then(() => {
+            JxHelper.hideLoadingPanel();
+        })
+    }
 
-                //TODO: bind event for each todo item
-
-
-                JxHelper.getContentPanel()
-                    .empty()
-                    .append(element);
+    static fetchPartial(resolve, reject) {
+        if (!Note.placeHolder)
+        {
+            fetch('/js/note/partial.html')
+            .then(response => {
+                if (!response.ok) {
+                    reject(response.statusText)
+                } 
+    
+                return response.text()
             })
-            .fail(function(xhr, statusCode, error) {
-                JxHelper.getSpecialError()
-                    .html("<h2>Opps, something wrong happen :(")
-                    .addClass("visible");
+            .then(htmlText => {
+                Note.placeHolder = JxHelper.parseHTMLString(htmlText)
+    
+                resolve(Note.placeHolder)
             })
-            .always(function() {
-                JxHelper.hideLoadingPanel();
-            });
+        } else {
+            resolve(Note.placeHolder)
+        }
+    }
+
+    static reloadTodoList(todoPlaceHolder) {
+        
+        return new Promise(function(resolve, reject){
+            JxHelper.emptyElementChildren(todoPlaceHolder)
+
+            todoPlaceHolder.appendChild(Note.generateToDoItem("buy lunch"))
+            todoPlaceHolder.appendChild(Note.generateToDoItem("mop floor"))
+            todoPlaceHolder.appendChild(Note.generateToDoItem("clean dishes"))
+
+            resolve(todoPlaceHolder)
+        })
+        
+        //TODO: bind event for each todo item
     }
 
     static generateToDoItem(message) {
-        var jqueryElement = $('<li class="todo-item">' + message + '</li>');
-        var domElement = jqueryElement[0];
+        let element = document.createElement('li')
+        element.classList.add('todo-item')
+        element.textContent = message
 
-        return jqueryElement;
+        return element;
     }
 }
-
-export { Note }
 //# sourceURL=note/note.js
