@@ -6,27 +6,25 @@ export class User {
     static async renderPage() {
         JxHelper.showLoadingPanel();
 
-        const partial = FetchHelper.fetchText("/js/user/partial.html")
-        const userData = FetchHelper.fetchJson("js/user/dummy.json")
-        const optionalDemo = FetchHelper.fetchJson("api/meals")
+        try
+        {
+            const partial = FetchHelper.text("/js/user/partial.html")
+            const userData = FetchHelper.json("js/user/dummy.json")
+            const optionalDemo = FetchHelper.json("/api/meals")
 
-        const responses = await Promise.all([partial, userDate, optionalDemo])
+            const responses = await Promise.all([partial, userData, optionalDemo])
+            const partialString = responses[0]
 
-        JxHelper.getContentPanel().innerHtml = responses[0]
+            const contentPanel = JxHelper.getContentPanel()
+            contentPanel.innerHTML = partialString
+
+        } catch(err) {
+            JxHelper.getSpecialError()
+                    .html("<h2>Opps, something wrong happen :(</h2>")
+                    .addClass("visible");
+        }
+
         JxHelper.hideLoadingPanel();
-
-        // $.when(partial, userData, optionalDemo)
-        //     .done(function(partialResponse, userDataResponse, demoResponse) {
-        //         JxHelper.getContentPanel().innerHtml = partialResponse[0]
-        //     })
-        //     .fail(function(jsXHR, statusCode, error) {
-        //         JxHelper.getSpecialError()
-        //             .html("<h2>Opps, something wrong happen :(</h2>")
-        //             .addClass("visible");
-        //     })
-        //     .always(function(xhr, statusCode, error) {
-        //         JxHelper.hideLoadingPanel();
-        //     });
     }
 }
 //# sourceURL=user/user.js

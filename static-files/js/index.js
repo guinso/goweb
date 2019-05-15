@@ -6,17 +6,17 @@ import { Router } from '/js/router.js'
 (async function() {
     try {
         //1. load dependencies
-        const jsfiles = await FetchHelper.fetchTexts(
+        const jsfiles = await FetchHelper.texts(
             ['/libs/jquery-3.2.1.min.js', '/libs/popper.min.js', '/libs/bootstrap.min.js'])
         jsfiles.forEach(file => addJSTag(file))
 
-        const cssFiles = await FetchHelper.fetchTexts(
+        const cssFiles = await FetchHelper.texts(
             ['/css/bootstrap.min.css', '/css/bootstrap-grid.min.css', '/css/bootstrap-reboot.min.css'])
         cssFiles.forEach(file => addCSSTag(file))
 
 
         //2. load webpage layout
-        const partial = await FetchHelper.fetchText('/js/mainContent/partial.html')
+        const partial = await FetchHelper.text('/js/mainContent/partial.html')
         JxHelper.getMainContent().innerHTML = partial
 
 

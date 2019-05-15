@@ -132,7 +132,9 @@ func handleHTTPLogout(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 	cookie, _ := r.Cookie(cookieKey)
 	if cookie == nil {
 		//cookie not found; either timeout or logged out
-		util.SendHTTPResponse(w, -1, "Logout rejected, you are not login yet", "{}")
+		//x util.SendHTTPResponse(w, -1, "Logout rejected, you are not login yet", "{}")
+
+		util.SendHTTPResponse(w, 0, "logout success", "{}")
 		return true
 	}
 

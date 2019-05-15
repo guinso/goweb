@@ -1,4 +1,5 @@
-import { JxHelper } from '/js/helper/jxhelper.js'
+import { JxHelper } from '/js/helper/jxHelper.js'
+import { FetchHelper } from '/js/helper/fetchHelper.js'
 
 //this module is solely handle swaping content based on URL hash value
 export class Router {
@@ -6,61 +7,63 @@ export class Router {
         //This function decides what type of page to show
         //depending on the current url hash value.
 
-        const currentUser = await fetch('/api/current-user')
-        if (!currentUser.ok) {
-            throw Error(currentUser.statusText)
-        }
+        const currentUser = await FetchHelper.json('/api/current-user')
 
-        const data = await currentUser.json()
-        if (data.statusCode !== 0 && data.response.id != '-') {
-            //show login page
-            Router.getModule('/js/login/login.js', function(module) {
-                module.Login.renderPage()
-            })
+        if (currentUser.statusCode === 0) {
+            if (currentUser.response.id === '-') {
+                //show login page
+                Router.getModule('/js/login/login.js', function(module) {
+                    module.Login.renderLoginPage()
+                })
+            } else {
+                //update current login username
+                document.querySelector('#usernameHolder').innerHTML = 
+                    currentUser.response.username //TODO: get full name
+
+                //route to actual URL
+                Router.actualRouting(url)
+            }
         } else {
-            //update current login username
-            document.getElementById('usernameHolder').innerHTML = data.response.username //TODO: get full name
-
-            //route to actual URL
-            Router.actualRouting(url);
+            console.log(`failed to get current user info: ${currentUser.statusMsg}`)
+            JxHelper.showServerErrorMessage()
         }
     }
 
     static actualRouting(url) {
         //get the keyword from the url
         if (url[0] === "#") {
-            url = url.substring(1);
+            url = url.substring(1)
         }
-        const paths = url.split('/');
+        const paths = url.split('/')
 
         //hide whatever page is currently shown
-        JxHelper.hideAllContent();
+        JxHelper.hideAllContent()
 
         //TODO: render side panel menu items
 
-        const mainContent = JxHelper.getContentPanel();
+        const mainContent = JxHelper.getContentPanel()
 
         if (paths[0] === "") {
-            location.href = "#user"; //redirect to user page...
+            location.href = "#user" //redirect to user page...
         } else if (paths[0] === "asd") {
 
-            mainContent.innerHTML = '<a href="#qwe" class="aaa">QWE</a>';
+            mainContent.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
             const aaa = mainContent.querySelector('.aaa')
             aaa.classList.add('color')
             aaa.classList.add('green')
 
-            JxHelper.showMainContent();
+            JxHelper.showMainContent()
 
         } else if (paths[0] === "qwe") {
 
             mainContent.innerHTML =
                 '<a href="#asd">ASD</a><br/>' +
-                '<a href="#user">User</a>';
+                '<a href="#user">User</a>'
 
-            JxHelper.showMainContent();
+            JxHelper.showMainContent()
         } else if (paths[0] === "user") {
             Router.getModule('/js/user/user.js', function(module) {
-                module.User.renderPage();
+                module.User.renderPage()
             });
         } else if (paths[0] === "note") {
             Router.getModule('/js/note/note.js', function(module) {
@@ -68,18 +71,18 @@ export class Router {
             });
         } else if (paths[0] === "login") {
             Router.getModule('/js/login/login.js', function(module) {
-                module.Login.renderPage();
+                module.Login.renderLoginPage()
             });
         } else if (paths[0] === "logout") {
             Router.getModule('/js/login/login.js', function(module) {
-                module.Login.logout();
+                module.Login.logout()
             });
         } else if (paths[0] === "role-access") {
             Router.getModule('/js/roleAccess/roleAccess.js', function(module) {
-                module.Role.renderPage();
+                module.RoleAccess.renderPage()
             });
         } else {
-            Router.renderPageNotFound();
+            Router.renderPageNotFound()
         }
     }
 
@@ -93,8 +96,7 @@ export class Router {
     static getModule(urlVal, execFn) {
         JxHelper.showSpecialLoading()
 
-        import (urlVal)
-        .then(module => {
+        import (urlVal).then(module => {
                 execFn(module)
                 JxHelper.hideSpecialLoading()
             })
@@ -106,7 +108,7 @@ export class Router {
     }
 
     static strPrefixMatch(strCompare, prefix) {
-        return strCompare.indexOf(prefix) === 0;
+        return strCompare.indexOf(prefix) === 0
     }
 }
 //# sourceURL=router.js
