@@ -22,13 +22,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+
+	"github.com/guinso/goweb/server"
 
 	//explicitly include GO mysql library
 	//_ "github.com/go-sql-driver/mysql"
-	"github.com/guinso/goweb/configuration"
-	"github.com/guinso/goweb/route"
-	"github.com/guinso/goweb/util"
+
 	//x _ "gopkg.in/go-sql-driver/mysql.v1"
+	"github.com/guinso/goweb/authentication"
+	"github.com/guinso/goweb/authorization"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -37,7 +41,9 @@ func main() {
 
 	log.Print("Loading configuration...")
 	//read configuration file; create if not found
-	config, configErr := configuration.InitializeConfiguration()
+
+	configService := server.ConfigurationINI{}
+	config, configErr := configService.LoadConfiguration("./config.ini")
 	if configErr != nil {
 		fmt.Println("[failed]")
 		fmt.Printf("Failed to load configuration: %s", configErr.Error())
@@ -74,7 +80,7 @@ func main() {
 		}
 	*/
 
-	util.SetDB(db)
+	server.SetDB(db)
 
 	//start web server
 	fmt.Printf("Starting web server with port number %d \n", config.PortNumber)
@@ -86,7 +92,7 @@ func main() {
 
 func startWebServer(port int) error {
 	// handler all request start from "/"
-	http.HandleFunc("/", route.WebHandler)
+	http.HandleFunc("/", WebHandler)
 
 	// start HTTP server in socket 7777
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
@@ -95,7 +101,7 @@ func startWebServer(port int) error {
 	//x http.ListenAndServeTLS("/", "abc.crt", "abc.key", handler)
 }
 
-func checkMySQLDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
+func checkMySQLDbConnection(config *server.ConfigInfo) (*sql.DB, error) {
 	//TODO:  handle various database vendor
 	dbx, err := sql.Open("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8",
@@ -117,7 +123,7 @@ func checkMySQLDbConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 	return dbx, nil
 }
 
-func checkSQLITEConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
+func checkSQLITEConnection(config *server.ConfigInfo) (*sql.DB, error) {
 	dbx, err := sql.Open("sqlite3", config.DbAddress)
 
 	if err != nil {
@@ -127,7 +133,7 @@ func checkSQLITEConnection(config *configuration.ConfigInfo) (*sql.DB, error) {
 	return dbx, nil
 }
 
-func initFilesAndDirs(config *configuration.ConfigInfo) error {
+func initFilesAndDirs(config *server.ConfigInfo) error {
 	exists, err := isDirectoryExists(config.LogicDir)
 	if err != nil {
 		fmt.Printf("Failed to check logical directory: %s", err.Error())
@@ -185,4 +191,103 @@ func isDirectoryExists(directoryName string) (bool, error) {
 	}
 
 	return stat.IsDir(), nil
+}
+
+// WebHandler HTTP request to either static file server or REST server (URL start with "api/")
+func WebHandler(w http.ResponseWriter, r *http.Request) {
+
+	var urlPath = r.URL.Path
+	if strings.HasPrefix(urlPath, "/") {
+		//remove first "/" character
+		urlPath = r.URL.Path[1:]
+	}
+
+	log.Println("Serving API URL: " + r.URL.Path)
+
+	//if start with "api/" direct to REST handler
+	if strings.HasPrefix(urlPath, "api/") {
+		//trim prefix "api/"
+		trimmedURL := urlPath[4:]
+		/*
+			//trim suffix "/"
+			if strings.HasSuffix(trimmedURL, "/") {
+				trimmedURL = trimmedURL[0:(len(trimmedURL) - 1)]
+			}
+		*/
+
+		routePath(w, r, trimmedURL)
+	} else {
+		log.Println("Serving static file URL: " + r.URL.Path)
+
+		// define your static file directory
+		staticFilePath := "./static-files/"
+
+		//other wise, let read a file path and display to client
+		http.ServeFile(w, r, staticFilePath+urlPath)
+	}
+}
+
+//handle dynamic HTTP user requset
+func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
+
+	/***********************************************/
+	//TODO: add your custom web API here:
+	/**********************************************/
+
+	//handle authentication web API
+	//1. /login (POST)
+	//2. /logout (POST)
+	if authentication.HandleHTTPRequest(server.GetDB(), w, r, trimURL) {
+		return
+	}
+
+	//TODO: handle authorization web API
+	//1. /role (GET + POST)
+	if authorization.HandleHTTPRequest(server.GetDB(), w, r, trimURL) {
+		return
+	}
+
+	//sample return JSON
+	if strings.HasPrefix(trimURL, "meals") {
+		w.Header().Set("Content-Type", "application/json")  //MIME to application/json
+		w.WriteHeader(http.StatusOK)                        //status code 200, OK
+		w.Write([]byte("{ \"msg\": \"this is meal A \" }")) //body text
+		return
+	}
+
+	//sample return virtual JPG file to client
+	if strings.HasPrefix(trimURL, "img/") {
+		logicalFilePath := "./logic-files/"
+		physicalFileName := "neon.jpg"
+
+		// try read file
+		data, err := ioutil.ReadFile(logicalFilePath + physicalFileName)
+		if err != nil {
+			// show error page if failed to read file
+			handleErrorCode(500, "Unable to retrieve image file", w)
+		} else {
+			//w.Header().Set("Content-Type", "image/jpg") // #optional HTTP header info
+
+			// uncomment if image file is meant to download instead of display on web browser
+			// clientDisplayFileName = "customName.jpg"
+			//w.header().Set("Content-Disposition", "attachment; filename=\"" + clientDisplayFileName + "\"")
+
+			// write file (in binary format) direct into HTTP return content
+			w.Write(data)
+		}
+	}
+
+	// show error code 404 not found
+	//(since the requested URL doesn't match any of it)
+	handleErrorCode(404, "Path not found.", w)
+}
+
+// Generate error page
+func handleErrorCode(errorCode int, description string, w http.ResponseWriter) {
+	w.WriteHeader(errorCode)                    // set HTTP status code (example 404, 500)
+	w.Header().Set("Content-Type", "text/html") // clarify return type (MIME)
+	w.Write([]byte(fmt.Sprintf(
+		"<html><body><h1>Error %d</h1><p>%s</p></body></html>",
+		errorCode,
+		description)))
 }

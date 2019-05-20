@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 	"github.com/guinso/rdbmstool"
 )
 
@@ -116,7 +116,7 @@ func AddRoleAccess(db rdbmstool.DbHandlerProxy, roleName, accessName string, isA
 	}
 
 	_, err := db.Exec("INSERT INTO role_access (id, access_id, role_id, is_authorize) VALUES (?, ?, ?, ?)",
-		util.GetRandomRunningNumber("role_access"),
+		server.GetRandomRunningNumber("role_access"),
 		accessID,
 		roleID,
 		authValue)
@@ -144,7 +144,7 @@ func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
 	}
 
 	_, err := db.Exec("UPDATE role_access is_authorize = ? WHERE access_id = ? AND role_id = ?)",
-		util.GetRandomRunningNumber("role_access"),
+		server.GetRandomRunningNumber("role_access"),
 		authValue,
 		accessID,
 		roleID)

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/guinso/goweb/authentication"
+	"github.com/guinso/goweb/server"
 
-	"github.com/guinso/goweb/util"
 	"github.com/guinso/rdbmstool"
 )
 
@@ -24,7 +24,7 @@ type Role struct {
 func AddRole(db rdbmstool.DbHandlerProxy, roleName string) error {
 	SQL := "INSERT INTO role (id, name) VALUES (?, ?)"
 
-	if _, err := db.Exec(SQL, util.GetRandomRunningNumber("role"), roleName); err != nil {
+	if _, err := db.Exec(SQL, server.GetRandomRunningNumber("role"), roleName); err != nil {
 		return err
 	}
 
@@ -97,7 +97,7 @@ func AddAccountRole(db rdbmstool.DbHandlerProxy, accountID, roleName string) err
 
 	_, err = db.Exec(
 		"INSERT INTO account_role (id, account_id, role_id) VALUES (?, ?, ?)",
-		util.GetRandomRunningNumber("account_role"),
+		server.GetRandomRunningNumber("account_role"),
 		accountID,
 		roleID)
 

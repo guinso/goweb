@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 )
 
 func TestAddAccessGroup(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -29,7 +29,7 @@ func TestAddAccessGroup(t *testing.T) {
 }
 
 func TestGetAccessGroupIDByName(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -55,7 +55,7 @@ func TestGetAccessGroupIDByName(t *testing.T) {
 }
 
 func TestAddAccess(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -81,7 +81,7 @@ func TestAddAccess(t *testing.T) {
 }
 
 func TestGetAccessIDByName(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -108,7 +108,7 @@ func TestGetAccessIDByName(t *testing.T) {
 }
 
 func TestGetAccess(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	items, err := GetAccess(db, "", 10, 0)
 	if err != nil {

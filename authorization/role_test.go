@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/guinso/goweb/authentication"
-
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 )
 
 func TestAddRole(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -27,7 +26,7 @@ func TestAddRole(t *testing.T) {
 }
 
 func TestGetRoleIDByName(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	roleID, err := GetRoleIDByName(db, "manager")
 	if err != nil {
@@ -46,7 +45,7 @@ func TestGetRoleIDByName(t *testing.T) {
 }
 
 func TestGetRole(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	roles, err := GetRole(db, "", 10, 0)
 	if err != nil {
@@ -77,7 +76,7 @@ func TestGetRole(t *testing.T) {
 }
 
 func TestAddAccountRole(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -114,7 +113,7 @@ func addAccRoleXXX(trx *sql.Tx, username string, roleName string) error {
 }
 
 func TestUpdateRole(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	trx, err := db.Begin()
 	if err != nil {

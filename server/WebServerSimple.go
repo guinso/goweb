@@ -1,4 +1,4 @@
-package util
+package server
 
 import (
 	"database/sql"
@@ -12,27 +12,28 @@ import (
 	"time"
 
 	"github.com/guinso/stringtool"
-
-	//explicitly include GO mysql library
-	//_ "github.com/go-sql-driver/mysql"
-	_ "gopkg.in/go-sql-driver/mysql.v1"
 )
 
-var dbb *sql.DB
+//WebServerSimple simple web server with configuration
+type WebServerSimple struct {
+	//dbb          *sql.DB
+	productionDB *sql.DB
 
-var productionDB *sql.DB
+	configuration *ConfigurationService
+}
 
 //SetDB set and hold production database handler
-func SetDB(db *sql.DB) {
-	productionDB = db
-}
+// func (server *WebServerSimple) SetDB(db *sql.DB) {
+// 	server.productionDB = db
+// }
 
 //GetDB get production database handler
-func GetDB() *sql.DB {
-	return productionDB
+func (server *WebServerSimple) GetDB() *sql.DB {
+	return server.productionDB
 }
 
-func DecodeJSON(request *http.Request, obj interface{}) error {
+//DecodeJSON marshal http request body stream to object
+func (server *WebServerSimple) DecodeJSON(request *http.Request, obj interface{}) error {
 	decoder := json.NewDecoder(request.Body)
 
 	if err := decoder.Decode(&obj); err != nil {
@@ -43,7 +44,7 @@ func DecodeJSON(request *http.Request, obj interface{}) error {
 }
 
 //GetRandomRunningNumber get next random generated MD5 value to fill
-func GetRandomRunningNumber(tableName string) string {
+func (server *WebServerSimple) GetRandomRunningNumber(tableName string) string {
 
 	return stringtool.MakeMD5(
 		tableName +
@@ -52,7 +53,7 @@ func GetRandomRunningNumber(tableName string) string {
 }
 
 //SendHTTPResponse send HTTP response
-func SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, json string) {
+func (server *WebServerSimple) SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, json string) {
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(fmt.Sprintf(
@@ -61,34 +62,34 @@ func SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, j
 }
 
 //SendHTTPErrorResponse send HTTP 500 internal error response
-func SendHTTPErrorResponse(w http.ResponseWriter) {
+func (server *WebServerSimple) SendHTTPErrorResponse(w http.ResponseWriter) {
 	w.WriteHeader(500)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{msg:\"Encounter internal server error\"}"))
 }
 
 //IsPOST check request HTTP is POST method
-func IsPOST(r *http.Request) bool {
+func (server *WebServerSimple) IsPOST(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "post") == 0
 }
 
 //IsGET check request HTTP is GET method
-func IsGET(r *http.Request) bool {
+func (server *WebServerSimple) IsGET(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "get") == 0
 }
 
 //IsPUT check request HTTP is PUT method
-func IsPUT(r *http.Request) bool {
+func (server *WebServerSimple) IsPUT(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "put") == 0
 }
 
 //IsDELETE check request HTTP is DELETE method
-func IsDELETE(r *http.Request) bool {
+func (server *WebServerSimple) IsDELETE(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "delete") == 0
 }
 
 // FileExists reports whether the named file or directory exists.
-func FileExists(name string) bool {
+func (server *WebServerSimple) FileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false

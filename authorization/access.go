@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 	"github.com/guinso/rdbmstool"
 )
 
@@ -28,7 +28,7 @@ func AddAccessGroup(db rdbmstool.DbHandlerProxy, groupName string) error {
 
 	SQL := "INSERT INTO access_group (id, name) VALUES (?, ?)"
 
-	_, err := db.Exec(SQL, util.GetRandomRunningNumber("access_group"), groupName)
+	_, err := db.Exec(SQL, server.GetRandomRunningNumber("access_group"), groupName)
 
 	return err
 }
@@ -82,7 +82,7 @@ func AddAccess(db rdbmstool.DbHandlerProxy, accessName, groupName string) error 
 	}
 
 	_, err = db.Exec("INSERT  INTO access (id, name, group_id) VALUES (?, ?, ?)",
-		util.GetRandomRunningNumber("access"),
+		server.GetRandomRunningNumber("access"),
 		accessName,
 		groupID)
 

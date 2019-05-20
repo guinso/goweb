@@ -1,4 +1,4 @@
-package configuration
+package server
 
 import (
 	"os"
@@ -8,33 +8,13 @@ import (
 	ini "gopkg.in/ini.v1"
 )
 
-const (
-	configFilename = "config.ini"
-)
-
-//ConfigInfo configuration file information
-type ConfigInfo struct {
-	DbAddress   string //database address; e.g. localhost
-	DbName      string //database name
-	DbUsername  string //database username
-	DbPassword  string //database password
-	DbPort      int    //database port number
-	DbInitTable bool   //flag; create basic datatable if not found
-
-	EmailServer     string //SMTP email server address
-	EmailPortNumber int    //SMTP email server port number
-	EMailUsername   string //SMTP email username
-	EmailPassword   string //SMTP email password
-
-	PortNumber int    //web server listen port number
-	LogicDir   string //directory where store logical physical files; e.g. pay-slip.pdf
-	StaticDir  string //directory where store direct access physical files; e.g. index.html
-}
+//ConfigurationINI INI configuration handler
+type ConfigurationINI struct{}
 
 //InitializeConfiguration init .ini file
-func InitializeConfiguration() (*ConfigInfo, error) {
+func (iniconfig *ConfigurationINI) InitializeConfiguration(filepath string) (*ConfigInfo, error) {
 	//check INI file exists or not; otherwise create one
-	if !isFileExists(configFilename) {
+	if !iniconfig.isFileExists(filepath) {
 		cfg := ini.Empty()
 		sec, err := cfg.NewSection("database")
 		if err != nil {
@@ -71,20 +51,25 @@ func InitializeConfiguration() (*ConfigInfo, error) {
 		}
 
 		//save to physical INI file
-		if err = cfg.SaveTo(configFilename); err != nil {
+		if err = cfg.SaveTo(filepath); err != nil {
 			return nil, err
 		}
 	}
 
-	return LoadConfiguration()
+	return iniconfig.reload(filepath)
 }
 
 //LoadConfiguration load .ini file
-func LoadConfiguration() (*ConfigInfo, error) {
-	cfg, err := ini.InsensitiveLoad(configFilename) //ignore capital letter key, all keys is small letter
+func (iniconfig *ConfigurationINI) LoadConfiguration(filepath string) (*ConfigInfo, error) {
+	return iniconfig.reload(filepath)
+}
+
+//reload load .ini file
+func (iniconfig *ConfigurationINI) reload(filepath string) (*ConfigInfo, error) {
+	cfg, err := ini.InsensitiveLoad(filepath) //ignore capital letter key, all keys is small letter
 
 	//save configuration to physical INI file before exit
-	defer cfg.SaveTo(configFilename)
+	defer cfg.SaveTo(filepath)
 
 	if err != nil {
 		return nil, err
@@ -96,22 +81,22 @@ func LoadConfiguration() (*ConfigInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if config.DbAddress, err = getConfigString(dbSection, "dbserver", "localhost"); err != nil {
+	if config.DbAddress, err = iniconfig.getConfigString(dbSection, "dbserver", "localhost"); err != nil {
 		return nil, err
 	}
-	if config.DbName, err = getConfigString(dbSection, "dbname", ""); err != nil {
+	if config.DbName, err = iniconfig.getConfigString(dbSection, "dbname", ""); err != nil {
 		return nil, err
 	}
-	if config.DbUsername, err = getConfigString(dbSection, "dbusername", "root"); err != nil {
+	if config.DbUsername, err = iniconfig.getConfigString(dbSection, "dbusername", "root"); err != nil {
 		return nil, err
 	}
-	if config.DbPassword, err = getConfigString(dbSection, "dbpassword", ""); err != nil {
+	if config.DbPassword, err = iniconfig.getConfigString(dbSection, "dbpassword", ""); err != nil {
 		return nil, err
 	}
-	if config.DbPort, err = getConfigInt(dbSection, "dbport", "3306"); err != nil {
+	if config.DbPort, err = iniconfig.getConfigInt(dbSection, "dbport", "3306"); err != nil {
 		return nil, err
 	}
-	tmp, err := getConfigString(dbSection, "dbinittable", "false")
+	tmp, err := iniconfig.getConfigString(dbSection, "dbinittable", "false")
 	if err != nil {
 		return nil, err
 	}
@@ -125,20 +110,20 @@ func LoadConfiguration() (*ConfigInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if config.PortNumber, err = getConfigInt(httpSection, "portnumber", "80"); err != nil {
+	if config.PortNumber, err = iniconfig.getConfigInt(httpSection, "portnumber", "80"); err != nil {
 		return nil, err
 	}
-	if config.LogicDir, err = getConfigString(httpSection, "logicaldir", "logical-files"); err != nil {
+	if config.LogicDir, err = iniconfig.getConfigString(httpSection, "logicaldir", "logical-files"); err != nil {
 		return nil, err
 	}
-	if config.StaticDir, err = getConfigString(httpSection, "staticdir", "static-files"); err != nil {
+	if config.StaticDir, err = iniconfig.getConfigString(httpSection, "staticdir", "static-files"); err != nil {
 		return nil, err
 	}
 
 	return &config, nil
 }
 
-func getConfigString(section *ini.Section, key string, defaultValue string) (string, error) {
+func (iniconfig *ConfigurationINI) getConfigString(section *ini.Section, key string, defaultValue string) (string, error) {
 	if section.Haskey(key) {
 		return section.Key(key).String(), nil
 	}
@@ -147,7 +132,7 @@ func getConfigString(section *ini.Section, key string, defaultValue string) (str
 	return defaultValue, nil
 }
 
-func getConfigInt(section *ini.Section, key string, defaultValue string) (int, error) {
+func (iniconfig *ConfigurationINI) getConfigInt(section *ini.Section, key string, defaultValue string) (int, error) {
 	if section.Haskey(key) {
 		return section.Key(key).Int()
 	}
@@ -156,7 +141,7 @@ func getConfigInt(section *ini.Section, key string, defaultValue string) (int, e
 	return strconv.Atoi(defaultValue)
 }
 
-func isFileExists(filename string) bool {
+func (iniconfig *ConfigurationINI) isFileExists(filename string) bool {
 	if _, err := os.Stat(filename); err != nil {
 		if os.IsNotExist(err) {
 			return false //file not found
@@ -168,7 +153,7 @@ func isFileExists(filename string) bool {
 	return true //file exists
 }
 
-func isDirectoryExists(directoryName string) (bool, error) {
+func (iniconfig *ConfigurationINI) isDirectoryExists(directoryName string) (bool, error) {
 	stat, err := os.Stat(directoryName)
 
 	if err != nil {

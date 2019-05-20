@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 )
 
 func TestAddAccount(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -29,7 +29,7 @@ func TestAddAccount(t *testing.T) {
 }
 
 func TestChangeAccountPassword(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -45,7 +45,7 @@ func TestChangeAccountPassword(t *testing.T) {
 }
 
 func TestGetAccountByName(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	account, err := GetAccountByName(db, "dick")
 	if err != nil {
@@ -68,7 +68,7 @@ func TestGetAccountByName(t *testing.T) {
 }
 
 func TestGetAccountByID(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	//TODO: replace this hardcorded user ID from database
 	account, err := GetAccountByID(db, "220c86dd0f5ad6322a4e2d94a7d925cf")
@@ -93,7 +93,7 @@ func TestGetAccountByID(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	accs, accErr := GetAccount(db, AccountSearchParam{
 		PageSize:  10,

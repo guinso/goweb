@@ -1,4 +1,4 @@
-package util
+package server
 
 import (
 	"database/sql"
@@ -17,9 +17,11 @@ type HTTPMsg struct {
 	Response      interface{} `json:"response,omitempty"`
 }
 
+var dbb *sql.DB
+
 const (
-	TestDatabaseName = "main"
-	SQLiteFilePath   = "C:\\Users\\Benjamin\\go\\src\\github.com\\guinso\\goweb\\sample.db" //"/Users/chingchetsiang/go/src/github.com/guinso/goweb/sample.db"
+	testDatabaseName = "main"
+	SQLiteFilePath   = "./sample.db"
 )
 
 //GetTestDB get database handler for unit test

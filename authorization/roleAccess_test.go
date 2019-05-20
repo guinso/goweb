@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 )
 
 func TestIsAuthorize(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	accInfo, err := authentication.GetAccountByName(db, "dick")
 	if err != nil {
@@ -35,7 +35,7 @@ func TestIsAuthorize(t *testing.T) {
 }
 
 func TestAddRoleAccess(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -66,7 +66,7 @@ func TestAddRoleAccess(t *testing.T) {
 }
 
 func TestGetRoleAccess(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	roles, err := GetAccessRole(db, "", "", "", 10, 0)
 	if err != nil {
@@ -89,7 +89,7 @@ func TestGetRoleAccess(t *testing.T) {
 }
 
 func TestGetRoleAccessCount(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 
 	cnt, err := GetAccessRoleCount(db, "", "", "")
 	if err != nil {
