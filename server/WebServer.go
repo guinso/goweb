@@ -3,7 +3,12 @@ package server
 import (
 	"database/sql"
 	"net/http"
+
+	"github.com/guinso/rdbmstool"
 )
+
+//GetDBProxy get database handler proxy
+type GetDBProxy func() rdbmstool.DbHandlerProxy
 
 //WebServer webserver service interface
 type WebServer interface {

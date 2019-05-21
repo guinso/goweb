@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/util"
+	"github.com/guinso/goweb/server"
 )
 
 func TestLogin(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())
@@ -30,7 +30,7 @@ func TestLogin(t *testing.T) {
 }
 
 func TestLogout(t *testing.T) {
-	db := util.GetTestDB()
+	db := server.GetTestDB()
 	trx, err := db.Begin()
 	if err != nil {
 		t.Error(err.Error())

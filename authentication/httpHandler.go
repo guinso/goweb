@@ -3,30 +3,56 @@ package authentication
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/guinso/rdbmstool"
+
 	"github.com/guinso/goweb/server"
 )
 
+//HTTPRequestHandler HTTP request handler for authentication
+type HTTPRequestHandler struct {
+	DB      *sql.DB
+	Server  server.WebServer
+	Auth    *AuthSessionSQLite
+	dbProxy rdbmstool.DbHandlerProxy
+}
+
+//NewHTTPRequestHandler instantiate a new HTTP request handler
+func NewHTTPRequestHandler(serverParam server.WebServer, DBparam *sql.DB) *HTTPRequestHandler {
+	handler := &HTTPRequestHandler{
+		DB:      DBparam,
+		Server:  serverParam,
+		dbProxy: DBparam}
+
+	handler.Auth = NewAuthSessionSQLite(serverParam, handler.getDBProxy)
+
+	return handler
+}
+
+//GetDBProxy get database proxy
+func (handler *HTTPRequestHandler) getDBProxy() rdbmstool.DbHandlerProxy {
+	return handler.dbProxy
+}
+
 //HandleHTTPRequest handle incoming http request
 //return true if request URL match and process
-func HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
-	if strings.HasPrefix(trimURL, "login") && server.IsPOST(r) {
-		return handleHTTPLogin(db, w, r)
-	} else if strings.HasPrefix(trimURL, "logout") && server.IsPOST(r) {
-		return handleHTTPLogout(db, w, r)
-	} else if strings.Compare(trimURL, "current-user") == 0 && server.IsGET(r) {
-		return handleCurrentUser(db, w, r)
+func (handler *HTTPRequestHandler) HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
+	if strings.HasPrefix(trimURL, "login") && handler.Server.IsPOST(r) {
+		return handler.handleHTTPLogin(w, r)
+	} else if strings.HasPrefix(trimURL, "logout") && handler.Server.IsPOST(r) {
+		return handler.handleHTTPLogout(w, r)
+	} else if strings.Compare(trimURL, "current-user") == 0 && handler.Server.IsGET(r) {
+		return handler.handleCurrentUser(w, r)
 	}
 
 	return false
 }
 
-func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
+func (handler *HTTPRequestHandler) handleCurrentUser(w http.ResponseWriter, r *http.Request) bool {
 
 	var user *AccountInfo
 
@@ -37,9 +63,9 @@ func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool 
 	} else {
 		hashKey := cookie.Value
 
-		user, err = GetCurrentUser(db, hashKey)
+		user, err = handler.Auth.GetCurrentLoginAccount(hashKey)
 		if err != nil {
-			server.SendHTTPErrorResponse(w)
+			handler.Server.SendHTTPErrorResponse(w)
 			return true
 		}
 	}
@@ -49,56 +75,62 @@ func handleCurrentUser(db *sql.DB, w http.ResponseWriter, r *http.Request) bool 
 			AccountID: "-",
 			Username:  "",
 			SaltedPwd: "",
-			Roles:     []string{}}
+			Roles:     []RoleInfo{}}
 	}
 
 	//TODO: end session if session expired and return anonymous user account
 
 	jsonStr, jsonErr := json.Marshal(user)
 	if jsonErr != nil {
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		log.Printf("[current-user] fail to encode JSON: %s\n", jsonErr.Error())
 		return true
 	}
 
-	server.SendHTTPResponse(w, 0, "", string(jsonStr))
+	handler.Server.SendHTTPResponse(w, 0, "", string(jsonStr))
 
 	return true
 }
 
-func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
+func (handler *HTTPRequestHandler) restoreDBSetting() {
+	handler.dbProxy = handler.DB
+}
+
+func (handler *HTTPRequestHandler) handleHTTPLogin(w http.ResponseWriter, r *http.Request) bool {
 	var loginReq LoginRequest
 
-	err := server.DecodeJSON(r, &loginReq)
+	err := handler.Server.DecodeJSON(r, &loginReq)
 	if err != nil {
 		log.Printf("[login] error to read user input: %s", err.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
 
-	trx, trxErr := db.Begin()
+	trx, trxErr := handler.DB.Begin()
 	if trxErr != nil {
 		log.Printf("[login] error to begin SQL transaction: %s", trxErr.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
+	handler.dbProxy = trx
+	defer handler.restoreDBSetting()
 
-	loginStatus, hashKey, loginErr := Login(trx, loginReq.Username, loginReq.Password)
+	loginStatus, hashKey, loginErr := handler.Auth.Login(&loginReq)
 	if loginErr != nil {
 		trx.Rollback()
 		log.Printf("[login] Encounter error to attempt Login(...): %s", loginErr.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	if err = trx.Commit(); err != nil {
 		log.Printf("[login] error to commit SQL transaction: %s", trxErr.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	switch loginStatus {
-	case LoginSuccess:
+	case LoggedIn:
 		//pass unique ID to cookie
 		//NOTE: memory cookies can set by not providing value to property 'Expires'
 		cookie := http.Cookie{
@@ -108,60 +140,63 @@ func handleHTTPLogin(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
 		}
 		http.SetCookie(w, &cookie)
 
-		server.SendHTTPResponse(w, 0, "login success", "{}")
+		handler.Server.SendHTTPResponse(w, 0, "login success", "{}")
 		break
 	case LoginFailed:
-		server.SendHTTPResponse(w, -1, "username or password not match", "{}")
+		handler.Server.SendHTTPResponse(w, -1, "username or password not match", "{}")
 		return true
-	case AlreadyLoggedIn:
-		msg := fmt.Sprintf(
-			"user [%s] already logged in. Please logout and try it again",
-			loginReq.Username)
-		server.SendHTTPResponse(w, -1, msg, "{}")
+		// case AlreadyLoggedIn:
+		// 	msg := fmt.Sprintf(
+		// 		"user [%s] already logged in. Please logout and try it again",
+		// 		loginReq.Username)
+		// 	server.SendHTTPResponse(w, -1, msg, "{}")
 		break
 	default:
 		log.Printf("[login] unknown login status: %d", loginStatus)
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		break
 	}
 
 	return true
 }
 
-func handleHTTPLogout(db *sql.DB, w http.ResponseWriter, r *http.Request) bool {
+func (handler *HTTPRequestHandler) handleHTTPLogout(w http.ResponseWriter, r *http.Request) bool {
 	cookie, _ := r.Cookie(cookieKey)
 	if cookie == nil {
 		//cookie not found; either timeout or logged out
 		//x util.SendHTTPResponse(w, -1, "Logout rejected, you are not login yet", "{}")
 
-		server.SendHTTPResponse(w, 0, "logout success", "{}")
+		handler.Server.SendHTTPResponse(w, 0, "logout success", "{}")
 		return true
 	}
 
-	trx, trxErr := db.Begin()
+	trx, trxErr := handler.DB.Begin()
 	if trxErr != nil {
 		log.Printf("[logout] failed to begin SQL transaction: %s\n", trxErr.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
-	result, err := Logout(trx, cookie.Value)
+	handler.dbProxy = trx
+	defer handler.restoreDBSetting()
+
+	result, err := handler.Auth.Logout(cookie.Value)
 	if err != nil {
 		trx.Rollback()
 		log.Printf("[logout] error on Logout: %s\n", err.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	if err = trx.Commit(); err != nil {
 		log.Printf("[logout] failed to commit SQL transaction: %s\n", trxErr.Error())
-		server.SendHTTPErrorResponse(w)
+		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
 
 	if result {
-		server.SendHTTPResponse(w, 0, "logout success", "{}")
+		handler.Server.SendHTTPResponse(w, 0, "logout success", "{}")
 	} else {
-		server.SendHTTPResponse(w, -1, "logout request rejected", "{}")
+		handler.Server.SendHTTPResponse(w, -1, "logout request rejected", "{}")
 	}
 
 	return true

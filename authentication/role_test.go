@@ -1,4 +1,4 @@
-package authorization
+package authentication
 
 import (
 	"database/sql"
@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/authentication"
 	"github.com/guinso/goweb/server"
 )
 
