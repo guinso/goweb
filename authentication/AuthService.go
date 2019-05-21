@@ -5,7 +5,6 @@ import "time"
 const (
 	//AnonymousID anonymous user ID
 	AnonymousID = 0
-	cookieKey   = "gorilla-goweb"
 )
 
 //LoginStatus login status

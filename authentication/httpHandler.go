@@ -15,18 +15,20 @@ import (
 
 //HTTPRequestHandler HTTP request handler for authentication
 type HTTPRequestHandler struct {
-	DB      *sql.DB
-	Server  server.WebServer
-	Auth    *AuthSessionSQLite
-	dbProxy rdbmstool.DbHandlerProxy
+	DB        *sql.DB
+	Server    server.WebServer
+	Auth      *AuthSessionSQLite
+	dbProxy   rdbmstool.DbHandlerProxy
+	CookieKey string
 }
 
 //NewHTTPRequestHandler instantiate a new HTTP request handler
-func NewHTTPRequestHandler(serverParam server.WebServer, DBparam *sql.DB) *HTTPRequestHandler {
+func NewHTTPRequestHandler(serverParam server.WebServer, DBparam *sql.DB, authSessionKey string) *HTTPRequestHandler {
 	handler := &HTTPRequestHandler{
-		DB:      DBparam,
-		Server:  serverParam,
-		dbProxy: DBparam}
+		DB:        DBparam,
+		Server:    serverParam,
+		dbProxy:   DBparam,
+		CookieKey: authSessionKey}
 
 	handler.Auth = NewAuthSessionSQLite(serverParam, handler.getDBProxy)
 
@@ -56,7 +58,7 @@ func (handler *HTTPRequestHandler) handleCurrentUser(w http.ResponseWriter, r *h
 
 	var user *AccountInfo
 
-	cookie, err := r.Cookie(cookieKey)
+	cookie, err := r.Cookie(handler.CookieKey)
 	if cookie == nil {
 		//cookie not found; either timeout or logged out
 		user = nil
@@ -134,7 +136,7 @@ func (handler *HTTPRequestHandler) handleHTTPLogin(w http.ResponseWriter, r *htt
 		//pass unique ID to cookie
 		//NOTE: memory cookies can set by not providing value to property 'Expires'
 		cookie := http.Cookie{
-			Name:    cookieKey,
+			Name:    handler.CookieKey,
 			Value:   hashKey,
 			Expires: time.Now().Add(time.Hour * 2), //expire after 2 hours
 		}
@@ -161,7 +163,7 @@ func (handler *HTTPRequestHandler) handleHTTPLogin(w http.ResponseWriter, r *htt
 }
 
 func (handler *HTTPRequestHandler) handleHTTPLogout(w http.ResponseWriter, r *http.Request) bool {
-	cookie, _ := r.Cookie(cookieKey)
+	cookie, _ := r.Cookie(handler.CookieKey)
 	if cookie == nil {
 		//cookie not found; either timeout or logged out
 		//x util.SendHTTPResponse(w, -1, "Logout rejected, you are not login yet", "{}")
