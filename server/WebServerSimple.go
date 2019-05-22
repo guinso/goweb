@@ -17,9 +17,9 @@ import (
 //WebServerSimple simple web server with configuration
 type WebServerSimple struct {
 	//dbb          *sql.DB
-	productionDB *sql.DB
+	DB *sql.DB
 
-	configuration *ConfigurationService
+	Configuration ConfigurationService
 }
 
 //SetDB set and hold production database handler
@@ -29,7 +29,7 @@ type WebServerSimple struct {
 
 //GetDB get production database handler
 func (server *WebServerSimple) GetDB() *sql.DB {
-	return server.productionDB
+	return server.DB
 }
 
 //DecodeJSON marshal http request body stream to object

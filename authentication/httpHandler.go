@@ -42,7 +42,7 @@ func (handler *HTTPRequestHandler) getDBProxy() rdbmstool.DbHandlerProxy {
 
 //HandleHTTPRequest handle incoming http request
 //return true if request URL match and process
-func (handler *HTTPRequestHandler) HandleHTTPRequest(db *sql.DB, w http.ResponseWriter, r *http.Request, trimURL string) bool {
+func (handler *HTTPRequestHandler) HandleHTTPRequest(w http.ResponseWriter, r *http.Request, trimURL string) bool {
 	if strings.HasPrefix(trimURL, "login") && handler.Server.IsPOST(r) {
 		return handler.handleHTTPLogin(w, r)
 	} else if strings.HasPrefix(trimURL, "logout") && handler.Server.IsPOST(r) {

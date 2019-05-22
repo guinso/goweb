@@ -42,7 +42,10 @@ func main() {
 	log.Print("Loading configuration...")
 	//read configuration file; create if not found
 
-	configService := server.ConfigurationINI{}
+	configService := &server.ConfigurationINI{}
+	webServer := &server.WebServerSimple{
+		Configuration: configService}
+
 	config, configErr := configService.LoadConfiguration("./config.ini")
 	if configErr != nil {
 		fmt.Println("[failed]")
@@ -80,7 +83,7 @@ func main() {
 		}
 	*/
 
-	server.SetDB(db)
+	webServer.DB = db
 
 	//start web server
 	fmt.Printf("Starting web server with port number %d \n", config.PortNumber)

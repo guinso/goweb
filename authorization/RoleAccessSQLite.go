@@ -5,25 +5,37 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guinso/goweb/authentication"
+
 	"github.com/guinso/goweb/server"
 	"github.com/guinso/rdbmstool"
 )
 
-//RoleAccess access description for related role
-type RoleAccess struct {
-	ID          string `json:"id"`
-	Role        string `json:"role"`
-	RoleID      string `json:"roleID"`
-	Access      string `json:"access"`
-	AccessID    string `json:"accessID"`
-	IsAuthorize bool   `json:"isAuthorize"`
+//RoleAccessSQLite role access service SQLite storage
+type RoleAccessSQLite struct {
+	DBProxy server.GetDBProxy
+	Server  server.WebServer
+	Role    *authentication.RoleSQLite
+	Access  *AccessSQLite
+}
+
+//NewRoleAccessSQLite initialize a new instance of  RoleAccess SQLite service
+func NewRoleAccessSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *RoleAccessSQLite {
+	roleAccess := &RoleAccessSQLite{
+		DBProxy: getDBProxyFn,
+		Server:  serverParam}
+
+	roleAccess.Role = authentication.NewRoleSQLite(serverParam, getDBProxyFn)
+	roleAccess.Access = NewAccessSQLite(serverParam, getDBProxyFn)
+
+	return roleAccess
 }
 
 //IsAuthorize check provided user is eligible to access specified subject
-func IsAuthorize(db rdbmstool.DbHandlerProxy, accountID, accessName string) (bool, error) {
+func (roleAccess *RoleAccessSQLite) IsAuthorize(accountID, accessName string) (bool, error) {
 	sql := "SELECT id FROM access WHERE name = ?"
 
-	rows, err := db.Query(sql, accessName)
+	rows, err := roleAccess.DBProxy().Query(sql, accessName)
 	if err != nil {
 		return false, err
 	}
@@ -49,17 +61,17 @@ func IsAuthorize(db rdbmstool.DbHandlerProxy, accountID, accessName string) (boo
 			accessName, count)
 	}
 
-	return isAuthorize(db, accountID, accessID)
+	return roleAccess.isAuthorizeByID(accountID, accessID)
 }
 
 //isAuthorize check provided user is eligible to access specified subject
-func isAuthorize(db rdbmstool.DbHandlerProxy, accountID string, accessID string) (bool, error) {
+func (roleAccess *RoleAccessSQLite) isAuthorizeByID(accountID string, accessID string) (bool, error) {
 
 	SQL := "SELECT SUM(a.is_authorize) FROM role_access a " +
 		"INNER JOIN account_role b ON a.role_id = b.role_id " +
 		"WHERE b.account_id = ? AND a.access_id = ?"
 
-	rows, queryErr := db.Query(SQL, accountID, accessID)
+	rows, queryErr := roleAccess.DBProxy().Query(SQL, accountID, accessID)
 	if queryErr != nil {
 		return false, queryErr
 	}
@@ -82,22 +94,22 @@ func isAuthorize(db rdbmstool.DbHandlerProxy, accountID string, accessID string)
 }
 
 //AddRoleAccess add role access record into database
-func AddRoleAccess(db rdbmstool.DbHandlerProxy, roleName, accessName string, isAuthorize bool) error {
-	roleID, roleErr := GetRoleIDByName(db, roleName)
+func (roleAccess *RoleAccessSQLite) AddRoleAccess(roleName, accessName string, isAuthorize bool) error {
+	roleID, roleErr := roleAccess.Role.GetRoleIDByName(roleName)
 	if roleErr != nil {
 		return roleErr
 	} else if len(roleID) == 0 {
 		return fmt.Errorf("Role '%s' not exists in database", roleName)
 	}
 
-	accessID, accessErr := GetAccessIDByName(db, accessName)
+	accessID, accessErr := roleAccess.Access.GetAccessIDByName(accessName)
 	if accessErr != nil {
 		return accessErr
 	} else if len(accessID) == 0 {
 		return fmt.Errorf("Access '%s' not exists in database", accessName)
 	}
 
-	rows, rErr := db.Query("SELECT * FROM role_access WHERE role_id = ? AND access_id = ?", roleID, accessID)
+	rows, rErr := roleAccess.DBProxy().Query("SELECT * FROM role_access WHERE role_id = ? AND access_id = ?", roleID, accessID)
 	if rErr != nil {
 		return rErr
 	}
@@ -115,8 +127,8 @@ func AddRoleAccess(db rdbmstool.DbHandlerProxy, roleName, accessName string, isA
 		authValue = 1
 	}
 
-	_, err := db.Exec("INSERT INTO role_access (id, access_id, role_id, is_authorize) VALUES (?, ?, ?, ?)",
-		server.GetRandomRunningNumber("role_access"),
+	_, err := roleAccess.DBProxy().Exec("INSERT INTO role_access (id, access_id, role_id, is_authorize) VALUES (?, ?, ?, ?)",
+		roleAccess.Server.GetRandomRunningNumber("role_access"),
 		accessID,
 		roleID,
 		authValue)
@@ -125,15 +137,14 @@ func AddRoleAccess(db rdbmstool.DbHandlerProxy, roleName, accessName string, isA
 }
 
 //UpdateRoleAccessAuthorization update role access authorization
-func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
-	roleName, accessName string, isAuthorize bool) error {
+func (roleAccess *RoleAccessSQLite) UpdateRoleAccessAuthorization(roleName, accessName string, isAuthorize bool) error {
 
-	roleID, roleErr := GetRoleIDByName(db, roleName)
+	roleID, roleErr := roleAccess.Role.GetRoleIDByName(roleName)
 	if roleErr != nil {
 		return roleErr
 	}
 
-	accessID, accessErr := GetAccessIDByName(db, accessName)
+	accessID, accessErr := roleAccess.Access.GetAccessIDByName(accessName)
 	if accessErr != nil {
 		return accessErr
 	}
@@ -143,8 +154,8 @@ func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
 		authValue = 1
 	}
 
-	_, err := db.Exec("UPDATE role_access is_authorize = ? WHERE access_id = ? AND role_id = ?)",
-		server.GetRandomRunningNumber("role_access"),
+	_, err := roleAccess.DBProxy().Exec("UPDATE role_access is_authorize = ? WHERE access_id = ? AND role_id = ?)",
+		roleAccess.Server.GetRandomRunningNumber("role_access"),
 		authValue,
 		accessID,
 		roleID)
@@ -153,9 +164,7 @@ func UpdateRoleAccessAuthorization(db rdbmstool.DbHandlerProxy,
 }
 
 //GetAccessRole get access role records
-func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
-	accessIDFilter string, roleIDFilter string,
-	pageSize int, pageIndex int) ([]RoleAccess, error) {
+func (roleAccess *RoleAccessSQLite) GetAccessRole(searchParam *RoleAccessSearchParam) ([]RoleAccess, error) {
 	var rows *sql.Rows
 	var dbErr error
 
@@ -169,19 +178,19 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 		Select("role_access.is_authorize", "").
 		JoinAdd("role", "", rdbmstool.LeftJoin, "role_access.role_id = role.id").
 		JoinAdd("access", "", rdbmstool.LeftJoin, "role_access.access_id = access.id").
-		Limit(pageSize, pageIndex)
+		Limit(searchParam.PageSize, searchParam.PageIndex)
 
-	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereAddOr("role.name LIKE '%" + keyword + "%'").
-			WhereAddOr("access.name LIKE '%" + keyword + "%'")
+	if strings.Compare(searchParam.Keyword, "") != 0 {
+		sqlQuery.WhereAddOr("role.name LIKE '%" + searchParam.Keyword + "%'").
+			WhereAddOr("access.name LIKE '%" + searchParam.Keyword + "%'")
 	}
 
-	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("role_access.access_id = '" + accessIDFilter + "'")
+	if strings.Compare(searchParam.AccessID, "") != 0 {
+		sqlQuery.WhereAddAnd("role_access.access_id = '" + searchParam.AccessID + "'")
 	}
 
-	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("role_access.role_id = '" + roleIDFilter + "'")
+	if strings.Compare(searchParam.RoleID, "") != 0 {
+		sqlQuery.WhereAddAnd("role_access.role_id = '" + searchParam.RoleID + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()
@@ -189,7 +198,7 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 		return nil, sqlErr
 	}
 
-	rows, dbErr = db.Query(sqlStr)
+	rows, dbErr = roleAccess.DBProxy().Query(sqlStr)
 	if dbErr != nil {
 		return nil, dbErr
 	}
@@ -211,8 +220,7 @@ func GetAccessRole(db rdbmstool.DbHandlerProxy, keyword string,
 }
 
 //GetAccessRoleCount get access role records
-func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
-	accessIDFilter string, roleIDFilter string) (int, error) {
+func (roleAccess *RoleAccessSQLite) GetAccessRoleCount(searchParam *RoleAccessSearchParam) (int, error) {
 	var rows *sql.Rows
 	var dbErr error
 
@@ -222,17 +230,17 @@ func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
 		JoinAdd("role", "", rdbmstool.LeftJoin, "role_access.role_id = role.id").
 		JoinAdd("access", "", rdbmstool.LeftJoin, "role_access.access_id = access.id")
 
-	if strings.Compare(keyword, "") != 0 {
-		sqlQuery.WhereAddOr("role.name LIKE '%" + keyword + "%'").
-			WhereAddOr("access.name LIKE '%" + keyword + "%'")
+	if strings.Compare(searchParam.Keyword, "") != 0 {
+		sqlQuery.WhereAddOr("role.name LIKE '%" + searchParam.Keyword + "%'").
+			WhereAddOr("access.name LIKE '%" + searchParam.Keyword + "%'")
 	}
 
-	if strings.Compare(accessIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("role_access.access_id = '" + accessIDFilter + "'")
+	if strings.Compare(searchParam.AccessID, "") != 0 {
+		sqlQuery.WhereAddAnd("role_access.access_id = '" + searchParam.AccessID + "'")
 	}
 
-	if strings.Compare(roleIDFilter, "") != 0 {
-		sqlQuery.WhereAddAnd("role_access.role_id = '" + roleIDFilter + "'")
+	if strings.Compare(searchParam.RoleID, "") != 0 {
+		sqlQuery.WhereAddAnd("role_access.role_id = '" + searchParam.RoleID + "'")
 	}
 
 	sqlStr, sqlErr := sqlQuery.SQL()
@@ -240,7 +248,7 @@ func GetAccessRoleCount(db rdbmstool.DbHandlerProxy, keyword string,
 		return 0, sqlErr
 	}
 
-	rows, dbErr = db.Query(sqlStr)
+	rows, dbErr = roleAccess.DBProxy().Query(sqlStr)
 	if dbErr != nil {
 		return 0, dbErr
 	}

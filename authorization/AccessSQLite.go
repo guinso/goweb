@@ -6,20 +6,24 @@ import (
 	"strings"
 
 	"github.com/guinso/goweb/server"
-	"github.com/guinso/rdbmstool"
 )
 
-//Access access record
-type Access struct {
-	//Id access record id
-	ID string `json:"id"`
-	//Name access record name
-	Name string `json:"name"`
+//AccessSQLite access service with SQLite storage
+type AccessSQLite struct {
+	DBProxy server.GetDBProxy
+	Server  server.WebServer
+}
+
+//NewAccessSQLite initialize a new instance of  Access SQLite service
+func NewAccessSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *AccessSQLite {
+	return &AccessSQLite{
+		DBProxy: getDBProxyFn,
+		Server:  serverParam}
 }
 
 //AddAccessGroup insert access group record into database
-func AddAccessGroup(db rdbmstool.DbHandlerProxy, groupName string) error {
-	accessGroupID, gErr := GetAccessGroupIDByName(db, groupName)
+func (access *AccessSQLite) AddAccessGroup(groupName string) error {
+	accessGroupID, gErr := access.GetAccessGroupIDByName(groupName)
 	if gErr != nil {
 		return gErr
 	} else if len(accessGroupID) > 0 {
@@ -28,14 +32,14 @@ func AddAccessGroup(db rdbmstool.DbHandlerProxy, groupName string) error {
 
 	SQL := "INSERT INTO access_group (id, name) VALUES (?, ?)"
 
-	_, err := db.Exec(SQL, server.GetRandomRunningNumber("access_group"), groupName)
+	_, err := access.DBProxy().Exec(SQL, access.Server.GetRandomRunningNumber("access_group"), groupName)
 
 	return err
 }
 
 //GetAccessGroupIDByName get access group ID by access group name
-func GetAccessGroupIDByName(db rdbmstool.DbHandlerProxy, groupName string) (string, error) {
-	rows, err := db.Query("SELECT id FROM access_group WHERE name = ?", groupName)
+func (access *AccessSQLite) GetAccessGroupIDByName(groupName string) (string, error) {
+	rows, err := access.DBProxy().Query("SELECT id FROM access_group WHERE name = ?", groupName)
 	if err != nil {
 		return "", err
 	}
@@ -66,23 +70,23 @@ func GetAccessGroupIDByName(db rdbmstool.DbHandlerProxy, groupName string) (stri
 }
 
 //AddAccess add access record into database
-func AddAccess(db rdbmstool.DbHandlerProxy, accessName, groupName string) error {
-	groupID, err := GetAccessGroupIDByName(db, groupName)
+func (access *AccessSQLite) AddAccess(accessName, groupName string) error {
+	groupID, err := access.GetAccessGroupIDByName(groupName)
 	if err != nil {
 		return err
 	} else if len(groupID) == 0 {
 		return fmt.Errorf("Access Group '%s' not found in database", groupName)
 	}
 
-	accessID, err := GetAccessIDByName(db, accessName)
+	accessID, err := access.GetAccessIDByName(accessName)
 	if err != nil {
 		return err
 	} else if len(accessID) > 0 {
 		return fmt.Errorf("Access '%s' already exists", accessName)
 	}
 
-	_, err = db.Exec("INSERT  INTO access (id, name, group_id) VALUES (?, ?, ?)",
-		server.GetRandomRunningNumber("access"),
+	_, err = access.DBProxy().Exec("INSERT  INTO access (id, name, group_id) VALUES (?, ?, ?)",
+		access.Server.GetRandomRunningNumber("access"),
 		accessName,
 		groupID)
 
@@ -90,8 +94,8 @@ func AddAccess(db rdbmstool.DbHandlerProxy, accessName, groupName string) error 
 }
 
 //GetAccessIDByName get access ID by providing access name
-func GetAccessIDByName(db rdbmstool.DbHandlerProxy, accessName string) (string, error) {
-	rows, err := db.Query("SELECT id FROM access WHERE name = ?", accessName)
+func (access *AccessSQLite) GetAccessIDByName(accessName string) (string, error) {
+	rows, err := access.DBProxy().Query("SELECT id FROM access WHERE name = ?", accessName)
 	if err != nil {
 		return "", nil
 	}
@@ -125,15 +129,15 @@ func GetAccessIDByName(db rdbmstool.DbHandlerProxy, accessName string) (string, 
 }
 
 //GetAccess get access record(s)
-func GetAccess(db rdbmstool.DbHandlerProxy, keyword string, pageSize int, pageIndex int) ([]Access, error) {
+func (access *AccessSQLite) GetAccess(searchParam *AccessSearchParam) ([]Access, error) {
 	var rows *sql.Rows
 	var dbErr error
-	if strings.Compare(keyword, "") == 0 {
-		rows, dbErr = db.Query("SELECT id, name FROM access LIMIT ? OFFSET ?",
-			pageSize, pageIndex*pageSize)
+	if strings.Compare(searchParam.Keyword, "") == 0 {
+		rows, dbErr = access.DBProxy().Query("SELECT id, name FROM access LIMIT ? OFFSET ?",
+			searchParam.PageSize, searchParam.PageIndex*searchParam.PageSize)
 	} else {
-		rows, dbErr = db.Query("SELECT id, name FROM access WHERE name LIKE ? LIMIT ? OFFSET ?",
-			"%"+keyword+"%", pageSize, pageIndex*pageSize)
+		rows, dbErr = access.DBProxy().Query("SELECT id, name FROM access WHERE name LIKE ? LIMIT ? OFFSET ?",
+			"%"+searchParam.Keyword+"%", searchParam.PageSize, searchParam.PageIndex*searchParam.PageSize)
 	}
 
 	if dbErr != nil {
