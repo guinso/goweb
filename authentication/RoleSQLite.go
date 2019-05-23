@@ -12,11 +12,11 @@ import (
 //RoleSQLite role store in SQLite medium
 type RoleSQLite struct {
 	DBProxy server.GetDBProxy
-	Server  server.WebServer
+	Server  server.WebService
 }
 
 //NewRoleSQLite initialize a new role SQLite service instance
-func NewRoleSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *RoleSQLite {
+func NewRoleSQLite(serverParam server.WebService, getDBProxyFn server.GetDBProxy) *RoleSQLite {
 	return &RoleSQLite{
 		Server:  serverParam,
 		DBProxy: getDBProxyFn}

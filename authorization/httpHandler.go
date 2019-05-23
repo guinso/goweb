@@ -54,26 +54,27 @@ func (handler *HTTPRequestHandler) getDBProxy() rdbmstool.DbHandlerProxy {
 //return true if request URL match and process
 func (handler *HTTPRequestHandler) HandleHTTPRequest(w http.ResponseWriter, r *http.Request, trimURL string) bool {
 	if strings.Compare(trimURL, "role") == 0 && handler.Server.IsPOST(r) {
-		handler.handleAddRole(w, r)
+		handler.HandleAddRole(w, r)
 		return true
 	} else if strings.Compare(trimURL, "role") == 0 && handler.Server.IsGET(r) {
-		handler.handleGetRole(w, r)
+		handler.HandleGetRole(w, r)
 		return true
 	} else if strings.Compare(trimURL, "role-access") == 0 && handler.Server.IsGET(r) {
-		handler.handleGetAccessRole(w, r)
+		handler.HandleGetAccessRole(w, r)
 		return true
 	} else if strings.Compare(trimURL, "role-access-count") == 0 && handler.Server.IsGET(r) {
-		handler.handleGetAccessRoleCount(w, r)
+		handler.HandleGetAccessRoleCount(w, r)
 		return true
 	} else if strings.Compare(trimURL, "access") == 0 && handler.Server.IsGET(r) {
-		handler.handleGetAccess(w, r)
+		handler.HandleGetAccess(w, r)
 		return true
 	}
 
 	return false
 }
 
-func (handler *HTTPRequestHandler) handleAddRole(w http.ResponseWriter, r *http.Request) {
+//HandleAddRole add a new role
+func (handler *HTTPRequestHandler) HandleAddRole(w http.ResponseWriter, r *http.Request) {
 	role := addRole{}
 
 	if err := handler.Server.DecodeJSON(r, &role); err != nil {
@@ -92,7 +93,8 @@ func (handler *HTTPRequestHandler) handleAddRole(w http.ResponseWriter, r *http.
 	handler.Server.SendHTTPResponse(w, 0, "", "{}")
 }
 
-func (handler *HTTPRequestHandler) handleGetRole(w http.ResponseWriter, r *http.Request) {
+//HandleGetRole get Role records
+func (handler *HTTPRequestHandler) HandleGetRole(w http.ResponseWriter, r *http.Request) {
 	roles, err := handler.Role.GetRole(&authentication.RoleSearchParam{Keyword: "", PageSize: 10, PageIndex: 0})
 	if err != nil {
 		log.Printf("[role] Encounter error to get role record: %s", err.Error())
@@ -110,7 +112,8 @@ func (handler *HTTPRequestHandler) handleGetRole(w http.ResponseWriter, r *http.
 	handler.Server.SendHTTPResponse(w, 0, "", string(jsonStr))
 }
 
-func (handler *HTTPRequestHandler) handleGetAccessRole(w http.ResponseWriter, r *http.Request) {
+//HandleGetAccessRole get AccessRole records
+func (handler *HTTPRequestHandler) HandleGetAccessRole(w http.ResponseWriter, r *http.Request) {
 
 	pgSize := 10
 	pgIndex := 0
@@ -158,7 +161,8 @@ func (handler *HTTPRequestHandler) handleGetAccessRole(w http.ResponseWriter, r 
 	handler.Server.SendHTTPResponse(w, 0, "", string(jsonStr))
 }
 
-func (handler *HTTPRequestHandler) handleGetAccessRoleCount(w http.ResponseWriter, r *http.Request) {
+//HandleGetAccessRoleCount get AccessRole records' count
+func (handler *HTTPRequestHandler) HandleGetAccessRoleCount(w http.ResponseWriter, r *http.Request) {
 
 	accessID := ""
 	roleID := ""
@@ -192,7 +196,8 @@ func (handler *HTTPRequestHandler) handleGetAccessRoleCount(w http.ResponseWrite
 	handler.Server.SendHTTPResponse(w, 0, "", string(jsonStr))
 }
 
-func (handler *HTTPRequestHandler) handleGetAccess(w http.ResponseWriter, r *http.Request) {
+//HandleGetAccess get Access records
+func (handler *HTTPRequestHandler) HandleGetAccess(w http.ResponseWriter, r *http.Request) {
 
 	pgSize := 10
 	pgIndex := 0

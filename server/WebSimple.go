@@ -14,8 +14,8 @@ import (
 	"github.com/guinso/stringtool"
 )
 
-//WebServerSimple simple web server with configuration
-type WebServerSimple struct {
+//WebSimple simple web server with configuration
+type WebSimple struct {
 	//dbb          *sql.DB
 	DB *sql.DB
 
@@ -28,12 +28,12 @@ type WebServerSimple struct {
 // }
 
 //GetDB get production database handler
-func (server *WebServerSimple) GetDB() *sql.DB {
+func (server *WebSimple) GetDB() *sql.DB {
 	return server.DB
 }
 
 //DecodeJSON marshal http request body stream to object
-func (server *WebServerSimple) DecodeJSON(request *http.Request, obj interface{}) error {
+func (server *WebSimple) DecodeJSON(request *http.Request, obj interface{}) error {
 	decoder := json.NewDecoder(request.Body)
 
 	if err := decoder.Decode(&obj); err != nil {
@@ -44,7 +44,7 @@ func (server *WebServerSimple) DecodeJSON(request *http.Request, obj interface{}
 }
 
 //GetRandomRunningNumber get next random generated MD5 value to fill
-func (server *WebServerSimple) GetRandomRunningNumber(tableName string) string {
+func (server *WebSimple) GetRandomRunningNumber(tableName string) string {
 
 	return stringtool.MakeMD5(
 		tableName +
@@ -53,7 +53,7 @@ func (server *WebServerSimple) GetRandomRunningNumber(tableName string) string {
 }
 
 //SendHTTPResponse send HTTP response
-func (server *WebServerSimple) SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, json string) {
+func (server *WebSimple) SendHTTPResponse(w http.ResponseWriter, statusCode int, statusMsg string, json string) {
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(fmt.Sprintf(
@@ -62,34 +62,34 @@ func (server *WebServerSimple) SendHTTPResponse(w http.ResponseWriter, statusCod
 }
 
 //SendHTTPErrorResponse send HTTP 500 internal error response
-func (server *WebServerSimple) SendHTTPErrorResponse(w http.ResponseWriter) {
+func (server *WebSimple) SendHTTPErrorResponse(w http.ResponseWriter) {
 	w.WriteHeader(500)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("{msg:\"Encounter internal server error\"}"))
 }
 
 //IsPOST check request HTTP is POST method
-func (server *WebServerSimple) IsPOST(r *http.Request) bool {
+func (server *WebSimple) IsPOST(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "post") == 0
 }
 
 //IsGET check request HTTP is GET method
-func (server *WebServerSimple) IsGET(r *http.Request) bool {
+func (server *WebSimple) IsGET(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "get") == 0
 }
 
 //IsPUT check request HTTP is PUT method
-func (server *WebServerSimple) IsPUT(r *http.Request) bool {
+func (server *WebSimple) IsPUT(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "put") == 0
 }
 
 //IsDELETE check request HTTP is DELETE method
-func (server *WebServerSimple) IsDELETE(r *http.Request) bool {
+func (server *WebSimple) IsDELETE(r *http.Request) bool {
 	return strings.Compare(strings.ToLower(r.Method), "delete") == 0
 }
 
 // FileExists reports whether the named file or directory exists.
-func (server *WebServerSimple) FileExists(name string) bool {
+func (server *WebSimple) FileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false

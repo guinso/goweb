@@ -10,8 +10,8 @@ import (
 //GetDBProxy get database handler proxy
 type GetDBProxy func() rdbmstool.DbHandlerProxy
 
-//WebServer webserver service interface
-type WebServer interface {
+//WebService webserver service interface
+type WebService interface {
 	GetDB() *sql.DB
 
 	DecodeJSON(request *http.Request, obj interface{}) error

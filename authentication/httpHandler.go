@@ -16,14 +16,14 @@ import (
 //HTTPRequestHandler HTTP request handler for authentication
 type HTTPRequestHandler struct {
 	DB        *sql.DB
-	Server    server.WebServer
+	Server    server.WebService
 	Auth      *AuthSessionSQLite
 	dbProxy   rdbmstool.DbHandlerProxy
 	CookieKey string
 }
 
 //NewHTTPRequestHandler instantiate a new HTTP request handler
-func NewHTTPRequestHandler(serverParam server.WebServer, DBparam *sql.DB, authSessionKey string) *HTTPRequestHandler {
+func NewHTTPRequestHandler(serverParam server.WebService, DBparam *sql.DB, authSessionKey string) *HTTPRequestHandler {
 	handler := &HTTPRequestHandler{
 		DB:        DBparam,
 		Server:    serverParam,
@@ -44,17 +44,18 @@ func (handler *HTTPRequestHandler) getDBProxy() rdbmstool.DbHandlerProxy {
 //return true if request URL match and process
 func (handler *HTTPRequestHandler) HandleHTTPRequest(w http.ResponseWriter, r *http.Request, trimURL string) bool {
 	if strings.HasPrefix(trimURL, "login") && handler.Server.IsPOST(r) {
-		return handler.handleHTTPLogin(w, r)
+		return handler.HandleHTTPLogin(w, r)
 	} else if strings.HasPrefix(trimURL, "logout") && handler.Server.IsPOST(r) {
-		return handler.handleHTTPLogout(w, r)
+		return handler.HandleHTTPLogout(w, r)
 	} else if strings.Compare(trimURL, "current-user") == 0 && handler.Server.IsGET(r) {
-		return handler.handleCurrentUser(w, r)
+		return handler.HandleCurrentUser(w, r)
 	}
 
 	return false
 }
 
-func (handler *HTTPRequestHandler) handleCurrentUser(w http.ResponseWriter, r *http.Request) bool {
+//HandleCurrentUser get current logged in user information
+func (handler *HTTPRequestHandler) HandleCurrentUser(w http.ResponseWriter, r *http.Request) bool {
 
 	var user *AccountInfo
 
@@ -98,7 +99,8 @@ func (handler *HTTPRequestHandler) restoreDBSetting() {
 	handler.dbProxy = handler.DB
 }
 
-func (handler *HTTPRequestHandler) handleHTTPLogin(w http.ResponseWriter, r *http.Request) bool {
+//HandleHTTPLogin try login
+func (handler *HTTPRequestHandler) HandleHTTPLogin(w http.ResponseWriter, r *http.Request) bool {
 	var loginReq LoginRequest
 
 	err := handler.Server.DecodeJSON(r, &loginReq)
@@ -162,7 +164,8 @@ func (handler *HTTPRequestHandler) handleHTTPLogin(w http.ResponseWriter, r *htt
 	return true
 }
 
-func (handler *HTTPRequestHandler) handleHTTPLogout(w http.ResponseWriter, r *http.Request) bool {
+//HandleHTTPLogout log out current login user
+func (handler *HTTPRequestHandler) HandleHTTPLogout(w http.ResponseWriter, r *http.Request) bool {
 	cookie, _ := r.Cookie(handler.CookieKey)
 	if cookie == nil {
 		//cookie not found; either timeout or logged out

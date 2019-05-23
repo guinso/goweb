@@ -16,11 +16,11 @@ import (
 type AccountSQLite struct {
 	DBProxy server.GetDBProxy
 	Role    *RoleSQLite
-	Server  server.WebServer
+	Server  server.WebService
 }
 
 //NewAccountSQLite Initialize a new instance of Account SQLite service
-func NewAccountSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *AccountSQLite {
+func NewAccountSQLite(serverParam server.WebService, getDBProxyFn server.GetDBProxy) *AccountSQLite {
 	return &AccountSQLite{
 		DBProxy: getDBProxyFn,
 		Server:  serverParam,

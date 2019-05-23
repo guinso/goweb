@@ -25,7 +25,7 @@ type AuthSessionSQLite struct {
 }
 
 //NewAuthSessionSQLite instantiate a new Authentication session based service
-func NewAuthSessionSQLite(serverParam server.WebServer, DBProxyFn server.GetDBProxy) *AuthSessionSQLite {
+func NewAuthSessionSQLite(serverParam server.WebService, DBProxyFn server.GetDBProxy) *AuthSessionSQLite {
 	return &AuthSessionSQLite{
 		DBProxy: DBProxyFn,
 		Account: NewAccountSQLite(serverParam, DBProxyFn)}
