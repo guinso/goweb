@@ -14,13 +14,13 @@ import (
 //RoleAccessSQLite role access service SQLite storage
 type RoleAccessSQLite struct {
 	DBProxy server.GetDBProxy
-	Server  server.WebServer
+	Server  server.WebService
 	Role    *authentication.RoleSQLite
 	Access  *AccessSQLite
 }
 
 //NewRoleAccessSQLite initialize a new instance of  RoleAccess SQLite service
-func NewRoleAccessSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *RoleAccessSQLite {
+func NewRoleAccessSQLite(serverParam server.WebService, getDBProxyFn server.GetDBProxy) *RoleAccessSQLite {
 	roleAccess := &RoleAccessSQLite{
 		DBProxy: getDBProxyFn,
 		Server:  serverParam}

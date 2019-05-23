@@ -106,6 +106,7 @@ func (handler *HTTPRequestHandler) HandleHTTPLogin(w http.ResponseWriter, r *htt
 	err := handler.Server.DecodeJSON(r, &loginReq)
 	if err != nil {
 		log.Printf("[login] error to read user input: %s", err.Error())
+		log.Print(err)
 		handler.Server.SendHTTPErrorResponse(w)
 		return true
 	}
@@ -148,7 +149,6 @@ func (handler *HTTPRequestHandler) HandleHTTPLogin(w http.ResponseWriter, r *htt
 		break
 	case LoginFailed:
 		handler.Server.SendHTTPResponse(w, -1, "username or password not match", "{}")
-		return true
 		// case AlreadyLoggedIn:
 		// 	msg := fmt.Sprintf(
 		// 		"user [%s] already logged in. Please logout and try it again",

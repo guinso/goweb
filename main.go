@@ -24,17 +24,22 @@ import (
 	"os"
 	"strings"
 
+	"github.com/guinso/goweb/authentication"
+	"github.com/guinso/goweb/authorization"
 	"github.com/guinso/goweb/server"
 
 	//explicitly include GO mysql library
 	//_ "github.com/go-sql-driver/mysql"
 
 	//x _ "gopkg.in/go-sql-driver/mysql.v1"
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/authorization"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+var webServer *server.WebSimple
+var authenticateHandler *authentication.HTTPRequestHandler
+var authorizeHandler *authorization.HTTPRequestHandler
+var config *server.ConfigInfo
 
 func main() {
 	log.Println("Starting GO web")
@@ -43,20 +48,21 @@ func main() {
 	//read configuration file; create if not found
 
 	configService := &server.ConfigurationINI{}
-	webServer := &server.WebServerSimple{
+	webServer = &server.WebSimple{
 		Configuration: configService}
 
-	config, configErr := configService.LoadConfiguration("./config.ini")
+	var configErr error
+	config, configErr = configService.LoadConfiguration("./config.ini")
 	if configErr != nil {
-		fmt.Println("[failed]")
-		fmt.Printf("Failed to load configuration: %s", configErr.Error())
+		log.Println("[failed]")
+		log.Printf("Failed to load configuration: %s", configErr.Error())
 		return
 	}
-	fmt.Println("[done]")
+	log.Print("[done]")
 
 	//create basic files and directories if not found
 	if err := initFilesAndDirs(config); err != nil {
-		fmt.Printf("Failed to init files and directories: %s", err.Error())
+		log.Printf("Failed to init files and directories: %s", err.Error())
 		return
 	}
 
@@ -64,11 +70,11 @@ func main() {
 	//check database connection
 	db, err := checkSQLITEConnection(config)
 	if err != nil {
-		fmt.Println("[failed]")
-		fmt.Printf("Failed to check database connection: %s", err.Error())
+		log.Print("[failed]")
+		log.Printf(": %s\r\n", err.Error())
 		return
 	}
-	fmt.Println("[done]")
+	log.Println("[done]")
 
 	//initialize database if requested
 	/*
@@ -83,12 +89,16 @@ func main() {
 		}
 	*/
 
+	log.Print("Preparing modules...")
 	webServer.DB = db
+	authenticateHandler = authentication.NewHTTPRequestHandler(webServer, db, "gorilla-web")
+	authorizeHandler = authorization.NewHTTPRequestHandler(webServer, db)
+	log.Println("[done]")
 
 	//start web server
-	fmt.Printf("Starting web server with port number %d \n", config.PortNumber)
+	log.Printf("Starting web server with port number %d \r\n", config.PortNumber)
 	if webErr := startWebServer(config.PortNumber); webErr != nil {
-		fmt.Printf("Failed to start web server: %s", webErr.Error())
+		log.Printf("Failed to start web server: %s\r\n", webErr.Error())
 		return
 	}
 }
@@ -137,7 +147,7 @@ func checkSQLITEConnection(config *server.ConfigInfo) (*sql.DB, error) {
 }
 
 func initFilesAndDirs(config *server.ConfigInfo) error {
-	exists, err := isDirectoryExists(config.LogicDir)
+	exists, err := webServer.DirectoryExists(config.LogicDir)
 	if err != nil {
 		fmt.Printf("Failed to check logical directory: %s", err.Error())
 		return err
@@ -149,7 +159,7 @@ func initFilesAndDirs(config *server.ConfigInfo) error {
 		}
 	}
 
-	exists, err = isDirectoryExists(config.StaticDir)
+	exists, err = webServer.DirectoryExists(config.StaticDir)
 	if err != nil {
 		fmt.Printf("Failed to check static directory: %s", err.Error())
 		return err
@@ -174,28 +184,6 @@ func initFilesAndDirs(config *server.ConfigInfo) error {
 	return nil
 }
 
-func isFileExists(filename string) bool {
-	if _, err := os.Stat(filename); err != nil {
-		if os.IsNotExist(err) {
-			return false //file not found
-		}
-
-		return false //stat command error
-	}
-
-	return true //file exists
-}
-
-func isDirectoryExists(directoryName string) (bool, error) {
-	stat, err := os.Stat(directoryName)
-
-	if err != nil {
-		return false, nil //other errors
-	}
-
-	return stat.IsDir(), nil
-}
-
 // WebHandler HTTP request to either static file server or REST server (URL start with "api/")
 func WebHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -205,10 +193,10 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 		urlPath = r.URL.Path[1:]
 	}
 
-	log.Println("Serving API URL: " + r.URL.Path)
-
 	//if start with "api/" direct to REST handler
 	if strings.HasPrefix(urlPath, "api/") {
+		log.Println("Serving API URL: " + r.URL.Path)
+
 		//trim prefix "api/"
 		trimmedURL := urlPath[4:]
 		/*
@@ -222,11 +210,10 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Serving static file URL: " + r.URL.Path)
 
-		// define your static file directory
-		staticFilePath := "./static-files/"
+		physicalFilePath := fmt.Sprintf("./%s/%s", config.StaticDir, urlPath)
 
-		//other wise, let read a file path and display to client
-		http.ServeFile(w, r, staticFilePath+urlPath)
+		//read a file path and display to client
+		http.ServeFile(w, r, physicalFilePath)
 	}
 }
 
@@ -237,29 +224,28 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 	//TODO: add your custom web API here:
 	/**********************************************/
 
-	//handle authentication web API
-	//1. /login (POST)
-	//2. /logout (POST)
-	if authentication.HandleHTTPRequest(server.GetDB(), w, r, trimURL) {
-		return
-	}
-
-	//TODO: handle authorization web API
-	//1. /role (GET + POST)
-	if authorization.HandleHTTPRequest(server.GetDB(), w, r, trimURL) {
-		return
-	}
-
-	//sample return JSON
-	if strings.HasPrefix(trimURL, "meals") {
+	if strings.HasPrefix(trimURL, "login") && webServer.IsPOST(r) { //>>>>authentication
+		authenticateHandler.HandleHTTPLogin(w, r)
+	} else if strings.HasPrefix(trimURL, "logout") && webServer.IsPOST(r) {
+		authenticateHandler.HandleHTTPLogout(w, r)
+	} else if strings.Compare(trimURL, "current-user") == 0 && webServer.IsGET(r) {
+		authenticateHandler.HandleCurrentUser(w, r)
+	} else if strings.Compare(trimURL, "role") == 0 && webServer.IsPOST(r) { //>>>>authorization
+		authorizeHandler.HandleAddRole(w, r)
+	} else if strings.Compare(trimURL, "role") == 0 && webServer.IsGET(r) {
+		authorizeHandler.HandleGetRole(w, r)
+	} else if strings.Compare(trimURL, "role-access") == 0 && webServer.IsGET(r) {
+		authorizeHandler.HandleGetAccessRole(w, r)
+	} else if strings.Compare(trimURL, "role-access-count") == 0 && webServer.IsGET(r) {
+		authorizeHandler.HandleGetAccessRoleCount(w, r)
+	} else if strings.Compare(trimURL, "access") == 0 && webServer.IsGET(r) {
+		authorizeHandler.HandleGetAccess(w, r)
+	} else if strings.HasPrefix(trimURL, "meals") { //>>>>sample return JSON
 		w.Header().Set("Content-Type", "application/json")  //MIME to application/json
 		w.WriteHeader(http.StatusOK)                        //status code 200, OK
 		w.Write([]byte("{ \"msg\": \"this is meal A \" }")) //body text
 		return
-	}
-
-	//sample return virtual JPG file to client
-	if strings.HasPrefix(trimURL, "img/") {
+	} else if strings.HasPrefix(trimURL, "img/") { //>>>>sample return virtual JPG file to client
 		logicalFilePath := "./logic-files/"
 		physicalFileName := "neon.jpg"
 
@@ -278,11 +264,12 @@ func routePath(w http.ResponseWriter, r *http.Request, trimURL string) {
 			// write file (in binary format) direct into HTTP return content
 			w.Write(data)
 		}
+	} else {
+		// show error code 404 not found
+		//(since the requested URL doesn't match any of it)
+		handleErrorCode(404, "Path not found.", w)
 	}
 
-	// show error code 404 not found
-	//(since the requested URL doesn't match any of it)
-	handleErrorCode(404, "Path not found.", w)
 }
 
 // Generate error page

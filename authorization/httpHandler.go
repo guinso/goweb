@@ -24,7 +24,7 @@ type rowCount struct {
 //HTTPRequestHandler HTTP request handler for authorization
 type HTTPRequestHandler struct {
 	DB         *sql.DB
-	Server     server.WebServer
+	Server     server.WebService
 	dbProxy    rdbmstool.DbHandlerProxy
 	Role       *authentication.RoleSQLite
 	Access     *AccessSQLite
@@ -32,7 +32,7 @@ type HTTPRequestHandler struct {
 }
 
 //NewHTTPRequestHandler instantiate a new HTTP request handler
-func NewHTTPRequestHandler(serverParam server.WebServer, DBparam *sql.DB) *HTTPRequestHandler {
+func NewHTTPRequestHandler(serverParam server.WebService, DBparam *sql.DB) *HTTPRequestHandler {
 	handler := &HTTPRequestHandler{
 		DB:      DBparam,
 		Server:  serverParam,

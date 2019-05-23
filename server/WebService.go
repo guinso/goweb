@@ -27,4 +27,5 @@ type WebService interface {
 	IsDELETE(r *http.Request) bool
 
 	FileExists(name string) bool
+	DirectoryExists(directoryName string) (bool, error)
 }

@@ -11,11 +11,11 @@ import (
 //AccessSQLite access service with SQLite storage
 type AccessSQLite struct {
 	DBProxy server.GetDBProxy
-	Server  server.WebServer
+	Server  server.WebService
 }
 
 //NewAccessSQLite initialize a new instance of  Access SQLite service
-func NewAccessSQLite(serverParam server.WebServer, getDBProxyFn server.GetDBProxy) *AccessSQLite {
+func NewAccessSQLite(serverParam server.WebService, getDBProxyFn server.GetDBProxy) *AccessSQLite {
 	return &AccessSQLite{
 		DBProxy: getDBProxyFn,
 		Server:  serverParam}

@@ -97,3 +97,14 @@ func (server *WebSimple) FileExists(name string) bool {
 	}
 	return true
 }
+
+//DirectoryExists reports whether the named directory exists.
+func (server *WebSimple) DirectoryExists(directoryName string) (bool, error) {
+	stat, err := os.Stat(directoryName)
+
+	if err != nil {
+		return false, nil //other errors
+	}
+
+	return stat.IsDir(), nil
+}
