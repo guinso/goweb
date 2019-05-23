@@ -195,6 +195,8 @@ func (auth *AuthSessionSQLite) getLoginSessionByHashKey(db rdbmstool.DbHandlerPr
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE hash_key = ?"
 
 	rows, err := db.Query(SQL, hashKey)
+	defer rows.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -246,14 +248,14 @@ func (auth *AuthSessionSQLite) formatLoginSession(rows *sql.Rows) (*LoginSession
 		}
 
 		if strings.Compare(tmpLogout, "") == 0 {
-			logout, err := time.Parse(tmpLogout, timeFormat)
+			result.Logout = time.Time{}
+		} else {
+			logout, err := time.Parse(timeFormat, tmpLogout)
 			if err != nil {
 				return nil, err
 			}
 
 			result.Logout = logout
-		} else {
-			result.Logout = time.Time{}
 		}
 
 		return &result, nil

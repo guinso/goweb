@@ -68,6 +68,7 @@ func (handler *HTTPRequestHandler) HandleCurrentUser(w http.ResponseWriter, r *h
 
 		user, err = handler.Auth.GetCurrentLoginAccount(hashKey)
 		if err != nil {
+			log.Print(err.Error())
 			handler.Server.SendHTTPErrorResponse(w)
 			return true
 		}
