@@ -18,15 +18,15 @@ import (
 	"github.com/guinso/stringtool"
 )
 
-//AuthSessionSQLite authentication service using HTTP session to keep login and MySQL at storage medium
-type AuthSessionSQLite struct {
+//AuthSQLite authentication service using HTTP session to keep login and MySQL at storage medium
+type AuthSQLite struct {
 	DBProxy server.GetDBProxy
 	Account AccountService
 }
 
-//NewAuthSessionSQLite instantiate a new Authentication session based service
-func NewAuthSessionSQLite(serverParam server.WebService, DBProxyFn server.GetDBProxy) *AuthSessionSQLite {
-	return &AuthSessionSQLite{
+//NewAuthSQLite instantiate a new Authentication session based service
+func NewAuthSQLite(serverParam server.WebService, DBProxyFn server.GetDBProxy) *AuthSQLite {
+	return &AuthSQLite{
 		DBProxy: DBProxyFn,
 		Account: NewAccountSQLite(serverParam, DBProxyFn)}
 }
@@ -35,7 +35,7 @@ func NewAuthSessionSQLite(serverParam server.WebService, DBProxyFn server.GetDBP
 //1. username and password matched
 //2. no one is login
 //return: login result, hash key, exception error message
-func (auth *AuthSessionSQLite) Login(request *LoginRequest) (LoginStatus, string, error) {
+func (auth *AuthSQLite) Login(request *LoginRequest) (LoginStatus, string, error) {
 
 	accInfo, err := auth.Account.GetAccountByUsername(request.Username)
 	if err != nil {
@@ -62,7 +62,7 @@ func (auth *AuthSessionSQLite) Login(request *LoginRequest) (LoginStatus, string
 }
 
 //Logout try end user login session
-func (auth *AuthSessionSQLite) Logout(hashKey string) (bool, error) {
+func (auth *AuthSQLite) Logout(hashKey string) (bool, error) {
 
 	loginSession, err := auth.getLoginSessionByHashKey(auth.DBProxy(), hashKey)
 	if err != nil {
@@ -83,7 +83,7 @@ func (auth *AuthSessionSQLite) Logout(hashKey string) (bool, error) {
 
 //GetCurrentLoginAccount get current active session's user ID
 //anonymous user will return nil object
-func (auth *AuthSessionSQLite) GetCurrentLoginAccount(hashKey string) (*AccountInfo, error) {
+func (auth *AuthSQLite) GetCurrentLoginAccount(hashKey string) (*AccountInfo, error) {
 
 	loginSession, err := auth.getLoginSessionByHashKey(auth.DBProxy(), hashKey)
 	if err != nil {
@@ -103,7 +103,7 @@ func (auth *AuthSessionSQLite) GetCurrentLoginAccount(hashKey string) (*AccountI
 
 //RegisterLoginSession register latest login session record
 //return hashkey and error message if encounter exception
-func (auth *AuthSessionSQLite) registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (LoginStatus, string, error) {
+func (auth *AuthSQLite) registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (LoginStatus, string, error) {
 	hashKey := strconv.FormatInt(logTime.UnixNano(), 10)
 
 	//validate login session
@@ -132,7 +132,7 @@ func (auth *AuthSessionSQLite) registerLoginSession(db rdbmstool.DbHandlerProxy,
 }
 
 //AddLoginSessionRecord add login session record
-func (auth *AuthSessionSQLite) addLoginSessionRecord(db rdbmstool.DbHandlerProxy, userID string, hashKey string, now time.Time) error {
+func (auth *AuthSQLite) addLoginSessionRecord(db rdbmstool.DbHandlerProxy, userID string, hashKey string, now time.Time) error {
 	//update database login session table
 	insertSQL := "INSERT INTO login_session (id, account_id, hash_key, login, last_seen, logout) VALUES (?, ?, ?, ?, ?, '')"
 
@@ -152,7 +152,7 @@ func (auth *AuthSessionSQLite) addLoginSessionRecord(db rdbmstool.DbHandlerProxy
 
 //RenewLoginSession renew login session with new hash key and time log
 //return hashkey and error message if encounter exception
-func (auth *AuthSessionSQLite) renewLoginSession(db rdbmstool.DbHandlerProxy, accountID string, hashKey string, logTime time.Time) (string, error) {
+func (auth *AuthSQLite) renewLoginSession(db rdbmstool.DbHandlerProxy, accountID string, hashKey string, logTime time.Time) (string, error) {
 	updateSQL := "UPDATE login_session SET hash_key = ?, login = ?, logout = '', last_seen = ?" +
 		" WHERE account_id = ?"
 
@@ -166,7 +166,7 @@ func (auth *AuthSessionSQLite) renewLoginSession(db rdbmstool.DbHandlerProxy, ac
 }
 
 //EndLoginSessionByAccountID mark login session for specified user to become logout
-func (auth *AuthSessionSQLite) endLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) error {
+func (auth *AuthSQLite) endLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) error {
 	updateSQL := "UPDATE login_session SET (logout = ?) WHERE account_id = ?"
 
 	if _, err := db.Exec(updateSQL,
@@ -178,7 +178,7 @@ func (auth *AuthSessionSQLite) endLoginSessionByAccountID(db rdbmstool.DbHandler
 }
 
 //EndLoginSessionByHashKey mark login session for specified user to become logout
-func (auth *AuthSessionSQLite) endLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) error {
+func (auth *AuthSQLite) endLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) error {
 	updateSQL := "UPDATE login_session SET logout = ? WHERE hash_key = ?"
 
 	if _, err := db.Exec(updateSQL,
@@ -191,7 +191,7 @@ func (auth *AuthSessionSQLite) endLoginSessionByHashKey(db rdbmstool.DbHandlerPr
 
 //GetLoginSessionByHashKey get Login session record by hash key
 //hash key is provided from client's cookies; please refer SessionHandler.go
-func (auth *AuthSessionSQLite) getLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) (*LoginSession, error) {
+func (auth *AuthSQLite) getLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE hash_key = ?"
 
 	rows, err := db.Query(SQL, hashKey)
@@ -205,7 +205,7 @@ func (auth *AuthSessionSQLite) getLoginSessionByHashKey(db rdbmstool.DbHandlerPr
 }
 
 //GetLoginSessionByAccountID get Login session record by account ID
-func (auth *AuthSessionSQLite) getLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) (*LoginSession, error) {
+func (auth *AuthSQLite) getLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE account_id = ?"
 
 	rows, err := db.Query(SQL, accountID)
@@ -216,7 +216,7 @@ func (auth *AuthSessionSQLite) getLoginSessionByAccountID(db rdbmstool.DbHandler
 	return auth.formatLoginSession(rows)
 }
 
-func (auth *AuthSessionSQLite) formatLoginSession(rows *sql.Rows) (*LoginSession, error) {
+func (auth *AuthSQLite) formatLoginSession(rows *sql.Rows) (*LoginSession, error) {
 	if rows.Next() {
 		var tmpID, tmpUserID, tmpHash string
 		var tmpLogin, tmpLastSeen string

@@ -19,8 +19,8 @@ import (
 	mysql "gopkg.in/go-sql-driver/mysql.v1"
 )
 
-//AuthSessionMySQL authentication service using HTTP session to keep login and MySQL at storage medium
-type AuthSessionMySQL struct {
+//AuthMySQL authentication service using HTTP session to keep login and MySQL at storage medium
+type AuthMySQL struct {
 	Db      rdbmstool.DbHandlerProxy
 	Account AccountService
 }
@@ -29,7 +29,7 @@ type AuthSessionMySQL struct {
 //1. username and password matched
 //2. no one is login
 //return: login result, hash key, exception error message
-func (auth *AuthSessionMySQL) Login(request *LoginRequest) (LoginStatus, string, error) {
+func (auth *AuthMySQL) Login(request *LoginRequest) (LoginStatus, string, error) {
 
 	accInfo, err := auth.Account.GetAccountByUsername(request.Username)
 	if err != nil {
@@ -56,7 +56,7 @@ func (auth *AuthSessionMySQL) Login(request *LoginRequest) (LoginStatus, string,
 }
 
 //Logout try end user login session
-func (auth *AuthSessionMySQL) Logout(hashKey string) (bool, error) {
+func (auth *AuthMySQL) Logout(hashKey string) (bool, error) {
 
 	loginSession, err := auth.getLoginSessionByHashKey(auth.Db, hashKey)
 	if err != nil {
@@ -77,7 +77,7 @@ func (auth *AuthSessionMySQL) Logout(hashKey string) (bool, error) {
 
 //GetCurrentLoginAccount get current active session's user ID
 //anonymous user will return nil object
-func (auth *AuthSessionMySQL) GetCurrentLoginAccount(hashKey string) (*AccountInfo, error) {
+func (auth *AuthMySQL) GetCurrentLoginAccount(hashKey string) (*AccountInfo, error) {
 
 	loginSession, err := auth.getLoginSessionByHashKey(auth.Db, hashKey)
 	if err != nil {
@@ -97,7 +97,7 @@ func (auth *AuthSessionMySQL) GetCurrentLoginAccount(hashKey string) (*AccountIn
 
 //RegisterLoginSession register latest login session record
 //return hashkey and error message if encounter exception
-func (auth *AuthSessionMySQL) registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (LoginStatus, string, error) {
+func (auth *AuthMySQL) registerLoginSession(db rdbmstool.DbHandlerProxy, accountInfo *AccountInfo, logTime time.Time) (LoginStatus, string, error) {
 	hashKey := strconv.FormatInt(logTime.UnixNano(), 10)
 
 	//validate login session
@@ -126,7 +126,7 @@ func (auth *AuthSessionMySQL) registerLoginSession(db rdbmstool.DbHandlerProxy, 
 }
 
 //AddLoginSessionRecord add login session record
-func (auth *AuthSessionMySQL) addLoginSessionRecord(db rdbmstool.DbHandlerProxy, userID string, hashKey string, now time.Time) error {
+func (auth *AuthMySQL) addLoginSessionRecord(db rdbmstool.DbHandlerProxy, userID string, hashKey string, now time.Time) error {
 	//update database login session table
 	insertSQL := "INSERT INTO login_session (id, account_id, hash_key, login, last_seen) VALUES (?, ?, ?, ?, ?)"
 
@@ -146,7 +146,7 @@ func (auth *AuthSessionMySQL) addLoginSessionRecord(db rdbmstool.DbHandlerProxy,
 
 //RenewLoginSession renew login session with new hash key and time log
 //return hashkey and error message if encounter exception
-func (auth *AuthSessionMySQL) renewLoginSession(db rdbmstool.DbHandlerProxy, accountID string, hashKey string, logTime time.Time) (string, error) {
+func (auth *AuthMySQL) renewLoginSession(db rdbmstool.DbHandlerProxy, accountID string, hashKey string, logTime time.Time) (string, error) {
 	updateSQL := "UPDATE login_session SET hash_key = ?, login = ?, logout = null, last_seen = ?" +
 		" WHERE account_id = ?"
 
@@ -160,7 +160,7 @@ func (auth *AuthSessionMySQL) renewLoginSession(db rdbmstool.DbHandlerProxy, acc
 }
 
 //EndLoginSessionByAccountID mark login session for specified user to become logout
-func (auth *AuthSessionMySQL) endLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) error {
+func (auth *AuthMySQL) endLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) error {
 	updateSQL := "UPDATE login_session SET (logout = ?) WHERE account_id = ?"
 
 	if _, err := db.Exec(updateSQL,
@@ -172,7 +172,7 @@ func (auth *AuthSessionMySQL) endLoginSessionByAccountID(db rdbmstool.DbHandlerP
 }
 
 //EndLoginSessionByHashKey mark login session for specified user to become logout
-func (auth *AuthSessionMySQL) endLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) error {
+func (auth *AuthMySQL) endLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) error {
 	updateSQL := "UPDATE login_session SET logout = ? WHERE hash_key = ?"
 
 	if _, err := db.Exec(updateSQL,
@@ -185,7 +185,7 @@ func (auth *AuthSessionMySQL) endLoginSessionByHashKey(db rdbmstool.DbHandlerPro
 
 //GetLoginSessionByHashKey get Login session record by hash key
 //hash key is provided from client's cookies; please refer SessionHandler.go
-func (auth *AuthSessionMySQL) getLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) (*LoginSession, error) {
+func (auth *AuthMySQL) getLoginSessionByHashKey(db rdbmstool.DbHandlerProxy, hashKey string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE hash_key = ?"
 
 	rows, err := db.Query(SQL, hashKey)
@@ -197,7 +197,7 @@ func (auth *AuthSessionMySQL) getLoginSessionByHashKey(db rdbmstool.DbHandlerPro
 }
 
 //GetLoginSessionByAccountID get Login session record by account ID
-func (auth *AuthSessionMySQL) getLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) (*LoginSession, error) {
+func (auth *AuthMySQL) getLoginSessionByAccountID(db rdbmstool.DbHandlerProxy, accountID string) (*LoginSession, error) {
 	SQL := "SELECT id, account_id, hash_key, login, logout, last_seen FROM login_session WHERE account_id = ?"
 
 	rows, err := db.Query(SQL, accountID)
@@ -208,7 +208,7 @@ func (auth *AuthSessionMySQL) getLoginSessionByAccountID(db rdbmstool.DbHandlerP
 	return auth.formatLoginSession(rows)
 }
 
-func (auth *AuthSessionMySQL) formatLoginSession(rows *sql.Rows) (*LoginSession, error) {
+func (auth *AuthMySQL) formatLoginSession(rows *sql.Rows) (*LoginSession, error) {
 	if rows.Next() {
 		var tmpID, tmpUserID, tmpHash string
 		var tmpLogin, tmpLastSeen mysql.NullTime

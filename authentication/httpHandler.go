@@ -17,7 +17,7 @@ import (
 type HTTPRequestHandler struct {
 	DB        *sql.DB
 	Server    server.WebService
-	Auth      *AuthSessionSQLite
+	Auth      *AuthSQLite
 	dbProxy   rdbmstool.DbHandlerProxy
 	CookieKey string
 }
@@ -30,7 +30,7 @@ func NewHTTPRequestHandler(serverParam server.WebService, DBparam *sql.DB, authS
 		dbProxy:   DBparam,
 		CookieKey: authSessionKey}
 
-	handler.Auth = NewAuthSessionSQLite(serverParam, handler.getDBProxy)
+	handler.Auth = NewAuthSQLite(serverParam, handler.getDBProxy)
 
 	return handler
 }
