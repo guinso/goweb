@@ -28,11 +28,6 @@ import (
 	"github.com/guinso/goweb/authorization"
 	"github.com/guinso/goweb/server"
 
-	//explicitly include GO mysql library
-	//_ "github.com/go-sql-driver/mysql"
-
-	//x _ "gopkg.in/go-sql-driver/mysql.v1"
-
 	_ "github.com/mattn/go-sqlite3"
 )
 
