@@ -1,30 +1,42 @@
-import { JxHelper } from '/js/helper/jxhelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
+"use strict";
 
-export class User {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.User = void 0;
 
-    static async renderPage() {
-        JxHelper.showLoadingPanel();
+require("core-js/modules/web.dom.iterable");
 
-        try
-        {
-            const partial = FetchHelper.text("/js/user/partial.html")
-            const userData = FetchHelper.json("js/user/dummy.json")
-            const optionalDemo = FetchHelper.json("/api/meals")
+var _jxhelper = require("/js/helper/jxhelper.js");
 
-            const responses = await Promise.all([partial, userData, optionalDemo])
-            const partialString = responses[0]
+var _fetchHelper = require("/js/helper/fetchHelper.js");
 
-            const contentPanel = JxHelper.getContentPanel()
-            contentPanel.innerHTML = partialString
+class User {
+  static async renderPage() {
+    _jxhelper.JxHelper.showLoadingPanel();
 
-        } catch(err) {
-            JxHelper.getSpecialError()
-                    .html("<h2>Opps, something wrong happen :(</h2>")
-                    .addClass("visible");
-        }
+    try {
+      const partial = _fetchHelper.FetchHelper.text("/js/user/partial.html");
 
-        JxHelper.hideLoadingPanel();
+      const userData = _fetchHelper.FetchHelper.json("js/user/dummy.json");
+
+      const optionalDemo = _fetchHelper.FetchHelper.json("/api/meals");
+
+      const responses = await Promise.all([partial, userData, optionalDemo]);
+      const partialString = responses[0];
+
+      const contentPanel = _jxhelper.JxHelper.getContentPanel();
+
+      contentPanel.innerHTML = partialString;
+    } catch (err) {
+      _jxhelper.JxHelper.getSpecialError().html("<h2>Opps, something wrong happen :(</h2>").addClass("visible");
     }
-}
-//# sourceURL=user/user.js
+
+    _jxhelper.JxHelper.hideLoadingPanel();
+  }
+
+} //# sourceURL=user/user.js
+
+
+exports.User = User;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2NsaWVudC9qcy91c2VyL3VzZXIuanMiXSwibmFtZXMiOlsiVXNlciIsInJlbmRlclBhZ2UiLCJKeEhlbHBlciIsInNob3dMb2FkaW5nUGFuZWwiLCJwYXJ0aWFsIiwiRmV0Y2hIZWxwZXIiLCJ0ZXh0IiwidXNlckRhdGEiLCJqc29uIiwib3B0aW9uYWxEZW1vIiwicmVzcG9uc2VzIiwiUHJvbWlzZSIsImFsbCIsInBhcnRpYWxTdHJpbmciLCJjb250ZW50UGFuZWwiLCJnZXRDb250ZW50UGFuZWwiLCJpbm5lckhUTUwiLCJlcnIiLCJnZXRTcGVjaWFsRXJyb3IiLCJodG1sIiwiYWRkQ2xhc3MiLCJoaWRlTG9hZGluZ1BhbmVsIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQTs7QUFDQTs7QUFFTyxNQUFNQSxJQUFOLENBQVc7QUFFZCxlQUFhQyxVQUFiLEdBQTBCO0FBQ3RCQyx1QkFBU0MsZ0JBQVQ7O0FBRUEsUUFDQTtBQUNJLFlBQU1DLE9BQU8sR0FBR0MseUJBQVlDLElBQVosQ0FBaUIsdUJBQWpCLENBQWhCOztBQUNBLFlBQU1DLFFBQVEsR0FBR0YseUJBQVlHLElBQVosQ0FBaUIsb0JBQWpCLENBQWpCOztBQUNBLFlBQU1DLFlBQVksR0FBR0oseUJBQVlHLElBQVosQ0FBaUIsWUFBakIsQ0FBckI7O0FBRUEsWUFBTUUsU0FBUyxHQUFHLE1BQU1DLE9BQU8sQ0FBQ0MsR0FBUixDQUFZLENBQUNSLE9BQUQsRUFBVUcsUUFBVixFQUFvQkUsWUFBcEIsQ0FBWixDQUF4QjtBQUNBLFlBQU1JLGFBQWEsR0FBR0gsU0FBUyxDQUFDLENBQUQsQ0FBL0I7O0FBRUEsWUFBTUksWUFBWSxHQUFHWixtQkFBU2EsZUFBVCxFQUFyQjs7QUFDQUQsTUFBQUEsWUFBWSxDQUFDRSxTQUFiLEdBQXlCSCxhQUF6QjtBQUVILEtBWkQsQ0FZRSxPQUFNSSxHQUFOLEVBQVc7QUFDVGYseUJBQVNnQixlQUFULEdBQ1NDLElBRFQsQ0FDYywwQ0FEZCxFQUVTQyxRQUZULENBRWtCLFNBRmxCO0FBR0g7O0FBRURsQix1QkFBU21CLGdCQUFUO0FBQ0g7O0FBeEJhLEMsQ0EwQmxCIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgSnhIZWxwZXIgfSBmcm9tICcvanMvaGVscGVyL2p4aGVscGVyLmpzJ1xyXG5pbXBvcnQgeyBGZXRjaEhlbHBlciB9IGZyb20gJy9qcy9oZWxwZXIvZmV0Y2hIZWxwZXIuanMnXHJcblxyXG5leHBvcnQgY2xhc3MgVXNlciB7XHJcblxyXG4gICAgc3RhdGljIGFzeW5jIHJlbmRlclBhZ2UoKSB7XHJcbiAgICAgICAgSnhIZWxwZXIuc2hvd0xvYWRpbmdQYW5lbCgpO1xyXG5cclxuICAgICAgICB0cnlcclxuICAgICAgICB7XHJcbiAgICAgICAgICAgIGNvbnN0IHBhcnRpYWwgPSBGZXRjaEhlbHBlci50ZXh0KFwiL2pzL3VzZXIvcGFydGlhbC5odG1sXCIpXHJcbiAgICAgICAgICAgIGNvbnN0IHVzZXJEYXRhID0gRmV0Y2hIZWxwZXIuanNvbihcImpzL3VzZXIvZHVtbXkuanNvblwiKVxyXG4gICAgICAgICAgICBjb25zdCBvcHRpb25hbERlbW8gPSBGZXRjaEhlbHBlci5qc29uKFwiL2FwaS9tZWFsc1wiKVxyXG5cclxuICAgICAgICAgICAgY29uc3QgcmVzcG9uc2VzID0gYXdhaXQgUHJvbWlzZS5hbGwoW3BhcnRpYWwsIHVzZXJEYXRhLCBvcHRpb25hbERlbW9dKVxyXG4gICAgICAgICAgICBjb25zdCBwYXJ0aWFsU3RyaW5nID0gcmVzcG9uc2VzWzBdXHJcblxyXG4gICAgICAgICAgICBjb25zdCBjb250ZW50UGFuZWwgPSBKeEhlbHBlci5nZXRDb250ZW50UGFuZWwoKVxyXG4gICAgICAgICAgICBjb250ZW50UGFuZWwuaW5uZXJIVE1MID0gcGFydGlhbFN0cmluZ1xyXG5cclxuICAgICAgICB9IGNhdGNoKGVycikge1xyXG4gICAgICAgICAgICBKeEhlbHBlci5nZXRTcGVjaWFsRXJyb3IoKVxyXG4gICAgICAgICAgICAgICAgICAgIC5odG1sKFwiPGgyPk9wcHMsIHNvbWV0aGluZyB3cm9uZyBoYXBwZW4gOig8L2gyPlwiKVxyXG4gICAgICAgICAgICAgICAgICAgIC5hZGRDbGFzcyhcInZpc2libGVcIik7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICBKeEhlbHBlci5oaWRlTG9hZGluZ1BhbmVsKCk7XHJcbiAgICB9XHJcbn1cclxuLy8jIHNvdXJjZVVSTD11c2VyL3VzZXIuanMiXX0=

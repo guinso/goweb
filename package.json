@@ -1,0 +1,35 @@
+{
+  "name": "goweb",
+  "version": "0.1.0",
+  "description": "simple web site",
+  "main": "client/index.js",
+  "devDependencies": {
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/plugin-syntax-dynamic-import": "7.2.0",
+    "@babel/preset-env": "7.4.5",
+    "webpack-cli": "^3.3.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "babel --watch client/js --out-dir client/js --source-maps inline --copy-files",
+    "build": "babel client --out-dir publicHTML  --ignore client/lib --copy-files --source-maps inline"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guinso/goweb.git"
+  },
+  "author": "Benjamin Ching",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/guinso/goweb/issues"
+  },
+  "homepage": "https://github.com/guinso/goweb#readme",
+  "dependencies": {
+    "@babel/plugin-transform-modules-systemjs": "^7.4.4",
+    "@babel/polyfill": "^7.4.4",
+    "watch": "^1.0.2",
+    "webpack": "^4.32.2"
+  }
+}

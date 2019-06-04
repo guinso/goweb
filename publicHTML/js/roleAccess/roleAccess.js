@@ -1,200 +1,231 @@
-import { JxHelper } from '/js/helper/JxHelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
-import { BtsHelper, BtsPaginationHelper, BtsDialogModalHelper } from '/js/helper/btsHelper.js'
+"use strict";
 
-export class RoleAccess {
-    static selectedPageIndex = 0
-    static pageSize = 10
-    static partialElement = null
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.RoleAccess = void 0;
 
-    static async renderPage() {
-        JxHelper.showLoadingPanel();
+require("core-js/modules/es6.regexp.to-string");
 
-        try {
-            const partial = FetchHelper.text("/js/roleAccess/partial.html")
+require("core-js/modules/web.dom.iterable");
 
-            const role = FetchHelper.json("/api/role")
-            const access = FetchHelper.json("/api/access")
-            const roleAccess = FetchHelper.json("/api/role-access")
-            const roleAccessCount = FetchHelper.json("/api/role-access-count")
+var _JxHelper = require("/js/helper/JxHelper.js");
 
-            let pgIndex = RoleAccess.selectedPageIndex;
-            let pgSize = RoleAccess.AccesspageSize;
+var _fetchHelper = require("/js/helper/fetchHelper.js");
 
-            const reponses = await Promise.all([partial, roleAccess, role, access, roleAccessCount])
+var _btsHelper = require("/js/helper/btsHelper.js");
 
-            const items = reponses[1]['response'] //JSON.parse(roleAccessResponse[0]);
-            const itemsCount = reponses[4]['response'] //JSON.parse(roleAccessCntResponse[0])['response'];
-            const roleItems = reponses[2]['response'] //JSON.parse(roleResponse[0]);
-            const accessItems = reponses[3]['response'] //JSON.parse(accessResponse[0]);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-            let tmp = JxHelper.parseHTMLString(reponses[0]) //document.createElement("div")
-                //tmp.innerHTML = reponses[0] //partialResponse[0];
-            RoleAccess.partialElement = tmp
+class RoleAccess {
+  static async renderPage() {
+    _JxHelper.JxHelper.showLoadingPanel();
 
-            RoleAccess._renderTable(tmp, items)
+    try {
+      const partial = _fetchHelper.FetchHelper.text("/js/roleAccess/partial.html");
 
-            RoleAccess._generateSelectOptions(tmp, "#roleSelect", roleItems)
-            RoleAccess._generateSelectOptions(tmp, "#accessSelect", accessItems)
+      const role = _fetchHelper.FetchHelper.json("/api/role");
 
-            //register search button event handler
-            tmp.querySelector("#roleAccessSearch").onclick = function() {
-                RoleAccess._search(tmp)
-            }
+      const access = _fetchHelper.FetchHelper.json("/api/access");
 
-            //build pagination
-            //var paginationElement = _buildPagination(pgIndex, pgSize, itemsCount.count, _pageIndexSearch);
-            let paginationElement = BtsPaginationHelper
-                .buildPaginationElement(pgIndex, pgSize, itemsCount.count, RoleAccess._pageIndexSearch)
-            let paginationPlaceholder = tmp.querySelector("#paginationPlaceholder")
-            BtsHelper.emptyChild(paginationPlaceholder)
-            paginationPlaceholder.appendChild(paginationElement)
+      const roleAccess = _fetchHelper.FetchHelper.json("/api/role-access");
 
-            //test create modal
-            let modalEle = BtsDialogModalHelper.buildElement()
-            BtsDialogModalHelper.setTitle(modalEle, "Sample Modal Dialog")
-            tmp.appendChild(modalEle)
+      const roleAccessCount = _fetchHelper.FetchHelper.json("/api/role-access-count");
 
-            const contentPanel = JxHelper.getContentPanel()
-            JxHelper.emptyElementChildren(contentPanel)
-            contentPanel.appendChild(tmp)
+      let pgIndex = RoleAccess.selectedPageIndex;
+      let pgSize = RoleAccess.AccesspageSize;
+      const reponses = await Promise.all([partial, roleAccess, role, access, roleAccessCount]);
+      const items = reponses[1]['response']; //JSON.parse(roleAccessResponse[0]);
 
-        } catch (err) {
-            console.error(`failed to render role access page: ${err.message}`)
+      const itemsCount = reponses[4]['response']; //JSON.parse(roleAccessCntResponse[0])['response'];
 
-            const specialContent = JxHelper.getSpecialError()
-            specialContent.innerHTML = '<h2>Opps, something wrong happen :(</h2>'
-            JxHelper.showSpecialError()
-        }
+      const roleItems = reponses[2]['response']; //JSON.parse(roleResponse[0]);
 
-        JxHelper.hideLoadingPanel()
+      const accessItems = reponses[3]['response']; //JSON.parse(accessResponse[0]);
+
+      let tmp = _JxHelper.JxHelper.parseHTMLString(reponses[0]); //document.createElement("div")
+      //tmp.innerHTML = reponses[0] //partialResponse[0];
+
+
+      RoleAccess.partialElement = tmp;
+
+      RoleAccess._renderTable(tmp, items);
+
+      RoleAccess._generateSelectOptions(tmp, "#roleSelect", roleItems);
+
+      RoleAccess._generateSelectOptions(tmp, "#accessSelect", accessItems); //register search button event handler
+
+
+      tmp.querySelector("#roleAccessSearch").onclick = function () {
+        RoleAccess._search(tmp);
+      }; //build pagination
+      //var paginationElement = _buildPagination(pgIndex, pgSize, itemsCount.count, _pageIndexSearch);
+
+
+      let paginationElement = _btsHelper.BtsPaginationHelper.buildPaginationElement(pgIndex, pgSize, itemsCount.count, RoleAccess._pageIndexSearch);
+
+      let paginationPlaceholder = tmp.querySelector("#paginationPlaceholder");
+
+      _btsHelper.BtsHelper.emptyChild(paginationPlaceholder);
+
+      paginationPlaceholder.appendChild(paginationElement); //test create modal
+
+      let modalEle = _btsHelper.BtsDialogModalHelper.buildElement();
+
+      _btsHelper.BtsDialogModalHelper.setTitle(modalEle, "Sample Modal Dialog");
+
+      tmp.appendChild(modalEle);
+
+      const contentPanel = _JxHelper.JxHelper.getContentPanel();
+
+      _JxHelper.JxHelper.emptyElementChildren(contentPanel);
+
+      contentPanel.appendChild(tmp);
+    } catch (err) {
+      console.error("failed to render role access page: ".concat(err.message));
+
+      const specialContent = _JxHelper.JxHelper.getSpecialError();
+
+      specialContent.innerHTML = '<h2>Opps, something wrong happen :(</h2>';
+
+      _JxHelper.JxHelper.showSpecialError();
     }
 
-    static _renderTable(element, items) {
+    _JxHelper.JxHelper.hideLoadingPanel();
+  }
 
-        const table = document.createElement("table")
-        table.classList.add("table")
-        table.innerHTML = '<tr><th>#</th><th>Access</th><th>Role</th>' +
-            '<th>Is Authorized</th></tr>'
+  static _renderTable(element, items) {
+    const table = document.createElement("table");
+    table.classList.add("table");
+    table.innerHTML = '<tr><th>#</th><th>Access</th><th>Role</th>' + '<th>Is Authorized</th></tr>';
 
-        for (var i = 0; i < items.length; i++) {
-            table.appendChild(RoleAccess._generateTableRow(i, items[i]))
-        }
-
-        const container = element.querySelector("#roleAccessTable")
-        JxHelper.emptyElementChildren(container)
-
-        container.appendChild(table)
+    for (var i = 0; i < items.length; i++) {
+      table.appendChild(RoleAccess._generateTableRow(i, items[i]));
     }
 
-    static _buildPagination(selectedIndex, pageSize, totalCount, onIndexSelectFn) {
-        const pageCount = (totalCount / pageSize) + (totalCount % pageSize > 0 ? 1 : 0)
-        let startIndex = selectedIndex
-        let endIndex = selectedIndex
-        for (var i = 0; i < 2; i++) {
-            startIndex--
-            if (startIndex < 0)
-                startIndex = 0
+    const container = element.querySelector("#roleAccessTable");
 
-            endIndex++
-            if (endIndex >= pageCount) {
-                endIndex = (pageCount - 1)
-            }
-        }
-        const pageRange = endIndex - startIndex + 1
-        let pageItems = []
+    _JxHelper.JxHelper.emptyElementChildren(container);
 
-        let tmpX = { text: "<<", onClick: () => onIndexSelectFn(0) }
-        pageItems.push(tmpX)
+    container.appendChild(table);
+  }
 
-        tmpX = { text: "<", onClick: null }
-        if (selectedIndex - 1 < 0)
-            tmpX.onClick = () => onIndexSelectFn(0)
-        else
-            tmpX.onClick = () => onIndexSelectFn(selectedIndex - 1)
-        pageItems.push(tmpX)
+  static _buildPagination(selectedIndex, pageSize, totalCount, onIndexSelectFn) {
+    const pageCount = totalCount / pageSize + (totalCount % pageSize > 0 ? 1 : 0);
+    let startIndex = selectedIndex;
+    let endIndex = selectedIndex;
 
-        for (let i = startIndex; i <= endIndex; i++) {
-            pageItems.push({
-                text: (i + 1).toString(),
-                onClick: () => onIndexSelectFn(i)
-            })
-        }
+    for (var i = 0; i < 2; i++) {
+      startIndex--;
+      if (startIndex < 0) startIndex = 0;
+      endIndex++;
 
-        tmpX = { text: ">", onClick: null }
-        if (selectedIndex + 1 >= pageCount)
-            tmpX.onClick = function() { onIndexSelectFn(pageCount - 1) }
-        else
-            tmpX.onClick = function() { onIndexSelectFn(selectedIndex + 1) }
-        pageItems.push(tmpX)
-
-        pageItems.push({
-            text: ">>",
-            onClick: function() { onIndexSelectFn(pageCount - 1) }
-        })
-
-        let paginationElement = BtsPaginationHelper.buildElementWithEvent(pageItems)
-        let hightlightIndex = 2 + (selectedIndex - startIndex)
-        BtsPaginationHelper.setActiveItem(paginationElement, hightlightIndex)
-
-        return paginationElement;
+      if (endIndex >= pageCount) {
+        endIndex = pageCount - 1;
+      }
     }
 
-    static _generateSelectOptions(element, selectID, items) {
-        const selectEle = element.querySelector(selectID)
+    const pageRange = endIndex - startIndex + 1;
+    let pageItems = [];
+    let tmpX = {
+      text: "<<",
+      onClick: () => onIndexSelectFn(0)
+    };
+    pageItems.push(tmpX);
+    tmpX = {
+      text: "<",
+      onClick: null
+    };
+    if (selectedIndex - 1 < 0) tmpX.onClick = () => onIndexSelectFn(0);else tmpX.onClick = () => onIndexSelectFn(selectedIndex - 1);
+    pageItems.push(tmpX);
 
-        while (selectEle.firstChild)
-            selectEle.removeChild(selectEle.firstChild)
-
-        const tmp = document.createElement("option")
-        tmp.text = "all"
-        tmp.value = ""
-        selectEle.appendChild(tmp)
-
-        for (let i = 0; i < items.length; i++) {
-            const tmp = document.createElement("option")
-            tmp.text = items[i]['name']
-            tmp.value = items[i]['id']
-
-            selectEle.appendChild(tmp)
-        }
+    for (let i = startIndex; i <= endIndex; i++) {
+      pageItems.push({
+        text: (i + 1).toString(),
+        onClick: () => onIndexSelectFn(i)
+      });
     }
 
-    static _generateTableRow(index, item) {
-        const row = document.createElement("tr")
+    tmpX = {
+      text: ">",
+      onClick: null
+    };
+    if (selectedIndex + 1 >= pageCount) tmpX.onClick = function () {
+      onIndexSelectFn(pageCount - 1);
+    };else tmpX.onClick = function () {
+      onIndexSelectFn(selectedIndex + 1);
+    };
+    pageItems.push(tmpX);
+    pageItems.push({
+      text: ">>",
+      onClick: function onClick() {
+        onIndexSelectFn(pageCount - 1);
+      }
+    });
 
-        row.innerHTML = `<td>${index + 1}</td><td>${item['access']}</td><td>` +
-            `${item['role']}</td><td>` +
-            `<input class='tgl tgl-light' id='cb${index}' ` +
-            ` type='checkbox'/><label class='tgl-btn' for='cb${index}'></label></td></tr>`
+    let paginationElement = _btsHelper.BtsPaginationHelper.buildElementWithEvent(pageItems);
 
-        row.querySelector("td > input").checked = item['isAuthorize']
-        return row
+    let hightlightIndex = 2 + (selectedIndex - startIndex);
+
+    _btsHelper.BtsPaginationHelper.setActiveItem(paginationElement, hightlightIndex);
+
+    return paginationElement;
+  }
+
+  static _generateSelectOptions(element, selectID, items) {
+    const selectEle = element.querySelector(selectID);
+
+    while (selectEle.firstChild) selectEle.removeChild(selectEle.firstChild);
+
+    const tmp = document.createElement("option");
+    tmp.text = "all";
+    tmp.value = "";
+    selectEle.appendChild(tmp);
+
+    for (let i = 0; i < items.length; i++) {
+      const tmp = document.createElement("option");
+      tmp.text = items[i]['name'];
+      tmp.value = items[i]['id'];
+      selectEle.appendChild(tmp);
     }
+  }
 
-    static _pageIndexSearch(index) {
-        RoleAccess.selectedPageIndex = index
-        RoleAccess._search(RoleAccess.partialElement)
-    }
+  static _generateTableRow(index, item) {
+    const row = document.createElement("tr");
+    row.innerHTML = "<td>".concat(index + 1, "</td><td>").concat(item['access'], "</td><td>") + "".concat(item['role'], "</td><td>") + "<input class='tgl tgl-light' id='cb".concat(index, "' ") + " type='checkbox'/><label class='tgl-btn' for='cb".concat(index, "'></label></td></tr>");
+    row.querySelector("td > input").checked = item['isAuthorize'];
+    return row;
+  }
 
-    static _search(partialEle) {
-        const accessSelectElement = partialEle.querySelector("#accessSelect")
-        const roleSelectElement = partialEle.querySelector("#roleSelect")
+  static _pageIndexSearch(index) {
+    RoleAccess.selectedPageIndex = index;
 
-        const accessID = accessSelectElement.options[accessSelectElement.selectedIndex].value
-        const roleID = roleSelectElement.options[roleSelectElement.selectedIndex].value
+    RoleAccess._search(RoleAccess.partialElement);
+  }
 
-        //var roleAccess = $.get({ url: `/api/role-access?accessID=${accessID}&roleID=${roleID}`, cache: false });
-        FetchHelper.json(`/api/role-access?accessID=${accessID}&roleID=${roleID}`)
-            .then(items => {
-                RoleAccess._renderTable(partialEle, items['response'])
-            })
-            .catch(err => {
-                console.error(`Failed to get role access records: ${err.message}`)
-                const container = element.querySelector("#roleAccessTable")
+  static _search(partialEle) {
+    const accessSelectElement = partialEle.querySelector("#accessSelect");
+    const roleSelectElement = partialEle.querySelector("#roleSelect");
+    const accessID = accessSelectElement.options[accessSelectElement.selectedIndex].value;
+    const roleID = roleSelectElement.options[roleSelectElement.selectedIndex].value; //var roleAccess = $.get({ url: `/api/role-access?accessID=${accessID}&roleID=${roleID}`, cache: false });
 
-                container.innerHTML = "<p>opps, failed to retrieve info from server</p>"
-            })
-    }
-}
-//# sourceURL=roleAccess/roleAccess.js
+    _fetchHelper.FetchHelper.json("/api/role-access?accessID=".concat(accessID, "&roleID=").concat(roleID)).then(items => {
+      RoleAccess._renderTable(partialEle, items['response']);
+    }).catch(err => {
+      console.error("Failed to get role access records: ".concat(err.message));
+      const container = element.querySelector("#roleAccessTable");
+      container.innerHTML = "<p>opps, failed to retrieve info from server</p>";
+    });
+  }
+
+} //# sourceURL=roleAccess/roleAccess.js
+
+
+exports.RoleAccess = RoleAccess;
+
+_defineProperty(RoleAccess, "selectedPageIndex", 0);
+
+_defineProperty(RoleAccess, "pageSize", 10);
+
+_defineProperty(RoleAccess, "partialElement", null);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2NsaWVudC9qcy9yb2xlQWNjZXNzL3JvbGVBY2Nlc3MuanMiXSwibmFtZXMiOlsiUm9sZUFjY2VzcyIsInJlbmRlclBhZ2UiLCJKeEhlbHBlciIsInNob3dMb2FkaW5nUGFuZWwiLCJwYXJ0aWFsIiwiRmV0Y2hIZWxwZXIiLCJ0ZXh0Iiwicm9sZSIsImpzb24iLCJhY2Nlc3MiLCJyb2xlQWNjZXNzIiwicm9sZUFjY2Vzc0NvdW50IiwicGdJbmRleCIsInNlbGVjdGVkUGFnZUluZGV4IiwicGdTaXplIiwiQWNjZXNzcGFnZVNpemUiLCJyZXBvbnNlcyIsIlByb21pc2UiLCJhbGwiLCJpdGVtcyIsIml0ZW1zQ291bnQiLCJyb2xlSXRlbXMiLCJhY2Nlc3NJdGVtcyIsInRtcCIsInBhcnNlSFRNTFN0cmluZyIsInBhcnRpYWxFbGVtZW50IiwiX3JlbmRlclRhYmxlIiwiX2dlbmVyYXRlU2VsZWN0T3B0aW9ucyIsInF1ZXJ5U2VsZWN0b3IiLCJvbmNsaWNrIiwiX3NlYXJjaCIsInBhZ2luYXRpb25FbGVtZW50IiwiQnRzUGFnaW5hdGlvbkhlbHBlciIsImJ1aWxkUGFnaW5hdGlvbkVsZW1lbnQiLCJjb3VudCIsIl9wYWdlSW5kZXhTZWFyY2giLCJwYWdpbmF0aW9uUGxhY2Vob2xkZXIiLCJCdHNIZWxwZXIiLCJlbXB0eUNoaWxkIiwiYXBwZW5kQ2hpbGQiLCJtb2RhbEVsZSIsIkJ0c0RpYWxvZ01vZGFsSGVscGVyIiwiYnVpbGRFbGVtZW50Iiwic2V0VGl0bGUiLCJjb250ZW50UGFuZWwiLCJnZXRDb250ZW50UGFuZWwiLCJlbXB0eUVsZW1lbnRDaGlsZHJlbiIsImVyciIsImNvbnNvbGUiLCJlcnJvciIsIm1lc3NhZ2UiLCJzcGVjaWFsQ29udGVudCIsImdldFNwZWNpYWxFcnJvciIsImlubmVySFRNTCIsInNob3dTcGVjaWFsRXJyb3IiLCJoaWRlTG9hZGluZ1BhbmVsIiwiZWxlbWVudCIsInRhYmxlIiwiZG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwiY2xhc3NMaXN0IiwiYWRkIiwiaSIsImxlbmd0aCIsIl9nZW5lcmF0ZVRhYmxlUm93IiwiY29udGFpbmVyIiwiX2J1aWxkUGFnaW5hdGlvbiIsInNlbGVjdGVkSW5kZXgiLCJwYWdlU2l6ZSIsInRvdGFsQ291bnQiLCJvbkluZGV4U2VsZWN0Rm4iLCJwYWdlQ291bnQiLCJzdGFydEluZGV4IiwiZW5kSW5kZXgiLCJwYWdlUmFuZ2UiLCJwYWdlSXRlbXMiLCJ0bXBYIiwib25DbGljayIsInB1c2giLCJ0b1N0cmluZyIsImJ1aWxkRWxlbWVudFdpdGhFdmVudCIsImhpZ2h0bGlnaHRJbmRleCIsInNldEFjdGl2ZUl0ZW0iLCJzZWxlY3RJRCIsInNlbGVjdEVsZSIsImZpcnN0Q2hpbGQiLCJyZW1vdmVDaGlsZCIsInZhbHVlIiwiaW5kZXgiLCJpdGVtIiwicm93IiwiY2hlY2tlZCIsInBhcnRpYWxFbGUiLCJhY2Nlc3NTZWxlY3RFbGVtZW50Iiwicm9sZVNlbGVjdEVsZW1lbnQiLCJhY2Nlc3NJRCIsIm9wdGlvbnMiLCJyb2xlSUQiLCJ0aGVuIiwiY2F0Y2giXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O0FBQUE7O0FBQ0E7O0FBQ0E7Ozs7QUFFTyxNQUFNQSxVQUFOLENBQWlCO0FBS3BCLGVBQWFDLFVBQWIsR0FBMEI7QUFDdEJDLHVCQUFTQyxnQkFBVDs7QUFFQSxRQUFJO0FBQ0EsWUFBTUMsT0FBTyxHQUFHQyx5QkFBWUMsSUFBWixDQUFpQiw2QkFBakIsQ0FBaEI7O0FBRUEsWUFBTUMsSUFBSSxHQUFHRix5QkFBWUcsSUFBWixDQUFpQixXQUFqQixDQUFiOztBQUNBLFlBQU1DLE1BQU0sR0FBR0oseUJBQVlHLElBQVosQ0FBaUIsYUFBakIsQ0FBZjs7QUFDQSxZQUFNRSxVQUFVLEdBQUdMLHlCQUFZRyxJQUFaLENBQWlCLGtCQUFqQixDQUFuQjs7QUFDQSxZQUFNRyxlQUFlLEdBQUdOLHlCQUFZRyxJQUFaLENBQWlCLHdCQUFqQixDQUF4Qjs7QUFFQSxVQUFJSSxPQUFPLEdBQUdaLFVBQVUs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QUFFRCxTQUFPSyxPQUFQLENBQWU4RCxVQUFmLEVBQTJCO0FBQ3ZCLFVBQU1DLG1CQUFtQixHQUFHRCxVQUFVLENBQUNoRSxhQUFYLENBQXlCLGVBQXpCLENBQTVCO0FBQ0EsVUFBTWtFLGlCQUFpQixHQUFHRixVQUFVLENBQUNoRSxhQUFYLENBQXlCLGFBQXpCLENBQTFCO0FBRUEsVUFBTW1FLFFBQVEsR0FBR0YsbUJBQW1CLENBQUNHLE9BQXBCLENBQTRCSCxtQkFBbUIsQ0FBQzFCLGFBQWhELEVBQStEb0IsS0FBaEY7QUFDQSxVQUFNVSxNQUFNLEdBQUdILGlCQUFpQixDQUFDRSxPQUFsQixDQUEwQkYsaUJBQWlCLENBQUMzQixhQUE1QyxFQUEyRG9CLEtBQTFFLENBTHVCLENBT3ZCOztBQUNBbEYsNkJBQVlHLElBQVoscUNBQThDdUYsUUFBOUMscUJBQWlFRSxNQUFqRSxHQUNLQyxJQURMLENBQ1UvRSxLQUFLLElBQUk7QUFDWG5CLE1BQUFBLFVBQVUsQ0FBQzBCLFlBQVgsQ0FBd0JrRSxVQUF4QixFQUFvQ3pFLEtBQUssQ0FBQyxVQUFELENBQXpDO0FBQ0gsS0FITCxFQUlLZ0YsS0FKTCxDQUlXcEQsR0FBRyxJQUFJO0FBQ1ZDLE1BQUFBLE9BQU8sQ0FBQ0MsS0FBUiw4Q0FBb0RGLEdBQUcsQ0FBQ0csT0FBeEQ7QUFDQSxZQUFNZSxTQUFTLEdBQUdULE9BQU8sQ0FBQzVCLGFBQVIsQ0FBc0Isa0JBQXRCLENBQWxCO0FBRUFxQyxNQUFBQSxTQUFTLENBQUNaLFNBQVYsR0FBc0Isa0RBQXRCO0FBQ0gsS0FUTDtBQVVIOztBQWpNbUIsQyxDQW1NeEI7Ozs7O2dCQW5NYXJELFUsdUJBQ2tCLEM7O2dCQURsQkEsVSxjQUVTLEU7O2dCQUZUQSxVLG9CQUdlLEkiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBKeEhlbHBlciB9IGZyb20gJy9qcy9oZWxwZXIvSnhIZWxwZXIuanMnXHJcbmltcG9ydCB7IEZldGNoSGVscGVyIH0gZnJvbSAnL2pzL2hlbHBlci9mZXRjaEhlbHBlci5qcydcclxuaW1wb3J0IHsgQnRzSGVscGVyLCBCdHNQYWdpbmF0aW9uSGVscGVyLCBCdHNEaWFsb2dNb2RhbEhlbHBlciB9IGZyb20gJy9qcy9oZWxwZXIvYnRzSGVscGVyLmpzJ1xyXG5cclxuZXhwb3J0IGNsYXNzIFJvbGVBY2Nlc3Mge1xyXG4gICAgc3RhdGljIHNlbGVjdGVkUGFnZUluZGV4ID0gMFxyXG4gICAgc3RhdGljIHBhZ2VTaXplID0gMTBcclxuICAgIHN0YXRpYyBwYXJ0aWFsRWxlbWVudCA9IG51bGxcclxuXHJcbiAgICBzdGF0aWMgYXN5bmMgcmVuZGVyUGFnZSgpIHtcclxuICAgICAgICBKeEhlbHBlci5zaG93TG9hZGluZ1BhbmVsKCk7XHJcblxyXG4gICAgICAgIHRyeSB7XHJcbiAgICAgICAgICAgIGNvbnN0IHBhcnRpYWwgPSBGZXRjaEhlbHBlci50ZXh0KFwiL2pzL3JvbGVBY2Nlc3MvcGFydGlhbC5odG1sXCIpXHJcblxyXG4gICAgICAgICAgICBjb25zdCByb2xlID0gRmV0Y2hIZWxwZXIuanNvbihcIi9hcGkvcm9sZVwiKVxyXG4gICAgICAgICAgICBjb25zdCBhY2Nlc3MgPSBGZXRjaEhlbHBlci5qc29uKFwiL2FwaS9hY2Nlc3NcIilcclxuICAgICAgICAgICAgY29uc3Qgcm9sZUFjY2VzcyA9IEZldGNoSGVscGVyLmpzb24oXCIvYXBpL3JvbGUtYWNjZXNzXCIpXHJcbiAgICAgICAgICAgIGNvbnN0IHJvbGVBY2Nlc3NDb3VudCA9IEZldGNoSGVscGVyLmpzb24oXCIvYXBpL3JvbGUtYWNjZXNzLWNvdW50XCIpXHJcblxyXG4gICAgICAgICAgICBsZXQgcGdJbmRleCA9IFJvbGVBY2Nlc3Muc2VsZWN0ZWRQYWdlSW5kZXg7XHJcbiAgICAgICAgICAgIGxldCBwZ1NpemUgPSBSb2xlQWNjZXNzLkFjY2Vzc3BhZ2VTaXplO1xyXG5cclxuICAgICAgICAgICAgY29uc3QgcmVwb25zZXMgPSBhd2FpdCBQcm9taXNlLmFsbChbcGFydGlhbCwgcm9sZUFjY2Vzcywgcm9sZSwgYWNjZXNzLCByb2xlQWNjZXNzQ291bnRdKVxyXG5cclxuICAgICAgICAgICAgY29uc3QgaXRlbXMgPSByZXBvbnNlc1sxXVsncmVzcG9uc2UnXSAvL0pTT04ucGFyc2Uocm9sZUFjY2Vzc1Jlc3BvbnNlWzBdKTtcclxuICAgICAgICAgICAgY29uc3QgaXRlbXNDb3VudCA9IHJlcG9uc2VzWzRdWydyZXNwb25zZSddIC8vSlNPTi5wYXJzZShyb2xlQWNjZXNzQ250UmVzcG9uc2VbMF0pWydyZXNwb25zZSddO1xyXG4gICAgICAgICAgICBjb25zdCByb2xlSXRlbXMgPSByZXBvbnNlc1syXVsncmVzcG9uc2UnXSAvL0pTT04ucGFyc2Uocm9sZVJlc3BvbnNlWzBdKTtcclxuICAgICAgICAgICAgY29uc3QgYWNjZXNzSXRlbXMgPSByZXBvbnNlc1szXVsncmVzcG9uc2UnXSAvL0pTT04ucGFyc2UoYWNjZXNzUmVzcG9uc2VbMF0pO1xyXG5cclxuICAgICAgICAgICAgbGV0IHRtcCA9IEp4SGVscGVyLnBhcnNlSFRNTFN0cmluZyhyZXBvbnNlc1swXSkgLy9kb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpXHJcbiAgICAgICAgICAgICAgICAvL3RtcC5pbm5lckhUTUwgPSByZXBvbnNlc1swXSAvL3BhcnRpYWxSZXNwb25zZVswXTtcclxuICAgICAgICAgICAgUm9sZUFjY2Vzcy5wYXJ0aWFsRWxlbWVudCA9IHRtcFxyXG5cclxuICAgICAgICAgICAgUm9sZUFjY2Vzcy5fcmVuZGVyVGFibGUodG1wLCBpdGVtcylcclxuXHJcbiAgICAgICAgICAgIFJvbGVBY2Nlc3MuX2dlbmVyYXRlU2VsZWN0T3B0aW9ucyh0bXAsIFwiI3JvbGVTZWxlY3RcIiwgcm9sZUl0ZW1zKVxyXG4gICAgICAgICAgICBSb2xlQWNjZXNzLl9nZW5lcmF0ZVNlbGVjdE9wdGlvbnModG1wLCBcIiNhY2Nlc3NTZWxlY3RcIiwgYWNjZXNzSXRlbXMpXHJcblxyXG4gICAgICAgICAgICAvL3JlZ2lzdGVyIHNlYXJjaCBidXR0b24gZXZlbnQgaGFuZGxlclxyXG4gICAgICAgICAgICB0bXAucXVlcnlTZWxlY3RvcihcIiNyb2xlQWNjZXNzU2VhcmNoXCIpLm9uY2xpY2sgPSBmdW5jdGlvbigpIHtcclxuICAgICAgICAgICAgICAgIFJvbGVBY2Nlc3MuX3NlYXJjaCh0bXApXHJcbiAgICAgICAgICAgIH1cclxuXHJcbiAgICAgICAgICAgIC8vYnVpbGQgcGFnaW5hdGlvblxyXG4gICAgICAgICAgICAvL3ZhciBwYWdpbmF0aW9uRWxlbWVudCA9IF9idWlsZFBhZ2luYXRpb24ocGdJbmRleCwgcGdTaXplLCBpdGVtc0NvdW50LmNvdW50LCBfcGFnZUluZGV4U2VhcmNoKTtcclxuICAgICAgICAgICAgbGV0IHBhZ2luYXRpb25FbGVtZW50ID0gQnRzUGFnaW5hdGlvbkhlbHBlclxyXG4gICAgICAgICAgICAgICAgLmJ1aWxkUGFnaW5hdGlvbkVsZW1lbnQocGdJbmRleCwgcGdTaXplLCBpdGVtc0NvdW50LmNvdW50LCBSb2xlQWNjZXNzLl9wYWdlSW5kZXhTZWFyY2gpXHJcbiAgICAgICAgICAgIGxldCBwYWdpbmF0aW9uUGxhY2Vob2xkZXIgPSB0bXAucXVlcnlTZWxlY3RvcihcIiNwYWdpbmF0aW9uUGxhY2Vob2xkZXJcIilcclxuICAgICAgICAgICAgQnRzSGVscGVyLmVtcHR5Q2hpbGQocGFnaW5hdGlvblBsYWNlaG9sZGVyKVxyXG4gICAgICAgICAgICBwYWdpbmF0aW9uUGxhY2Vob2xkZXIuYXBwZW5kQ2hpbGQocGFnaW5hdGlvbkVsZW1lbnQpXHJcblxyXG4gICAgICAgICAgICAvL3Rlc3QgY3JlYXRlIG1vZGFsXHJcbiAgICAgICAgICAgIGxldCBtb2RhbEVsZSA9IEJ0c0RpYWxvZ01vZGFsSGVscGVyLmJ1aWxkRWxlbWVudCgpXHJcbiAgICAgICAgICAgIEJ0c0RpYWxvZ01vZGFsSGVscGVyLnNldFRpdGxlKG1vZGFsRWxlLCBcIlNhbXBsZSBNb2RhbCBEaWFsb2dcIilcclxuICAgICAgICAgICAgdG1wLmFwcGVuZENoaWxkKG1vZGFsRWxlKVxyXG5cclxuICAgICAgICAgICAgY29uc3QgY29udGVudFBhbmVsID0gSnhIZWxwZXIuZ2V0Q29udGVudFBhbmVsKClcclxuICAgICAgICAgICAgSnhIZWxwZXIuZW1wdHlFbGVtZW50Q2hpbGRyZW4oY29udGVudFBhbmVsKVxyXG4gICAgICAgICAgICBjb250ZW50UGFuZWwuYXBwZW5kQ2hpbGQodG1wKVxyXG5cclxuICAgICAgICB9IGNhdGNoIChlcnIpIHtcclxuICAgICAgICAgICAgY29uc29sZS5lcnJvcihgZmFpbGVkIHRvIHJlbmRlciByb2xlIGFjY2VzcyBwYWdlOiAke2Vyci5tZXNzYWdlfWApXHJcblxyXG4gICAgICAgICAgICBjb25zdCBzcGVjaWFsQ29udGVudCA9IEp4SGVscGVyLmdldFNwZWNpYWxFcnJvcigpXHJcbiAgICAgICAgICAgIHNwZWNpYWxDb250ZW50LmlubmVySFRNTCA9ICc8aDI+T3Bwcywgc29tZXRoaW5nIHdyb25nIGhhcHBlbiA6KDwvaDI+J1xyXG4gICAgICAgICAgICBKeEhlbHBlci5zaG93U3BlY2lhbEVycm9yKClcclxuICAgICAgICB9XHJcblxyXG4gICAgICAgIEp4SGVscGVyLmhpZGVMb2FkaW5nUGFuZWwoKVxyXG4gICAgfVxyXG5cclxuICAgIHN0YXRpYyBfcmVuZGVyVGFibGUoZWxlbWVudCwgaXRlbXMpIHtcclxuXHJcbiAgICAgICAgY29uc3QgdGFibGUgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwidGFibGVcIilcclxuICAgICAgICB0YWJsZS5jbGFzc0xpc3QuYWRkKFwidGFibGVcIilcclxuICAgICAgICB0YWJsZS5pbm5lckhUTUwgPSAnPHRyPjx0aD4jPC90aD48dGg+QWNjZXNzPC90aD48dGg+Um9sZTwvdGg+JyArXHJcbiAgICAgICAgICAgICc8dGg+SXMgQXV0aG9yaXplZDwvdGg+PC90cj4nXHJcblxyXG4gICAgICAgIGZvciAodmFyIGkgPSAwOyBpIDwgaXRlbXMubGVuZ3RoOyBpKyspIHtcclxuICAgICAgICAgICAgdGFibGUuYXBwZW5kQ2hpbGQoUm9sZUFjY2Vzcy5fZ2VuZXJhdGVUYWJsZVJvdyhpLCBpdGVtc1tpXSkpXHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICBjb25zdCBjb250YWluZXIgPSBlbGVtZW50LnF1ZXJ5U2VsZWN0b3IoXCIjcm9sZUFjY2Vzc1RhYmxlXCIpXHJcbiAgICAgICAgSnhIZWxwZXIuZW1wdHlFbGVtZW50Q2hpbGRyZW4oY29udGFpbmVyKVxyXG5cclxuICAgICAgICBjb250YWluZXIuYXBwZW5kQ2hpbGQodGFibGUpXHJcbiAgICB9XHJcblxyXG4gICAgc3RhdGljIF9idWlsZFBhZ2luYXRpb24oc2VsZWN0ZWRJbmRleCwgcGFnZVNpemUsIHRvdGFsQ291bnQsIG9uSW5kZXhTZWxlY3RGbikge1xyXG4gICAgICAgIGNvbnN0IHBhZ2VDb3VudCA9ICh0b3RhbENvdW50IC8gcGFnZVNpemUpICsgKHRvdGFsQ291bnQgJSBwYWdlU2l6ZSA+IDAgPyAxIDogMClcclxuICAgICAgICBsZXQgc3RhcnRJbmRleCA9IHNlbGVjdGVkSW5kZXhcclxuICAgICAgICBsZXQgZW5kSW5kZXggPSBzZWxlY3RlZEluZGV4XHJcbiAgICAgICAgZm9yICh2YXIgaSA9IDA7IGkgPCAyOyBpKyspIHtcclxuICAgICAgICAgICAgc3RhcnRJbmRleC0tXHJcbiAgICAgICAgICAgIGlmIChzdGFydEluZGV4IDwgMClcclxuICAgICAgICAgICAgICAgIHN0YXJ0SW5kZXggPSAwXHJcblxyXG4gICAgICAgICAgICBlbmRJbmRleCsrXHJcbiAgICAgICAgICAgIGlmIChlbmRJbmRleCA+PSBwYWdlQ291bnQpIHtcclxuICAgICAgICAgICAgICAgIGVuZEluZGV4ID0gKHBhZ2VDb3VudCAtIDEpXHJcbiAgICAgICAgICAgIH1cclxuICAgICAgICB9XHJcbiAgICAgICAgY29uc3QgcGFnZVJhbmdlID0gZW5kSW5kZXggLSBzdGFydEluZGV4ICsgMVxyXG4gICAgICAgIGxldCBwYWdlSXRlbXMgPSBbXVxyXG5cclxuICAgICAgICBsZXQgdG1wWCA9IHsgdGV4dDogXCI8PFwiLCBvbkNsaWNrOiAoKSA9PiBvbkluZGV4U2VsZWN0Rm4oMCkgfVxyXG4gICAgICAgIHBhZ2VJdGVtcy5wdXNoKHRtcFgpXHJcblxyXG4gICAgICAgIHRtcFggPSB7IHRleHQ6IFwiPFwiLCBvbkNsaWNrOiBudWxsIH1cclxuICAgICAgICBpZiAoc2VsZWN0ZWRJbmRleCAtIDEgPCAwKVxyXG4gICAgICAgICAgICB0bXBYLm9uQ2xpY2sgPSAoKSA9PiBvbkluZGV4U2VsZWN0Rm4oMClcclxuICAgICAgICBlbHNlXHJcbiAgICAgICAgICAgIHRtcFgub25DbGljayA9ICgpID0+IG9uSW5kZXhTZWxlY3RGbihzZWxlY3RlZEluZGV4IC0gMSlcclxuICAgICAgICBwYWdlSXRlbXMucHVzaCh0bXBYKVxyXG5cclxuICAgICAgICBmb3IgKGxldCBpID0gc3RhcnRJbmRleDsgaSA8PSBlbmRJbmRleDsgaSsrKSB7XHJcbiAgICAgICAgICAgIHBhZ2VJdGVtcy5wdXNoKHtcclxuICAgICAgICAgICAgICAgIHRleHQ6IChpICsgMSkudG9TdHJpbmcoKSxcclxuICAgICAgICAgICAgICAgIG9uQ2xpY2s6ICgpID0+IG9uSW5kZXhTZWxlY3RGbihpKVxyXG4gICAgICAgICAgICB9KVxyXG4gICAgICAgIH1cclxuXHJcbiAgICAgICAgdG1wWCA9IHsgdGV4dDogXCI+XCIsIG9uQ2xpY2s6IG51bGwgfVxyXG4gICAgICAgIGlmIChzZWxlY3RlZEluZGV4ICsgMSA+PSBwYWdlQ291bnQpXHJcbiAgICAgICAgICAgIHRtcFgub25DbGljayA9IGZ1bmN0aW9uKCkgeyBvbkluZGV4U2VsZWN0Rm4ocGFnZUNvdW50IC0gMSkgfVxyXG4gICAgICAgIGVsc2VcclxuICAgICAgICAgICAgdG1wWC5vbkNsaWNrID0gZnVuY3Rpb24oKSB7IG9uSW5kZXhTZWxlY3RGbihzZWxlY3RlZEluZGV4ICsgMSkgfVxyXG4gICAgICAgIHBhZ2VJdGVtcy5wdXNoKHRtcFgpXHJcblxyXG4gICAgICAgIHBhZ2VJdGVtcy5wdXNoKHtcclxuICAgICAgICAgICAgdGV4dDogXCI+PlwiLFxyXG4gICAgICAgICAgICBvbkNsaWNrOiBmdW5jdGlvbigpIHsgb25JbmRleFNlbGVjdEZuKHBhZ2VDb3VudCAtIDEpIH1cclxuICAgICAgICB9KVxyXG5cclxuICAgICAgICBsZXQgcGFnaW5hdGlvbkVsZW1lbnQgPSBCdHNQYWdpbmF0aW9uSGVscGVyLmJ1aWxkRWxlbWVudFdpdGhFdmVudChwYWdlSXRlbXMpXHJcbiAgICAgICAgbGV0IGhpZ2h0bGlnaHRJbmRleCA9IDIgKyAoc2VsZWN0ZWRJbmRleCAtIHN0YXJ0SW5kZXgpXHJcbiAgICAgICAgQnRzUGFnaW5hdGlvbkhlbHBlci5zZXRBY3RpdmVJdGVtKHBhZ2luYXRpb25FbGVtZW50LCBoaWdodGxpZ2h0SW5kZXgpXHJcblxyXG4gICAgICAgIHJldHVybiBwYWdpbmF0aW9uRWxlbWVudDtcclxuICAgIH1cclxuXHJcbiAgICBzdGF0aWMgX2dlbmVyYXRlU2VsZWN0T3B0aW9ucyhlbGVtZW50LCBzZWxlY3RJRCwgaXRlbXMpIHtcclxuICAgICAgICBjb25zdCBzZWxlY3RFbGUgPSBlbGVtZW50LnF1ZXJ5U2VsZWN0b3Ioc2VsZWN0SUQpXHJcblxyXG4gICAgICAgIHdoaWxlIChzZWxlY3RFbGUuZmlyc3RDaGlsZClcclxuICAgICAgICAgICAgc2VsZWN0RWxlLnJlbW92ZUNoaWxkKHNlbGVjdEVsZS5maXJzdENoaWxkKVxyXG5cclxuICAgICAgICBjb25zdCB0bXAgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwib3B0aW9uXCIpXHJcbiAgICAgICAgdG1wLnRleHQgPSBcImFsbFwiXHJcbiAgICAgICAgdG1wLnZhbHVlID0gXCJcIlxyXG4gICAgICAgIHNlbGVjdEVsZS5hcHBlbmRDaGlsZCh0bXApXHJcblxyXG4gICAgICAgIGZvciAobGV0IGkgPSAwOyBpIDwgaXRlbXMubGVuZ3RoOyBpKyspIHtcclxuICAgICAgICAgICAgY29uc3QgdG1wID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcIm9wdGlvblwiKVxyXG4gICAgICAgICAgICB0bXAudGV4dCA9IGl0ZW1zW2ldWyduYW1lJ11cclxuICAgICAgICAgICAgdG1wLnZhbHVlID0gaXRlbXNbaV1bJ2lkJ11cclxuXHJcbiAgICAgICAgICAgIHNlbGVjdEVsZS5hcHBlbmRDaGlsZCh0bXApXHJcbiAgICAgICAgfVxyXG4gICAgfVxyXG5cclxuICAgIHN0YXRpYyBfZ2VuZXJhdGVUYWJsZVJvdyhpbmRleCwgaXRlbSkge1xyXG4gICAgICAgIGNvbnN0IHJvdyA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJ0clwiKVxyXG5cclxuICAgICAgICByb3cuaW5uZXJIVE1MID0gYDx0ZD4ke2luZGV4ICsgMX08L3RkPjx0ZD4ke2l0ZW1bJ2FjY2VzcyddfTwvdGQ+PHRkPmAgK1xyXG4gICAgICAgICAgICBgJHtpdGVtWydyb2xlJ119PC90ZD48dGQ+YCArXHJcbiAgICAgICAgICAgIGA8aW5wdXQgY2xhc3M9J3RnbCB0Z2wtbGlnaHQnIGlkPSdjYiR7aW5kZXh9JyBgICtcclxuICAgICAgICAgICAgYCB0eXBlPSdjaGVja2JveCcvPjxsYWJlbCBjbGFzcz0ndGdsLWJ0bicgZm9yPSdjYiR7aW5kZXh9Jz48L2xhYmVsPjwvdGQ+PC90cj5gXHJcblxyXG4gICAgICAgIHJvdy5xdWVyeVNlbGVjdG9yKFwidGQgPiBpbnB1dFwiKS5jaGVja2VkID0gaXRlbVsnaXNBdXRob3JpemUnXVxyXG4gICAgICAgIHJldHVybiByb3dcclxuICAgIH1cclxuXHJcbiAgICBzdGF0aWMgX3BhZ2VJbmRleFNlYXJjaChpbmRleCkge1xyXG4gICAgICAgIFJvbGVBY2Nlc3Muc2VsZWN0ZWRQYWdlSW5kZXggPSBpbmRleFxyXG4gICAgICAgIFJvbGVBY2Nlc3MuX3NlYXJjaChSb2xlQWNjZXNzLnBhcnRpYWxFbGVtZW50KVxyXG4gICAgfVxyXG5cclxuICAgIHN0YXRpYyBfc2VhcmNoKHBhcnRpYWxFbGUpIHtcclxuICAgICAgICBjb25zdCBhY2Nlc3NTZWxlY3RFbGVtZW50ID0gcGFydGlhbEVsZS5xdWVyeVNlbGVjdG9yKFwiI2FjY2Vzc1NlbGVjdFwiKVxyXG4gICAgICAgIGNvbnN0IHJvbGVTZWxlY3RFbGVtZW50ID0gcGFydGlhbEVsZS5xdWVyeVNlbGVjdG9yKFwiI3JvbGVTZWxlY3RcIilcclxuXHJcbiAgICAgICAgY29uc3QgYWNjZXNzSUQgPSBhY2Nlc3NTZWxlY3RFbGVtZW50Lm9wdGlvbnNbYWNjZXNzU2VsZWN0RWxlbWVudC5zZWxlY3RlZEluZGV4XS52YWx1ZVxyXG4gICAgICAgIGNvbnN0IHJvbGVJRCA9IHJvbGVTZWxlY3RFbGVtZW50Lm9wdGlvbnNbcm9sZVNlbGVjdEVsZW1lbnQuc2VsZWN0ZWRJbmRleF0udmFsdWVcclxuXHJcbiAgICAgICAgLy92YXIgcm9sZUFjY2VzcyA9ICQuZ2V0KHsgdXJsOiBgL2FwaS9yb2xlLWFjY2Vzcz9hY2Nlc3NJRD0ke2FjY2Vzc0lEfSZyb2xlSUQ9JHtyb2xlSUR9YCwgY2FjaGU6IGZhbHNlIH0pO1xyXG4gICAgICAgIEZldGNoSGVscGVyLmpzb24oYC9hcGkvcm9sZS1hY2Nlc3M/YWNjZXNzSUQ9JHthY2Nlc3NJRH0mcm9sZUlEPSR7cm9sZUlEfWApXHJcbiAgICAgICAgICAgIC50aGVuKGl0ZW1zID0+IHtcclxuICAgICAgICAgICAgICAgIFJvbGVBY2Nlc3MuX3JlbmRlclRhYmxlKHBhcnRpYWxFbGUsIGl0ZW1zWydyZXNwb25zZSddKVxyXG4gICAgICAgICAgICB9KVxyXG4gICAgICAgICAgICAuY2F0Y2goZXJyID0+IHtcclxuICAgICAgICAgICAgICAgIGNvbnNvbGUuZXJyb3IoYEZhaWxlZCB0byBnZXQgcm9sZSBhY2Nlc3MgcmVjb3JkczogJHtlcnIubWVzc2FnZX1gKVxyXG4gICAgICAgICAgICAgICAgY29uc3QgY29udGFpbmVyID0gZWxlbWVudC5xdWVyeVNlbGVjdG9yKFwiI3JvbGVBY2Nlc3NUYWJsZVwiKVxyXG5cclxuICAgICAgICAgICAgICAgIGNvbnRhaW5lci5pbm5lckhUTUwgPSBcIjxwPm9wcHMsIGZhaWxlZCB0byByZXRyaWV2ZSBpbmZvIGZyb20gc2VydmVyPC9wPlwiXHJcbiAgICAgICAgICAgIH0pXHJcbiAgICB9XHJcbn1cclxuLy8jIHNvdXJjZVVSTD1yb2xlQWNjZXNzL3JvbGVBY2Nlc3MuanMiXX0=

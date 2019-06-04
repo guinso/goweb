@@ -1,332 +1,345 @@
-export class BtsHelper {
-    /**
-     * Create Boostrap button HTML element
-     * @param {String} innerText - button display text 
-     * @param {String} btnClass - additional Boostrap button CSS class 
-     * @returns {Element} HTML BUTTON element
-     */
-    static buildButton(innerText, btnClass) {
-        var element = document.createElement('button');
-        element.type = 'button';
-        element.classList.add('btn');
+"use strict";
 
-        if (btnClass !== '') {
-            element.classList.add(btnClass.toLowerCase());
-        }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BtsComboboxHelper = exports.BtsDialogModalHelper = exports.BtsPaginationHelper = exports.BtsHelper = void 0;
 
-        if (innerText !== '') {
-            element.innerText = innerText;
-        }
-    };
+require("core-js/modules/es6.regexp.to-string");
 
-    /**
-     * Empty HTML element child(ren)
-     * @param {Element} element - HTML element
-     */
-    static emptyChild(element) {
-        while (element.firstChild)
-            element.removeChild(element.firstChild);
+class BtsHelper {
+  /**
+   * Create Boostrap button HTML element
+   * @param {String} innerText - button display text 
+   * @param {String} btnClass - additional Boostrap button CSS class 
+   * @returns {Element} HTML BUTTON element
+   */
+  static buildButton(innerText, btnClass) {
+    var element = document.createElement('button');
+    element.type = 'button';
+    element.classList.add('btn');
+
+    if (btnClass !== '') {
+      element.classList.add(btnClass.toLowerCase());
     }
+
+    if (innerText !== '') {
+      element.innerText = innerText;
+    }
+  }
+
+  /**
+   * Empty HTML element child(ren)
+   * @param {Element} element - HTML element
+   */
+  static emptyChild(element) {
+    while (element.firstChild) element.removeChild(element.firstChild);
+  }
+
 }
 
-export class BtsPaginationHelper {
+exports.BtsHelper = BtsHelper;
 
-    /**
-     * Create Boostrap pagination HTML element
-     * @param {String[]} textArr - array of pagination items' display text 
-     * @returns {Element} HTML UL element
-     */
-    static buildElement(textArr) {
-        var element = document.createElement("ul");
-        element.classList.add("pagination");
+class BtsPaginationHelper {
+  /**
+   * Create Boostrap pagination HTML element
+   * @param {String[]} textArr - array of pagination items' display text 
+   * @returns {Element} HTML UL element
+   */
+  static buildElement(textArr) {
+    var element = document.createElement("ul");
+    element.classList.add("pagination");
 
-        for (var i = 0; i < textArr.length; i++) {
-            var firstPage = document.createElement("li");
-            firstPage.classList.add("page-item");
-
-            var firstLink = document.createElement("a");
-            firstLink.classList.add("page-link");
-            firstLink.innerText = textArr[i];
-
-            firstPage.appendChild(firstLink);
-
-            element.appendChild(firstPage);
-        }
-
-        return element;
-    };
-
-    /**
-     * Create Boostrap pagination HTML element with additional '<<', '<', '>', and '>>' items
-     * @param {Number} selectedIndex - highlighted index item based on total page count, zero based
-     * @param {Number} pageSize - number of page items to display
-     * @param {Number} totalCount - total number of pages available
-     * @param {BtsPaginationHelper~itemSelectedCallback} onIndexSelectFn - handle pagination item is selected
-     */
-    static buildPaginationElement(selectedIndex, pageSize, totalCount, onIndexSelectFn) {
-
-        var pageCount = (totalCount / pageSize) + (totalCount % pageSize > 0 ? 1 : 0);
-        var startIndex = selectedIndex;
-        var endIndex = selectedIndex;
-        for (var i = 0; i < 2; i++) {
-            startIndex--;
-            if (startIndex < 0)
-                startIndex = 0;
-
-            endIndex++;
-            if (endIndex >= pageCount)
-                endIndex = (pageCount - 1);
-        }
-        var pageRange = endIndex - startIndex + 1;
-        var pageItems = [];
-
-        var tmpX = { text: "<<", onClick: function() { onIndexSelectFn(0) } };
-        pageItems.push(tmpX);
-
-        var tmpX = { text: "<", onClick: null };
-        if (selectedIndex - 1 < 0)
-            tmpX.onClick = function() { onIndexSelectFn(0) };
-        else
-            tmpX.onClick = function() { onIndexSelectFn(selectedIndex - 1) };
-        pageItems.push(tmpX);
-
-        for (var i = startIndex; i <= endIndex; i++) {
-            pageItems.push({
-                text: (i + 1).toString(),
-                onClick: function() { onIndexSelectFn(i) }
-            });
-        }
-
-        var tmpX = { text: ">", onClick: null };
-        if (selectedIndex + 1 >= pageCount)
-            tmpX.onClick = function() { onIndexSelectFn(pageCount - 1) };
-        else
-            tmpX.onClick = function() { onIndexSelectFn(selectedIndex + 1) };
-        pageItems.push(tmpX);
-
-        pageItems.push({
-            text: ">>",
-            onClick: function() { onIndexSelectFn(pageCount - 1) }
-        })
-
-        var paginationElement = this.buildElementWithEvent(pageItems);
-        var hightlightIndex = 2 + (selectedIndex - startIndex);
-        this.setActiveItem(paginationElement, hightlightIndex);
-
-        return paginationElement;
+    for (var i = 0; i < textArr.length; i++) {
+      var firstPage = document.createElement("li");
+      firstPage.classList.add("page-item");
+      var firstLink = document.createElement("a");
+      firstLink.classList.add("page-link");
+      firstLink.innerText = textArr[i];
+      firstPage.appendChild(firstLink);
+      element.appendChild(firstPage);
     }
 
-    /**
-     * Create simple Bootstrap pagination HTML element
-     * @param {Object[]} items - pagination item description
-     * @param {String} items[].text - pagination item display text
-     * @param {MouseEvent} items[].onClick - pagination item onClick callback handler (no parameter) 
-     */
-    static buildElementWithEvent(items) {
-        var element = document.createElement("ul");
-        element.classList.add("pagination");
+    return element;
+  }
 
-        for (var i = 0; i < items.length; i++) {
-            var firstPage = document.createElement("li");
-            firstPage.classList.add("page-item");
+  /**
+   * Create Boostrap pagination HTML element with additional '<<', '<', '>', and '>>' items
+   * @param {Number} selectedIndex - highlighted index item based on total page count, zero based
+   * @param {Number} pageSize - number of page items to display
+   * @param {Number} totalCount - total number of pages available
+   * @param {BtsPaginationHelper~itemSelectedCallback} onIndexSelectFn - handle pagination item is selected
+   */
+  static buildPaginationElement(selectedIndex, pageSize, totalCount, onIndexSelectFn) {
+    var pageCount = totalCount / pageSize + (totalCount % pageSize > 0 ? 1 : 0);
+    var startIndex = selectedIndex;
+    var endIndex = selectedIndex;
 
-            var firstLink = document.createElement("a");
-            firstLink.classList.add("page-link");
-            firstLink.innerText = items[i].text;
-            firstLink.onclick = items[i].onClick;
-            firstLink.href = "javascript:void(0);";
+    for (var i = 0; i < 2; i++) {
+      startIndex--;
+      if (startIndex < 0) startIndex = 0;
+      endIndex++;
+      if (endIndex >= pageCount) endIndex = pageCount - 1;
+    }
 
-            firstPage.appendChild(firstLink);
-
-            element.appendChild(firstPage);
-        }
-
-        return element;
+    var pageRange = endIndex - startIndex + 1;
+    var pageItems = [];
+    var tmpX = {
+      text: "<<",
+      onClick: function onClick() {
+        onIndexSelectFn(0);
+      }
     };
-
-    /**
-     * Set/Change Boostrap pagination highlight item
-     * @param {Element} element - Boostrap pagination HTML UL element 
-     * @param {Number} index - pagination item's index, zero based
-     */
-    static setActiveItem(element, index) {
-        var items = element.querySelectorAll("li");
-
-        if (items !== null && items[index] !== null) {
-            for (var i = 0; i < items.length; i++) {
-                items[i].classList.remove("active");
-            }
-
-            var x = items[index];
-            x.classList.add("active");
-
-            return true;
-        }
-
-        return false;
+    pageItems.push(tmpX);
+    var tmpX = {
+      text: "<",
+      onClick: null
     };
-
-    /**
-     * Modify Boostrap pagination item's content
-     * @param {Element} element - HTML pagination element, tagname UL
-     * @param {Number} index - pagination item's index location, zero based
-     * @param {String} text - pagination item's display text
-     * @param {BtsPaginationHelper~itemSelectedCallback} selectFn - callback to handle when item is selected
-     */
-    static setItem(element, index, text, selectFn) {
-        var items = element.querySelectorAll("li");
-
-        if (items !== null && items[index] !== null) {
-            var linkElement = items[index].querySelector("a");
-
-            if (linkElement !== null) {
-                linkElement.innerText = text;
-                linkElement.onclick = selectFn;
-
-                return true;
-            }
-        }
-
-        return false;
+    if (selectedIndex - 1 < 0) tmpX.onClick = function () {
+      onIndexSelectFn(0);
+    };else tmpX.onClick = function () {
+      onIndexSelectFn(selectedIndex - 1);
     };
+    pageItems.push(tmpX);
+
+    for (var i = startIndex; i <= endIndex; i++) {
+      pageItems.push({
+        text: (i + 1).toString(),
+        onClick: function onClick() {
+          onIndexSelectFn(i);
+        }
+      });
+    }
+
+    var tmpX = {
+      text: ">",
+      onClick: null
+    };
+    if (selectedIndex + 1 >= pageCount) tmpX.onClick = function () {
+      onIndexSelectFn(pageCount - 1);
+    };else tmpX.onClick = function () {
+      onIndexSelectFn(selectedIndex + 1);
+    };
+    pageItems.push(tmpX);
+    pageItems.push({
+      text: ">>",
+      onClick: function onClick() {
+        onIndexSelectFn(pageCount - 1);
+      }
+    });
+    var paginationElement = this.buildElementWithEvent(pageItems);
+    var hightlightIndex = 2 + (selectedIndex - startIndex);
+    this.setActiveItem(paginationElement, hightlightIndex);
+    return paginationElement;
+  }
+  /**
+   * Create simple Bootstrap pagination HTML element
+   * @param {Object[]} items - pagination item description
+   * @param {String} items[].text - pagination item display text
+   * @param {MouseEvent} items[].onClick - pagination item onClick callback handler (no parameter) 
+   */
+
+
+  static buildElementWithEvent(items) {
+    var element = document.createElement("ul");
+    element.classList.add("pagination");
+
+    for (var i = 0; i < items.length; i++) {
+      var firstPage = document.createElement("li");
+      firstPage.classList.add("page-item");
+      var firstLink = document.createElement("a");
+      firstLink.classList.add("page-link");
+      firstLink.innerText = items[i].text;
+      firstLink.onclick = items[i].onClick;
+      firstLink.href = "javascript:void(0);";
+      firstPage.appendChild(firstLink);
+      element.appendChild(firstPage);
+    }
+
+    return element;
+  }
+
+  /**
+   * Set/Change Boostrap pagination highlight item
+   * @param {Element} element - Boostrap pagination HTML UL element 
+   * @param {Number} index - pagination item's index, zero based
+   */
+  static setActiveItem(element, index) {
+    var items = element.querySelectorAll("li");
+
+    if (items !== null && items[index] !== null) {
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove("active");
+      }
+
+      var x = items[index];
+      x.classList.add("active");
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Modify Boostrap pagination item's content
+   * @param {Element} element - HTML pagination element, tagname UL
+   * @param {Number} index - pagination item's index location, zero based
+   * @param {String} text - pagination item's display text
+   * @param {BtsPaginationHelper~itemSelectedCallback} selectFn - callback to handle when item is selected
+   */
+  static setItem(element, index, text, selectFn) {
+    var items = element.querySelectorAll("li");
+
+    if (items !== null && items[index] !== null) {
+      var linkElement = items[index].querySelector("a");
+
+      if (linkElement !== null) {
+        linkElement.innerText = text;
+        linkElement.onclick = selectFn;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 }
 
-export class BtsDialogModalHelper {
+exports.BtsPaginationHelper = BtsPaginationHelper;
 
-    /**
-     * Create an empty Boostrap Modal HTML element, tagname is DIV
-     * @returns {Element} Boostrap modal HTML element, tagname is DIV
-     */
-    static buildElement() {
-        var element = document.createElement("div");
-        element.classList.add('modal');
-        element.setAttribute('role', 'dialog');
+class BtsDialogModalHelper {
+  /**
+   * Create an empty Boostrap Modal HTML element, tagname is DIV
+   * @returns {Element} Boostrap modal HTML element, tagname is DIV
+   */
+  static buildElement() {
+    var element = document.createElement("div");
+    element.classList.add('modal');
+    element.setAttribute('role', 'dialog');
+    var doc = document.createElement('div');
+    doc.classList.add('modal-dialog');
+    doc.setAttribute('role', 'document');
+    var content = document.createElement('div');
+    content.classList.add('modal-content');
+    var header = document.createElement('div');
+    header.classList.add('model-header');
+    var body = document.createElement('div');
+    body.classList.add('modal-body');
+    var footer = document.createElement('div');
+    footer.classList.add('modal-footer'); //decorate header
 
-        var doc = document.createElement('div');
-        doc.classList.add('modal-dialog');
-        doc.setAttribute('role', 'document');
+    var title = document.createElement('h5');
+    title.classList.add('modal-title');
+    var closeBtn = document.createElement('button');
+    closeBtn.classList.add('close');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('data-dismiss', 'modal');
+    closeBtn.setAttribute('aria-label', 'Close');
+    var closeSpan = document.createElement('span');
+    closeSpan.setAttribute('aria-hidden', true);
+    closeSpan.innerText = "&times;";
+    closeBtn.appendChild(closeSpan);
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    element.appendChild(doc);
+    doc.appendChild(content);
+    content.appendChild(header);
+    content.appendChild(body);
+    content.appendChild(footer);
+    return element;
+  }
+  /**
+   * Set Boostrap dialog modal's title
+   * @param {Element} element - HTML DIV element
+   * @param {String} title - Modal title 
+   */
 
-        var content = document.createElement('div');
-        content.classList.add('modal-content');
 
-        var header = document.createElement('div');
-        header.classList.add('model-header');
+  static setTitle(element, title) {
+    var titleElement = element.querySelector('.modal-title');
 
-        var body = document.createElement('div');
-        body.classList.add('modal-body');
-
-        var footer = document.createElement('div');
-        footer.classList.add('modal-footer');
-
-        //decorate header
-        var title = document.createElement('h5');
-        title.classList.add('modal-title');
-        var closeBtn = document.createElement('button');
-        closeBtn.classList.add('close');
-        closeBtn.type = 'button';
-        closeBtn.setAttribute('data-dismiss', 'modal');
-        closeBtn.setAttribute('aria-label', 'Close');
-        var closeSpan = document.createElement('span');
-        closeSpan.setAttribute('aria-hidden', true);
-        closeSpan.innerText = "&times;";
-        closeBtn.appendChild(closeSpan);
-
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-
-        element.appendChild(doc);
-        doc.appendChild(content);
-        content.appendChild(header);
-        content.appendChild(body);
-        content.appendChild(footer);
-
-        return element;
+    if (titleElement !== null) {
+      titleElement.innerText = title;
     }
+  }
 
-    /**
-     * Set Boostrap dialog modal's title
-     * @param {Element} element - HTML DIV element
-     * @param {String} title - Modal title 
-     */
-    static setTitle(element, title) {
-        var titleElement = element.querySelector('.modal-title');
+  /**
+   * Get Boostrap dialog modal's body element
+   * @param {Element} element - HTML DIV element
+   * @return {Element}  HTML DIV element
+   */
+  static getBody(element) {
+    return element.querySelector('.modal-body');
+  }
+  /**
+   * Get Boostrap dialog modal's footer element
+   * @param {Element} element - HTML DIV element
+   * @return {Element}  HTML DIV element
+   */
 
-        if (titleElement !== null) {
-            titleElement.innerText = title;
-        }
-    };
 
-    /**
-     * Get Boostrap dialog modal's body element
-     * @param {Element} element - HTML DIV element
-     * @return {Element}  HTML DIV element
-     */
-    static getBody(element) {
-        return element.querySelector('.modal-body');
-    }
+  static getFooter(element) {
+    return element.querySelector('.modal-footer');
+  }
+  /**
+   * Get Boostrap dialog modal's header element
+   * @param {Element} element - HTML DIV element
+   * @return {Element}  HTML DIV element
+   */
 
-    /**
-     * Get Boostrap dialog modal's footer element
-     * @param {Element} element - HTML DIV element
-     * @return {Element}  HTML DIV element
-     */
-    static getFooter(element) {
-        return element.querySelector('.modal-footer');
-    }
 
-    /**
-     * Get Boostrap dialog modal's header element
-     * @param {Element} element - HTML DIV element
-     * @return {Element}  HTML DIV element
-     */
-    static getHeader(element) {
-        return element.querySelector('.modal-header');
-    }
+  static getHeader(element) {
+    return element.querySelector('.modal-header');
+  }
+
 }
 
-export class BtsComboboxHelper {
+exports.BtsDialogModalHelper = BtsDialogModalHelper;
 
-    /**
-     * Build bootstrap combox element
-     * @param {object[]} items - combobox's item description
-     * @param {string} items[].text - combobox item's display name
-     * @param {string} items[].value - combobox item's value written in HTML tag 
-     */
-    static buildElement(items) {
-        var element = document.createElement('select');
-        element.classList.add('form-control');
+class BtsComboboxHelper {
+  /**
+   * Build bootstrap combox element
+   * @param {object[]} items - combobox's item description
+   * @param {string} items[].text - combobox item's display name
+   * @param {string} items[].value - combobox item's value written in HTML tag 
+   */
+  static buildElement(items) {
+    var element = document.createElement('select');
+    element.classList.add('form-control');
 
-        for (var i = 0; i < items.length; i++) {
-            var option = document.createElement('option');
-            option.innerText = items[i]['text'];
-            option.value = items[i]['value'];
-
-            element.appendChild(option);
-        }
-
-        return element;
+    for (var i = 0; i < items.length; i++) {
+      var option = document.createElement('option');
+      option.innerText = items[i]['text'];
+      option.value = items[i]['value'];
+      element.appendChild(option);
     }
 
-    /**
-     * Rebuild existing combobox element's content
-     * @param {Element} element - HTML combobox, tagname is SELECT 
-     * @param {object[]} items - combobox's item description
-     * @param {string} items[].text - combobox item's display name
-     * @param {string} items[].value - combobox item's value written in HTML tag 
-     */
-    static rebuildItems(element, items) {
-        while (element.firstChild)
-            element.removeChild(element.firstChild);
+    return element;
+  }
+  /**
+   * Rebuild existing combobox element's content
+   * @param {Element} element - HTML combobox, tagname is SELECT 
+   * @param {object[]} items - combobox's item description
+   * @param {string} items[].text - combobox item's display name
+   * @param {string} items[].value - combobox item's value written in HTML tag 
+   */
 
-        for (var i = 0; i < items.length; i++) {
-            var option = document.createElement('option');
-            option.innerText = items[i]['text'];
-            option.value = items[i]['value'];
 
-            element.appendChild(option);
-        }
+  static rebuildItems(element, items) {
+    while (element.firstChild) element.removeChild(element.firstChild);
 
-        return element;
+    for (var i = 0; i < items.length; i++) {
+      var option = document.createElement('option');
+      option.innerText = items[i]['text'];
+      option.value = items[i]['value'];
+      element.appendChild(option);
     }
-}
-//# sourceURL=btsHelper.js
+
+    return element;
+  }
+
+} //# sourceURL=btsHelper.js
+
+
+exports.BtsComboboxHelper = BtsComboboxHelper;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL2NsaWVudC9qcy9oZWxwZXIvYnRzSGVscGVyLmpzIl0sIm5hbWVzIjpbIkJ0c0hlbHBlciIsImJ1aWxkQnV0dG9uIiwiaW5uZXJUZXh0IiwiYnRuQ2xhc3MiLCJlbGVtZW50IiwiZG9jdW1lbnQiLCJjcmVhdGVFbGVtZW50IiwidHlwZSIsImNsYXNzTGlzdCIsImFkZCIsInRvTG93ZXJDYXNlIiwiZW1wdHlDaGlsZCIsImZpcnN0Q2hpbGQiLCJyZW1vdmVDaGlsZCIsIkJ0c1BhZ2luYXRpb25IZWxwZXIiLCJidWlsZEVsZW1lbnQiLCJ0ZXh0QXJyIiwiaSIsImxlbmd0aCIsImZpcnN0UGFnZSIsImZpcnN0TGluayIsImFwcGVuZENoaWxkIiwiYnVpbGRQYWdpbmF0aW9uRWxlbWVudCIsInNlbGVjdGVkSW5kZXgiLCJwYWdlU2l6ZSIsInRvdGFsQ291bnQiLCJvbkluZGV4U2VsZWN0Rm4iLCJwYWdlQ291bnQiLCJzdGFydEluZGV4IiwiZW5kSW5kZXgiLCJwYWdlUmFuZ2UiLCJwYWdlSXRlbXMiLCJ0bXBYIiwidGV4dCIsIm9uQ2xpY2siLCJwdXNoIiwidG9TdHJpbmciLCJwYWdpbmF0aW9uRWxlbWVudCIsImJ1aWxkRWxlbWVudFdpdGhFdmVudCIsImhpZ2h0bGlnaHRJbmRleCIsInNldEFjdGl2ZUl0ZW0iLCJpdGVtcyIsIm9uY2xpY2siLCJocmVmIiwiaW5kZXgiLCJxdWVyeVNlbGVjdG9yQWxsIiwicmVtb3ZlIiwieCIsInNldEl0ZW0iLCJzZWxlY3RGbiIsImxpbmtFbGVtZW50IiwicXVlcnlTZWxlY3RvciIsIkJ0c0RpYWxvZ01vZGFsSGVscGVyIiwic2V0QXR0cmlidXRlIiwiZG9jIiwiY29udGVudCIsImhlYWRlciIsImJvZHkiLCJmb290ZXIiLCJ0aXRsZSIsImNsb3NlQnRuIiwiY2xvc2VTcGFuIiwic2V0VGl0bGUiLCJ0aXRsZUVsZW1lbnQiLCJnZXRCb2R5IiwiZ2V0Rm9vdGVyIiwiZ2V0SGVhZGVyIiwiQnRzQ29tYm9ib3hI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QnVDLEtBQUssQ0FBQ3hCLENBQUQsQ0FBTCxDQUFTLE1BQVQsQ0FBbkI7QUFDQW1ELE1BQUFBLE1BQU0sQ0FBQ0MsS0FBUCxHQUFlNUIsS0FBSyxDQUFDeEIsQ0FBRCxDQUFMLENBQVMsT0FBVCxDQUFmO0FBRUFiLE1BQUFBLE9BQU8sQ0FBQ2lCLFdBQVIsQ0FBb0IrQyxNQUFwQjtBQUNIOztBQUVELFdBQU9oRSxPQUFQO0FBQ0g7O0FBM0MwQixDLENBNkMvQiIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjbGFzcyBCdHNIZWxwZXIge1xyXG4gICAgLyoqXHJcbiAgICAgKiBDcmVhdGUgQm9vc3RyYXAgYnV0dG9uIEhUTUwgZWxlbWVudFxyXG4gICAgICogQHBhcmFtIHtTdHJpbmd9IGlubmVyVGV4dCAtIGJ1dHRvbiBkaXNwbGF5IHRleHQgXHJcbiAgICAgKiBAcGFyYW0ge1N0cmluZ30gYnRuQ2xhc3MgLSBhZGRpdGlvbmFsIEJvb3N0cmFwIGJ1dHRvbiBDU1MgY2xhc3MgXHJcbiAgICAgKiBAcmV0dXJucyB7RWxlbWVudH0gSFRNTCBCVVRUT04gZWxlbWVudFxyXG4gICAgICovXHJcbiAgICBzdGF0aWMgYnVpbGRCdXR0b24oaW5uZXJUZXh0LCBidG5DbGFzcykge1xyXG4gICAgICAgIHZhciBlbGVtZW50ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnYnV0dG9uJyk7XHJcbiAgICAgICAgZWxlbWVudC50eXBlID0gJ2J1dHRvbic7XHJcbiAgICAgICAgZWxlbWVudC5jbGFzc0xpc3QuYWRkKCdidG4nKTtcclxuXHJcbiAgICAgICAgaWYgKGJ0bkNsYXNzICE9PSAnJykge1xyXG4gICAgICAgICAgICBlbGVtZW50LmNsYXNzTGlzdC5hZGQoYnRuQ2xhc3MudG9Mb3dlckNhc2UoKSk7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICBpZiAoaW5uZXJUZXh0ICE9PSAnJykge1xyXG4gICAgICAgICAgICBlbGVtZW50LmlubmVyVGV4dCA9IGlubmVyVGV4dDtcclxuICAgICAgICB9XHJcbiAgICB9O1xyXG5cclxuICAgIC8qKlxyXG4gICAgICogRW1wdHkgSFRNTCBlbGVtZW50IGNoaWxkKHJlbilcclxuICAgICAqIEBwYXJhbSB7RWxlbWVudH0gZWxlbWVudCAtIEhUTUwgZWxlbWVudFxyXG4gICAgICovXHJcbiAgICBzdGF0aWMgZW1wdHlDaGlsZChlbGVtZW50KSB7XHJcbiAgICAgICAgd2hpbGUgKGVsZW1lbnQuZmlyc3RDaGlsZClcclxuICAgICAgICAgICAgZWxlbWVudC5yZW1vdmVDaGlsZChlbGVtZW50LmZpcnN0Q2hpbGQpO1xyXG4gICAgfVxyXG59XHJcblxyXG5leHBvcnQgY2xhc3MgQnRzUGFnaW5hdGlvbkhlbHBlciB7XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBDcmVhdGUgQm9vc3RyYXAgcGFnaW5hdGlvbiBIVE1MIGVsZW1lbnRcclxuICAgICAqIEBwYXJhbSB7U3RyaW5nW119IHRleHRBcnIgLSBhcnJheSBvZiBwYWdpbmF0aW9uIGl0ZW1zJyBkaXNwbGF5IHRleHQgXHJcbiAgICAgKiBAcmV0dXJucyB7RWxlbWVudH0gSFRNTCBVTCBlbGVtZW50XHJcbiAgICAgKi9cclxuICAgIHN0YXRpYyBidWlsZEVsZW1lbnQodGV4dEFycikge1xyXG4gICAgICAgIHZhciBlbGVtZW50ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcInVsXCIpO1xyXG4gICAgICAgIGVsZW1lbnQuY2xhc3NMaXN0LmFkZChcInBhZ2luYXRpb25cIik7XHJcblxyXG4gICAgICAgIGZvciAodmFyIGkgPSAwOyBpIDwgdGV4dEFyci5sZW5ndGg7IGkrKykge1xyXG4gICAgICAgICAgICB2YXIgZmlyc3RQYWdlID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudChcImxpXCIpO1xyXG4gICAgICAgICAgICBmaXJzdFBhZ2UuY2xhc3NMaXN0LmFkZChcInBhZ2UtaXRlbVwiKTtcclxuXHJcbiAgICAgICAgICAgIHZhciBmaXJzdExpbmsgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiYVwiKTtcclxuICAgICAgICAgICAgZmlyc3RMaW5rLmNsYXNzTGlzdC5hZGQoXCJwYWdlLWxpbmtcIik7XHJcbiAgICAgICAgICAgIGZpcnN0TGluay5pbm5lclRleHQgPSB0ZXh0QXJyW2ldO1xyXG5cclxuICAgICAgICAgICAgZmlyc3RQYWdlLmFwcGVuZENoaWxkKGZpcnN0TGluayk7XHJcblxyXG4gICAgICAgICAgICBlbGVtZW50LmFwcGVuZENoaWxkKGZpcnN0UGFnZSk7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICByZXR1cm4gZWxlbWVudDtcclxuICAgIH07XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBDcmVhdGUgQm9vc3RyYXAgcGFnaW5hdGlvbiBIVE1MIGVsZW1lbnQgd2l0aCBhZGRpdGlvbmFsICc8PCcsICc8JywgJz4nLCBhbmQgJz4+JyBpdGVtc1xyXG4gICAgICogQHBhcmFtIHtOdW1iZXJ9IHNlbGVjdGVkSW5kZXggLSBoaWdobGlnaHRlZCBpbmRleCBpdGVtIGJhc2VkIG9uIHRvdGFsIHBhZ2UgY291bnQsIHplcm8gYmFzZWRcclxuICAgICAqIEBwYXJhbSB7TnVtYmVyfSBwYWdlU2l6ZSAtIG51bWJlciBvZiBwYWdlIGl0ZW1zIHRvIGRpc3BsYXlcclxuICAgICAqIEBwYXJhbSB7TnVtYmVyfSB0b3RhbENvdW50IC0gdG90YWwgbnVtYmVyIG9mIHBhZ2VzIGF2YWlsYWJsZVxyXG4gICAgICogQHBhcmFtIHtCdHNQYWdpbmF0aW9uSGVscGVyfml0ZW1TZWxlY3RlZENhbGxiYWNrfSBvbkluZGV4U2VsZWN0Rm4gLSBoYW5kbGUgcGFnaW5hdGlvbiBpdGVtIGlzIHNlbGVjdGVkXHJcbiAgICAgKi9cclxuICAgIHN0YXRpYyBidWlsZFBhZ2luYXRpb25FbGVtZW50KHNlbGVjdGVkSW5kZXgsIHBhZ2VTaXplLCB0b3RhbENvdW50LCBvbkluZGV4U2VsZWN0Rm4pIHtcclxuXHJcbiAgICAgICAgdmFyIHBhZ2VDb3VudCA9ICh0b3RhbENvdW50IC8gcGFnZVNpemUpICsgKHRvdGFsQ291bnQgJSBwYWdlU2l6ZSA+IDAgPyAxIDogMCk7XHJcbiAgICAgICAgdmFyIHN0YXJ0SW5kZXggPSBzZWxlY3RlZEluZGV4O1xyXG4gICAgICAgIHZhciBlbmRJbmRleCA9IHNlbGVjdGVkSW5kZXg7XHJcbiAgICAgICAgZm9yICh2YXIgaSA9IDA7IGkgPCAyOyBpKyspIHtcclxuICAgICAgICAgICAgc3RhcnRJbmRleC0tO1xyXG4gICAgICAgICAgICBpZiAoc3RhcnRJbmRleCA8IDApXHJcbiAgICAgICAgICAgICAgICBzdGFydEluZGV4ID0gMDtcclxuXHJcbiAgICAgICAgICAgIGVuZEluZGV4Kys7XHJcbiAgICAgICAgICAgIGlmIChlbmRJbmRleCA+PSBwYWdlQ291bnQpXHJcbiAgICAgICAgICAgICAgICBlbmRJbmRleCA9IChwYWdlQ291bnQgLSAxKTtcclxuICAgICAgICB9XHJcbiAgICAgICAgdmFyIHBhZ2VSYW5nZSA9IGVuZEluZGV4IC0gc3RhcnRJbmRleCArIDE7XHJcbiAgICAgICAgdmFyIHBhZ2VJdGVtcyA9IFtdO1xyXG5cclxuICAgICAgICB2YXIgdG1wWCA9IHsgdGV4dDogXCI8PFwiLCBvbkNsaWNrOiBmdW5jdGlvbigpIHsgb25JbmRleFNlbGVjdEZuKDApIH0gfTtcclxuICAgICAgICBwYWdlSXRlbXMucHVzaCh0bXBYKTtcclxuXHJcbiAgICAgICAgdmFyIHRtcFggPSB7IHRleHQ6IFwiPFwiLCBvbkNsaWNrOiBudWxsIH07XHJcbiAgICAgICAgaWYgKHNlbGVjdGVkSW5kZXggLSAxIDwgMClcclxuICAgICAgICAgICAgdG1wWC5vbkNsaWNrID0gZnVuY3Rpb24oKSB7IG9uSW5kZXhTZWxlY3RGbigwKSB9O1xyXG4gICAgICAgIGVsc2VcclxuICAgICAgICAgICAgdG1wWC5vbkNsaWNrID0gZnVuY3Rpb24oKSB7IG9uSW5kZXhTZWxlY3RGbihzZWxlY3RlZEluZGV4IC0gMSkgfTtcclxuICAgICAgICBwYWdlSXRlbXMucHVzaCh0bXBYKTtcclxuXHJcbiAgICAgICAgZm9yICh2YXIgaSA9IHN0YXJ0SW5kZXg7IGkgPD0gZW5kSW5kZXg7IGkrKykge1xyXG4gICAgICAgICAgICBwYWdlSXRlbXMucHVzaCh7XHJcbiAgICAgICAgICAgICAgICB0ZXh0OiAoaSArIDEpLnRvU3RyaW5nKCksXHJcbiAgICAgICAgICAgICAgICBvbkNsaWNrOiBmdW5jdGlvbigpIHsgb25JbmRleFNlbGVjdEZuKGkpIH1cclxuICAgICAgICAgICAgfSk7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICB2YXIgdG1wWCA9IHsgdGV4dDogXCI+XCIsIG9uQ2xpY2s6IG51bGwgfTtcclxuICAgICAgICBpZiAoc2VsZWN0ZWRJbmRleCArIDEgPj0gcGFnZUNvdW50KVxyXG4gICAgICAgICAgICB0bXBYLm9uQ2xpY2sgPSBmdW5jdGlvbigpIHsgb25JbmRleFNlbGVjdEZuKHBhZ2VDb3VudCAtIDEpIH07XHJcbiAgICAgICAgZWxzZVxyXG4gICAgICAgICAgICB0bXBYLm9uQ2xpY2sgPSBmdW5jdGlvbigpIHsgb25JbmRleFNlbGVjdEZuKHNlbGVjdGVkSW5kZXggKyAxKSB9O1xyXG4gICAgICAgIHBhZ2VJdGVtcy5wdXNoKHRtcFgpO1xyXG5cclxuICAgICAgICBwYWdlSXRlbXMucHVzaCh7XHJcbiAgICAgICAgICAgIHRleHQ6IFwiPj5cIixcclxuICAgICAgICAgICAgb25DbGljazogZnVuY3Rpb24oKSB7IG9uSW5kZXhTZWxlY3RGbihwYWdlQ291bnQgLSAxKSB9XHJcbiAgICAgICAgfSlcclxuXHJcbiAgICAgICAgdmFyIHBhZ2luYXRpb25FbGVtZW50ID0gdGhpcy5idWlsZEVsZW1lbnRXaXRoRXZlbnQocGFnZUl0ZW1zKTtcclxuICAgICAgICB2YXIgaGlnaHRsaWdodEluZGV4ID0gMiArIChzZWxlY3RlZEluZGV4IC0gc3RhcnRJbmRleCk7XHJcbiAgICAgICAgdGhpcy5zZXRBY3RpdmVJdGVtKHBhZ2luYXRpb25FbGVtZW50LCBoaWdodGxpZ2h0SW5kZXgpO1xyXG5cclxuICAgICAgICByZXR1cm4gcGFnaW5hdGlvbkVsZW1lbnQ7XHJcbiAgICB9XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBDcmVhdGUgc2ltcGxlIEJvb3RzdHJhcCBwYWdpbmF0aW9uIEhUTUwgZWxlbWVudFxyXG4gICAgICogQHBhcmFtIHtPYmplY3RbXX0gaXRlbXMgLSBwYWdpbmF0aW9uIGl0ZW0gZGVzY3JpcHRpb25cclxuICAgICAqIEBwYXJhbSB7U3RyaW5nfSBpdGVtc1tdLnRleHQgLSBwYWdpbmF0aW9uIGl0ZW0gZGlzcGxheSB0ZXh0XHJcbiAgICAgKiBAcGFyYW0ge01vdXNlRXZlbnR9IGl0ZW1zW10ub25DbGljayAtIHBhZ2luYXRpb24gaXRlbSBvbkNsaWNrIGNhbGxiYWNrIGhhbmRsZXIgKG5vIHBhcmFtZXRlcikgXHJcbiAgICAgKi9cclxuICAgIHN0YXRpYyBidWlsZEVsZW1lbnRXaXRoRXZlbnQoaXRlbXMpIHtcclxuICAgICAgICB2YXIgZWxlbWVudCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJ1bFwiKTtcclxuICAgICAgICBlbGVtZW50LmNsYXNzTGlzdC5hZGQoXCJwYWdpbmF0aW9uXCIpO1xyXG5cclxuICAgICAgICBmb3IgKHZhciBpID0gMDsgaSA8IGl0ZW1zLmxlbmd0aDsgaSsrKSB7XHJcbiAgICAgICAgICAgIHZhciBmaXJzdFBhZ2UgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KFwibGlcIik7XHJcbiAgICAgICAgICAgIGZpcnN0UGFnZS5jbGFzc0xpc3QuYWRkKFwicGFnZS1pdGVtXCIpO1xyXG5cclxuICAgICAgICAgICAgdmFyIGZpcnN0TGluayA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJhXCIpO1xyXG4gICAgICAgICAgICBmaXJzdExpbmsuY2xhc3NMaXN0LmFkZChcInBhZ2UtbGlua1wiKTtcclxuICAgICAgICAgICAgZmlyc3RMaW5rLmlubmVyVGV4dCA9IGl0ZW1zW2ldLnRleHQ7XHJcbiAgICAgICAgICAgIGZpcnN0TGluay5vbmNsaWNrID0gaXRlbXNbaV0ub25DbGljaztcclxuICAgICAgICAgICAgZmlyc3RMaW5rLmhyZWYgPSBcImphdmFzY3JpcHQ6dm9pZCgwKTtcIjtcclxuXHJcbiAgICAgICAgICAgIGZpcnN0UGFnZS5hcHBlbmRDaGlsZChmaXJzdExpbmspO1xyXG5cclxuICAgICAgICAgICAgZWxlbWVudC5hcHBlbmRDaGlsZChmaXJzdFBhZ2UpO1xyXG4gICAgICAgIH1cclxuXHJcbiAgICAgICAgcmV0dXJuIGVsZW1lbnQ7XHJcbiAgICB9O1xyXG5cclxuICAgIC8qKlxyXG4gICAgICogU2V0L0NoYW5nZSBCb29zdHJhcCBwYWdpbmF0aW9uIGhpZ2hsaWdodCBpdGVtXHJcbiAgICAgKiBAcGFyYW0ge0VsZW1lbnR9IGVsZW1lbnQgLSBCb29zdHJhcCBwYWdpbmF0aW9uIEhUTUwgVUwgZWxlbWVudCBcclxuICAgICAqIEBwYXJhbSB7TnVtYmVyfSBpbmRleCAtIHBhZ2luYXRpb24gaXRlbSdzIGluZGV4LCB6ZXJvIGJhc2VkXHJcbiAgICAgKi9cclxuICAgIHN0YXRpYyBzZXRBY3RpdmVJdGVtKGVsZW1lbnQsIGluZGV4KSB7XHJcbiAgICAgICAgdmFyIGl0ZW1zID0gZWxlbWVudC5xdWVyeVNlbGVjdG9yQWxsKFwibGlcIik7XHJcblxyXG4gICAgICAgIGlmIChpdGVtcyAhPT0gbnVsbCAmJiBpdGVtc1tpbmRleF0gIT09IG51bGwpIHtcclxuICAgICAgICAgICAgZm9yICh2YXIgaSA9IDA7IGkgPCBpdGVtcy5sZW5ndGg7IGkrKykge1xyXG4gICAgICAgICAgICAgICAgaXRlbXNbaV0uY2xhc3NMaXN0LnJlbW92ZShcImFjdGl2ZVwiKTtcclxuICAgICAgICAgICAgfVxyXG5cclxuICAgICAgICAgICAgdmFyIHggPSBpdGVtc1tpbmRleF07XHJcbiAgICAgICAgICAgIHguY2xhc3NMaXN0LmFkZChcImFjdGl2ZVwiKTtcclxuXHJcbiAgICAgICAgICAgIHJldHVybiB0cnVlO1xyXG4gICAgICAgIH1cclxuXHJcbiAgICAgICAgcmV0dXJuIGZhbHNlO1xyXG4gICAgfTtcclxuXHJcbiAgICAvKipcclxuICAgICAqIE1vZGlmeSBCb29zdHJhcCBwYWdpbmF0aW9uIGl0ZW0ncyBjb250ZW50XHJcbiAgICAgKiBAcGFyYW0ge0VsZW1lbnR9IGVsZW1lbnQgLSBIVE1MIHBhZ2luYXRpb24gZWxlbWVudCwgdGFnbmFtZSBVTFxyXG4gICAgICogQHBhcmFtIHtOdW1iZXJ9IGluZGV4IC0gcGFnaW5hdGlvbiBpdGVtJ3MgaW5kZXggbG9jYXRpb24sIHplcm8gYmFzZWRcclxuICAgICAqIEBwYXJhbSB7U3RyaW5nfSB0ZXh0IC0gcGFnaW5hdGlvbiBpdGVtJ3MgZGlzcGxheSB0ZXh0XHJcbiAgICAgKiBAcGFyYW0ge0J0c1BhZ2luYXRpb25IZWxwZXJ+aXRlbVNlbGVjdGVkQ2FsbGJhY2t9IHNlbGVjdEZuIC0gY2FsbGJhY2sgdG8gaGFuZGxlIHdoZW4gaXRlbSBpcyBzZWxlY3RlZFxyXG4gICAgICovXHJcbiAgICBzdGF0aWMgc2V0SXRlbShlbGVtZW50LCBpbmRleCwgdGV4dCwgc2VsZWN0Rm4pIHtcclxuICAgICAgICB2YXIgaXRlbXMgPSBlbGVtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoXCJsaVwiKTtcclxuXHJcbiAgICAgICAgaWYgKGl0ZW1zICE9PSBudWxsICYmIGl0ZW1zW2luZGV4XSAhPT0gbnVsbCkge1xyXG4gICAgICAgICAgICB2YXIgbGlua0VsZW1lbnQgPSBpdGVtc1tpbmRleF0ucXVlcnlTZWxlY3RvcihcImFcIik7XHJcblxyXG4gICAgICAgICAgICBpZiAobGlua0VsZW1lbnQgIT09IG51bGwpIHtcclxuICAgICAgICAgICAgICAgIGxpbmtFbGVtZW50LmlubmVyVGV4dCA9IHRleHQ7XHJcbiAgICAgICAgICAgICAgICBsaW5rRWxlbWVudC5vbmNsaWNrID0gc2VsZWN0Rm47XHJcblxyXG4gICAgICAgICAgICAgICAgcmV0dXJuIHRydWU7XHJcbiAgICAgICAgICAgIH1cclxuICAgICAgICB9XHJcblxyXG4gICAgICAgIHJldHVybiBmYWxzZTtcclxuICAgIH07XHJcbn1cclxuXHJcbmV4cG9ydCBjbGFzcyBCdHNEaWFsb2dNb2RhbEhlbHBlciB7XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBDcmVhdGUgYW4gZW1wdHkgQm9vc3RyYXAgTW9kYWwgSFRNTCBlbGVtZW50LCB0YWduYW1lIGlzIERJVlxyXG4gICAgICogQHJldHVybnMge0VsZW1lbnR9IEJvb3N0cmFwIG1vZGFsIEhUTUwgZWxlbWVudCwgdGFnbmFtZSBpcyBESVZcclxuICAgICAqL1xyXG4gICAgc3RhdGljIGJ1aWxkRWxlbWVudCgpIHtcclxuICAgICAgICB2YXIgZWxlbWVudCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJkaXZcIik7XHJcbiAgICAgICAgZWxlbWVudC5jbGFzc0xpc3QuYWRkKCdtb2RhbCcpO1xyXG4gICAgICAgIGVsZW1lbnQuc2V0QXR0cmlidXRlKCdyb2xlJywgJ2RpYWxvZycpO1xyXG5cclxuICAgICAgICB2YXIgZG9jID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7XHJcbiAgICAgICAgZG9jLmNsYXNzTGlzdC5hZGQoJ21vZGFsLWRpYWxvZycpO1xyXG4gICAgICAgIGRvYy5zZXRBdHRyaWJ1dGUoJ3JvbGUnLCAnZG9jdW1lbnQnKTtcclxuXHJcbiAgICAgICAgdmFyIGNvbnRlbnQgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTtcclxuICAgICAgICBjb250ZW50LmNsYXNzTGlzdC5hZGQoJ21vZGFsLWNvbnRlbnQnKTtcclxuXHJcbiAgICAgICAgdmFyIGhlYWRlciA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpO1xyXG4gICAgICAgIGhlYWRlci5jbGFzc0xpc3QuYWRkKCdtb2RlbC1oZWFkZXInKTtcclxuXHJcbiAgICAgICAgdmFyIGJvZHkgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTtcclxuICAgICAgICBib2R5LmNsYXNzTGlzdC5hZGQoJ21vZGFsLWJvZHknKTtcclxuXHJcbiAgICAgICAgdmFyIGZvb3RlciA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpO1xyXG4gICAgICAgIGZvb3Rlci5jbGFzc0xpc3QuYWRkKCdtb2RhbC1mb290ZXInKTtcclxuXHJcbiAgICAgICAgLy9kZWNvcmF0ZSBoZWFkZXJcclxuICAgICAgICB2YXIgdGl0bGUgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdoNScpO1xyXG4gICAgICAgIHRpdGxlLmNsYXNzTGlzdC5hZGQoJ21vZGFsLXRpdGxlJyk7XHJcbiAgICAgICAgdmFyIGNsb3NlQnRuID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnYnV0dG9uJyk7XHJcbiAgICAgICAgY2xvc2VCdG4uY2xhc3NMaXN0LmFkZCgnY2xvc2UnKTtcclxuICAgICAgICBjbG9zZUJ0bi50eXBlID0gJ2J1dHRvbic7XHJcbiAgICAgICAgY2xvc2VCdG4uc2V0QXR0cmlidXRlKCdkYXRhLWRpc21pc3MnLCAnbW9kYWwnKTtcclxuICAgICAgICBjbG9zZUJ0bi5zZXRBdHRyaWJ1dGUoJ2FyaWEtbGFiZWwnLCAnQ2xvc2UnKTtcclxuICAgICAgICB2YXIgY2xvc2VTcGFuID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnc3BhbicpO1xyXG4gICAgICAgIGNsb3NlU3Bhbi5zZXRBdHRyaWJ1dGUoJ2FyaWEtaGlkZGVuJywgdHJ1ZSk7XHJcbiAgICAgICAgY2xvc2VTcGFuLmlubmVyVGV4dCA9IFwiJnRpbWVzO1wiO1xyXG4gICAgICAgIGNsb3NlQnRuLmFwcGVuZENoaWxkKGNsb3NlU3Bhbik7XHJcblxyXG4gICAgICAgIGhlYWRlci5hcHBlbmRDaGlsZCh0aXRsZSk7XHJcbiAgICAgICAgaGVhZGVyLmFwcGVuZENoaWxkKGNsb3NlQnRuKTtcclxuXHJcbiAgICAgICAgZWxlbWVudC5hcHBlbmRDaGlsZChkb2MpO1xyXG4gICAgICAgIGRvYy5hcHBlbmRDaGlsZChjb250ZW50KTtcclxuICAgICAgICBjb250ZW50LmFwcGVuZENoaWxkKGhlYWRlcik7XHJcbiAgICAgICAgY29udGVudC5hcHBlbmRDaGlsZChib2R5KTtcclxuICAgICAgICBjb250ZW50LmFwcGVuZENoaWxkKGZvb3Rlcik7XHJcblxyXG4gICAgICAgIHJldHVybiBlbGVtZW50O1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogU2V0IEJvb3N0cmFwIGRpYWxvZyBtb2RhbCdzIHRpdGxlXHJcbiAgICAgKiBAcGFyYW0ge0VsZW1lbnR9IGVsZW1lbnQgLSBIVE1MIERJViBlbGVtZW50XHJcbiAgICAgKiBAcGFyYW0ge1N0cmluZ30gdGl0bGUgLSBNb2RhbCB0aXRsZSBcclxuICAgICAqL1xyXG4gICAgc3RhdGljIHNldFRpdGxlKGVsZW1lbnQsIHRpdGxlKSB7XHJcbiAgICAgICAgdmFyIHRpdGxlRWxlbWVudCA9IGVsZW1lbnQucXVlcnlTZWxlY3RvcignLm1vZGFsLXRpdGxlJyk7XHJcblxyXG4gICAgICAgIGlmICh0aXRsZUVsZW1lbnQgIT09IG51bGwpIHtcclxuICAgICAgICAgICAgdGl0bGVFbGVtZW50LmlubmVyVGV4dCA9IHRpdGxlO1xyXG4gICAgICAgIH1cclxuICAgIH07XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBHZXQgQm9vc3RyYXAgZGlhbG9nIG1vZGFsJ3MgYm9keSBlbGVtZW50XHJcbiAgICAgKiBAcGFyYW0ge0VsZW1lbnR9IGVsZW1lbnQgLSBIVE1MIERJViBlbGVtZW50XHJcbiAgICAgKiBAcmV0dXJuIHtFbGVtZW50fSAgSFRNTCBESVYgZWxlbWVudFxyXG4gICAgICovXHJcbiAgICBzdGF0aWMgZ2V0Qm9keShlbGVtZW50KSB7XHJcbiAgICAgICAgcmV0dXJuIGVsZW1lbnQucXVlcnlTZWxlY3RvcignLm1vZGFsLWJvZHknKTtcclxuICAgIH1cclxuXHJcbiAgICAvKipcclxuICAgICAqIEdldCBCb29zdHJhcCBkaWFsb2cgbW9kYWwncyBmb290ZXIgZWxlbWVudFxyXG4gICAgICogQHBhcmFtIHtFbGVtZW50fSBlbGVtZW50IC0gSFRNTCBESVYgZWxlbWVudFxyXG4gICAgICogQHJldHVybiB7RWxlbWVudH0gIEhUTUwgRElWIGVsZW1lbnRcclxuICAgICAqL1xyXG4gICAgc3RhdGljIGdldEZvb3RlcihlbGVtZW50KSB7XHJcbiAgICAgICAgcmV0dXJuIGVsZW1lbnQucXVlcnlTZWxlY3RvcignLm1vZGFsLWZvb3RlcicpO1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogR2V0IEJvb3N0cmFwIGRpYWxvZyBtb2RhbCdzIGhlYWRlciBlbGVtZW50XHJcbiAgICAgKiBAcGFyYW0ge0VsZW1lbnR9IGVsZW1lbnQgLSBIVE1MIERJViBlbGVtZW50XHJcbiAgICAgKiBAcmV0dXJuIHtFbGVtZW50fSAgSFRNTCBESVYgZWxlbWVudFxyXG4gICAgICovXHJcbiAgICBzdGF0aWMgZ2V0SGVhZGVyKGVsZW1lbnQpIHtcclxuICAgICAgICByZXR1cm4gZWxlbWVudC5xdWVyeVNlbGVjdG9yKCcubW9kYWwtaGVhZGVyJyk7XHJcbiAgICB9XHJcbn1cclxuXHJcbmV4cG9ydCBjbGFzcyBCdHNDb21ib2JveEhlbHBlciB7XHJcblxyXG4gICAgLyoqXHJcbiAgICAgKiBCdWlsZCBib290c3RyYXAgY29tYm94IGVsZW1lbnRcclxuICAgICAqIEBwYXJhbSB7b2JqZWN0W119IGl0ZW1zIC0gY29tYm9ib3gncyBpdGVtIGRlc2NyaXB0aW9uXHJcbiAgICAgKiBAcGFyYW0ge3N0cmluZ30gaXRlbXNbXS50ZXh0IC0gY29tYm9ib3ggaXRlbSdzIGRpc3BsYXkgbmFtZVxyXG4gICAgICogQHBhcmFtIHtzdHJpbmd9IGl0ZW1zW10udmFsdWUgLSBjb21ib2JveCBpdGVtJ3MgdmFsdWUgd3JpdHRlbiBpbiBIVE1MIHRhZyBcclxuICAgICAqL1xyXG4gICAgc3RhdGljIGJ1aWxkRWxlbWVudChpdGVtcykge1xyXG4gICAgICAgIHZhciBlbGVtZW50ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnc2VsZWN0Jyk7XHJcbiAgICAgICAgZWxlbWVudC5jbGFzc0xpc3QuYWRkKCdmb3JtLWNvbnRyb2wnKTtcclxuXHJcbiAgICAgICAgZm9yICh2YXIgaSA9IDA7IGkgPCBpdGVtcy5sZW5ndGg7IGkrKykge1xyXG4gICAgICAgICAgICB2YXIgb3B0aW9uID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnb3B0aW9uJyk7XHJcbiAgICAgICAgICAgIG9wdGlvbi5pbm5lclRleHQgPSBpdGVtc1tpXVsndGV4dCddO1xyXG4gICAgICAgICAgICBvcHRpb24udmFsdWUgPSBpdGVtc1tpXVsndmFsdWUnXTtcclxuXHJcbiAgICAgICAgICAgIGVsZW1lbnQuYXBwZW5kQ2hpbGQob3B0aW9uKTtcclxuICAgICAgICB9XHJcblxyXG4gICAgICAgIHJldHVybiBlbGVtZW50O1xyXG4gICAgfVxyXG5cclxuICAgIC8qKlxyXG4gICAgICogUmVidWlsZCBleGlzdGluZyBjb21ib2JveCBlbGVtZW50J3MgY29udGVudFxyXG4gICAgICogQHBhcmFtIHtFbGVtZW50fSBlbGVtZW50IC0gSFRNTCBjb21ib2JveCwgdGFnbmFtZSBpcyBTRUxFQ1QgXHJcbiAgICAgKiBAcGFyYW0ge29iamVjdFtdfSBpdGVtcyAtIGNvbWJvYm94J3MgaXRlbSBkZXNjcmlwdGlvblxyXG4gICAgICogQHBhcmFtIHtzdHJpbmd9IGl0ZW1zW10udGV4dCAtIGNvbWJvYm94IGl0ZW0ncyBkaXNwbGF5IG5hbWVcclxuICAgICAqIEBwYXJhbSB7c3RyaW5nfSBpdGVtc1tdLnZhbHVlIC0gY29tYm9ib3ggaXRlbSdzIHZhbHVlIHdyaXR0ZW4gaW4gSFRNTCB0YWcgXHJcbiAgICAgKi9cclxuICAgIHN0YXRpYyByZWJ1aWxkSXRlbXMoZWxlbWVudCwgaXRlbXMpIHtcclxuICAgICAgICB3aGlsZSAoZWxlbWVudC5maXJzdENoaWxkKVxyXG4gICAgICAgICAgICBlbGVtZW50LnJlbW92ZUNoaWxkKGVsZW1lbnQuZmlyc3RDaGlsZCk7XHJcblxyXG4gICAgICAgIGZvciAodmFyIGkgPSAwOyBpIDwgaXRlbXMubGVuZ3RoOyBpKyspIHtcclxuICAgICAgICAgICAgdmFyIG9wdGlvbiA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ29wdGlvbicpO1xyXG4gICAgICAgICAgICBvcHRpb24uaW5uZXJUZXh0ID0gaXRlbXNbaV1bJ3RleHQnXTtcclxuICAgICAgICAgICAgb3B0aW9uLnZhbHVlID0gaXRlbXNbaV1bJ3ZhbHVlJ107XHJcblxyXG4gICAgICAgICAgICBlbGVtZW50LmFwcGVuZENoaWxkKG9wdGlvbik7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICByZXR1cm4gZWxlbWVudDtcclxuICAgIH1cclxufVxyXG4vLyMgc291cmNlVVJMPWJ0c0hlbHBlci5qcyJdfQ==
