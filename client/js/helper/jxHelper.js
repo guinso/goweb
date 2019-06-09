@@ -1,14 +1,15 @@
-export class JxHelper {
+class JxHelper {
 
     //loading panel
     static getLoadingPanel() {
         return document.querySelector('.loading-panel')
     }
     static showLoadingPanel() {
-        JxHelper.getLoadingPanel().classList.add('visible-panel');
+        let loadingPanel = JxHelper.getLoadingPanel()
+        loadingPanel.classList.add('visible-panel')
     }
     static hideLoadingPanel() {
-        JxHelper.getLoadingPanel().classList.remove('visible-panel');
+        JxHelper.getLoadingPanel().classList.remove('visible-panel')
     }
 
     //content panel
