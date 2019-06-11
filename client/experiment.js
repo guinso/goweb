@@ -106,12 +106,7 @@ JxBoot.prototype.AddScriptTag = function(rawText, fileURL) {
         newScript.setAttribute('data-url', fileURL)
     }
 
-    try
-    {
-        header.appendChild(newScript)
-    } catch (err) {
-        console.error('Failed to add script tag (' + fileURL + ') : ' + err.message)
-    }
+    header.appendChild(newScript)
 };
 
 JxBoot.prototype.AddStyleSheetTag = function(rawText, fileURL) {
@@ -141,12 +136,7 @@ JxBoot.prototype.AddStyleSheetTag = function(rawText, fileURL) {
         newStyleSheet.setAttribute('data-url', fileURL)
     }
 
-    try
-    {
-        header.appendChild(newStyleSheet)
-    } catch (err) {
-        console.error('Failed to add stylesheet tag (' + fileURL + ') : ' + err.message)
-    }
+    header.appendChild(newStyleSheet)
 };
 
 window.JxLoader = new JxBoot()
@@ -189,13 +179,11 @@ function bootstrapWebPage() {
 };
 
 (function() {
-    var jx = new JxBoot()
-
-    if (typeof Promise === 'undefined') {
+    if (typeof Promise == 'undefined') {
         //need to load Bluebird
-        jx.LoadFile('libs/bluebird-3.5.5.min.js',
+        JxLoader.LoadFile('libs/bluebird-3.5.5.min.js',
             function(text){
-                jx.AddScriptTag(text)
+                JxLoader.AddScriptTag(text)
 
                 //TODO: load series of scripts and stylesheets
                 console.log('load Promise polyfill successfully')
