@@ -1,90 +1,108 @@
-class JxHelper {
+'use strict';
 
-    //loading panel
-    static getLoadingPanel() {
-        return document.querySelector('.loading-panel')
-    }
-    static showLoadingPanel() {
-        let loadingPanel = JxHelper.getLoadingPanel()
-        loadingPanel.classList.add('visible-panel')
-    }
-    static hideLoadingPanel() {
-        JxHelper.getLoadingPanel().classList.remove('visible-panel')
-    }
+function jxHelper(){}
 
-    //content panel
-    static getContentPanel() {
-        return document.querySelector('.content-panel')
-    }
+//loading panel
+jxHelper.prototype.getLoadingPanel = function() {
+    return document.querySelector('.loading-panel')
+};
 
-    //hide all content
-    static hideAllContent() {
-        const pages = document.getElementsByClassName('page')
-        for (let i = 0; i < pages.length; i++) {
-            pages[i].classList.remove('visible')
-        }
-    }
+jxHelper.prototype.showLoadingPanel = function() {
+    var loadingPanel = this.getLoadingPanel()
+    loadingPanel.classList.add('visible-panel')
+};
 
-    //main content
-    static getMainContent() {
-        return document.querySelector('.main-content')
-    }
-    static showMainContent() {
-        JxHelper.getMainContent().classList.add('visible')
-    }
-    static hideMainContain() {
-        JxHelper.getMainContent().classList.remove('visible')
-    }
+jxHelper.prototype.hideLoadingPanel = function() {
+    this.getLoadingPanel().classList.remove('visible-panel')
+};
 
-    //special error
-    static getSpecialError() {
-        return document.querySelector('.special-error')
-    }
-    static showSpecialError() {
-        JxHelper.getSpecialError().classList.add('visible')
-    }
-    static hideSpecialError() {
-        JxHelper.getSpecialError().classList.remove('visible')
-    }
-    static showServerErrorMessage() {
-        JxHelper.getSpecialError()
-            .innerHTML = "<h2>Opps, there's problem try to connect to server</h2>"
-        JxHelper.showSpecialError();
-    }
+//content panel
+jxHelper.prototype.getContentPanel = function() {
+    return document.querySelector('.content-panel')
+};
 
-    //special content
-    static getSpecialContent() {
-        return document.querySelector('.special-content')
+//hide all content
+jxHelper.prototype.hideAllContent = function() {
+    var pages = document.getElementsByClassName('page')
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('visible')
     }
-    static showSpecialContent() {
-        JxHelper.getSpecialContent().classList.add('visible')
-    }
-    static hideSpecialContent() {
-        JxHelper.getSpecialContent().classList.remove('visible')
-    }
+};
 
-    //special loading
-    static getSpecialLoading() {
-        return document.querySelector('.special-loading')
-    }
-    static showSpecialLoading() {
-        JxHelper.getSpecialLoading().classList.add('visible')
-    }
-    static hideSpecialLoading() {
-        JxHelper.getSpecialLoading().classList.remove('visible')
-    }
+//main content
+jxHelper.prototype.getMainContent = function() {
+    return document.querySelector('.main-content')
+};
 
-    static emptyElementChildren(element) {
-        while (element.firstChild) {
-            element.firstChild.remove()
-        }
-    }
+jxHelper.prototype.showMainContent = function() {
+    this.getMainContent().classList.add('visible')
+};
 
-    static parseHTMLString(htmlString) {
-        let x = document.createElement('div')
-        x.innerHTML = htmlString
+jxHelper.prototype.hideMainContain = function() {
+    this.getMainContent().classList.remove('visible')
+};
 
-        return x
+//special error
+jxHelper.prototype.getSpecialError = function() {
+    return document.querySelector('.special-error')
+};
+
+jxHelper.prototype.showSpecialError = function() {
+    this.getSpecialError().classList.add('visible')
+};
+
+jxHelper.prototype.hideSpecialError = function() {
+    this.getSpecialError().classList.remove('visible')
+};
+
+jxHelper.prototype.showServerErrorMessage = function() {
+    this.getSpecialError()
+        .innerHTML = "<h2>Opps, there's problem try to connect to server</h2>"
+    this.showSpecialError()
+};
+
+//special content
+jxHelper.prototype.getSpecialContent = function() {
+    return document.querySelector('.special-content')
+};
+
+jxHelper.prototype.showSpecialContent = function() {
+    this.getSpecialContent().classList.add('visible')
+};
+
+jxHelper.prototype.hideSpecialContent = function() {
+    this.getSpecialContent().classList.remove('visible')
+};
+
+//special loading
+jxHelper.prototype.getSpecialLoading = function() {
+    return document.querySelector('.special-loading')
+};
+
+jxHelper.prototype.showSpecialLoading = function() {
+    this.getSpecialLoading().classList.add('visible')
+};
+
+jxHelper.prototype.hideSpecialLoading = function() {
+    this.getSpecialLoading().classList.remove('visible')
+};
+
+jxHelper.prototype.emptyElementChildren = function(element) {
+    while (element.firstChild) {
+        element.firstChild.remove()
     }
-}
-//# sourceURL=jxhelper.js
+};
+
+jxHelper.prototype.parseHTMLString = function(htmlString) {
+    var x = document.createElement('div')
+    x.innerHTML = htmlString
+
+    return x
+};
+
+(function(){
+    if (typeof JxHelper === 'undefined') {
+        window.JxHelper = jxHelper()
+    }
+})()
+//# sourceURL=js/helper/jxhelper.js

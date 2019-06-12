@@ -1,286 +1,136 @@
-'use strict'
+(function(global){
+    'use strict';
 
-/** polyfills for string */
-String.prototype.contains = String.prototype.contains || function(str) {
-    return this.indexOf(str) >= 0;
-};
+    function bootstrapSequence(resolve, reject) {
+        // var bootSequence = [loadGUILibs, loadPolyfills, buildWebPage]
 
-String.prototype.startsWith = String.prototype.startsWith || function(prefix) {
-    return this.indexOf(prefix) === 0;
-};
+        // var ss = [
+        //     function(){ return new Promise(function(s,r){ 
+        //         console.log("s1")
+        //         JxLoader.loadFile('/js/login/login.js', function(text){ s(text) }, function(err){ r(err) })
+        //     })},
+        //     function(){ return new Promise(function(s,r){ 
+        //         console.log("s2")
+        //         JxLoader.loadFile('/js/note/note.js', function(text){ s(text) }, function(err){ r(err) })
+        //     })},
+        //     function(){ return new Promise(function(s,r){ 
+        //         console.log("s3")
+        //         JxLoader.loadFile('/js/user/user.js', function(text){ s(text) }, function(err){ r(err) })
+        //     })}
+        // ]
 
-String.prototype.endsWith = String.prototype.endsWith || function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) >= 0;
-};
+        // console.log('begin serial promises')
+        // var ssPromise = JxLoader.runPromiseInSerial(ss)
+        // ssPromise.then(
+        //     function(result){
+        //         console.log(result)
+        //         console.log('done serial promises')
+        //     },
+        //     function(err){
+        //         console.log('error encounter in serial promises: ' + err.message)
+        //     }
+        // )
 
-function JxBoot() {
-    this.task = [] //stack data type
-}
+        //step 1: load base dependecies
+        var guiLibs = new Promise(loadGUILibs)
+        var polyfills = new Promise(loadPolyfills)
+        var utilities = new Promise(loadUtilities)
 
-/** JxBoot */
-JxBoot.prototype.loadFile = function(urlFile, successFN, failureFN) {
-    if (!('jxFiles' in window)) {
-        window['jxFiles'] = new Array()
-    }
+        Promise.all([guiLibs, polyfills, utilities])
+            .then(function(){
+                //step 2: build web page
+                var buildPagePromise = new Promise(buildWebPage)
+                buildPagePromise
+                    .then(function(){ resolve()})
+                    .catch(function(err){reject(err)})
+            })
+            .catch(function(err){
+                reject(err)
+            })
+    };
 
-    var fileLUT = window['jxFiles']
-    var cacheFiles = fileLUT.filter(function(x) { return x.fileName == urlFile })
+    function loadGUILibs(resolve, reject) {
 
-    if (cacheFiles.length > 0) {
-        console.warn("File " + urlFile + " is cached")
-        successFN(cacheFiles[0].text)
-        return //cached
-    }
+        JxLoader.loadMultipleFiles([
+                '/libs/jquery-3.4.1.min.js',
+                '/libs/popper.min.js',
+                '/libs/bootstrap.min.js',
+                '/css/style.css',
+                '/css/bootstrap.min.css',
+                '/css/bootstrap-grid.min.css',
+                '/css/bootstrap-reboot.min.css'
+            ],
+            function(
+                jquery, popper, bootstrap,
+                styleCSS, bootstrapCSS, bootstrapGridCSS, boostrapRebootCSS,
+                jxHelper) {
 
-    var request = new XMLHttpRequest()
-    request.onerror = function() {
-        failureFN(new Error(
-            "Failed to get " + urlFile +
-            ", HTTP status: " + request.status + " - " + request.statusText))
-    }
+                JxLoader.addScriptTag(jquery, '/libs/jquery-3.4.1.min.js')
+                JxLoader.addScriptTag(popper, '/libs/popper.min.js')
+                JxLoader.addScriptTag(bootstrap, '/libs/bootstrap.min.js')
+                console.log("load libs done")
 
-    request.onload = function() {
-        if (request.status == 200 || request.status < 300) {
-            fileLUT.push({ fileName: urlFile, text: request.responseText })
+                JxLoader.addStyleSheetTag(styleCSS, '/css/style.css')
+                JxLoader.addStyleSheetTag(bootstrapCSS, '/css/bootstrap.min.css')
+                JxLoader.addStyleSheetTag(bootstrapGridCSS, '/css/bootstrap-grid.min.css')
+                JxLoader.addStyleSheetTag(boostrapRebootCSS, '/css/bootstrap-reboot.min.css')
+                console.log("load stylesheets done")
 
-            successFN(request.responseText)
-        } else {
-            failureFN(new Error(
-                "Failed to get " + urlFile +
-                ", HTTP status: " + request.status + " - " + request.statusText))
-        }
-    }
+                //JxLoader.addScriptTag(jxHelper, '/js/helper/jxHelper.js')
 
-    var isAsynchronous = true
-
-    request.open('GET', urlFile, isAsynchronous)
-    request.send()
-};
-
-JxBoot.prototype.loadMultipleFiles = function(urls, successFN, failedFN) {
-    var urlCount = urls.length
-
-    var successCount = 0
-    var triggeredFail = false
-
-    for (var i = 0; i < urlCount; i++) {
-        JxBoot.prototype.loadFile.call(this, urls[i],
-            function() {
-                successCount++
-                if (successCount == urlCount) {
-                    var responseTexts = urls.map(function(url) {
-                        var cache = window['jxFiles'].filter(function(x) { return x.fileName == url })
-                        return cache[0].text
-                    })
-                    successFN.apply(null, responseTexts)
-                }
+                // $('.special-loading').text('asd')
+                // $('.special-loading').addClass('visible')
+                resolve()
             },
             function(err) {
-                if (triggeredFail == false) {
-                    triggeredFail = true
-                    failedFN(err)
-                }
+                reject(err)
             })
-    }
-};
+    };
 
-JxBoot.prototype.addScriptTag = function(rawText, fileURL) {
-    var header = document.head // document.getElementsByTagName('head')[0]
+    function loadPolyfills(resolve, reject) {
+        resolve()
+    };
 
-    var found = false
-    var headCount = header.childElementCount
-    for (var i = 0; i < headCount; i++) {
-        if (header.children[i].nodeName.toLowerCase() === 'script' &&
-            header.children[i].dataset &&
-            header.children[i].dataset.url &&
-            header.children[i].dataset.url === fileURL) {
-            found = true
-        }
-    }
-    if (found) {
-        console.log('script URL ' + fileURL + ' already added')
-        return
-    }
+    function loadUtilities(resolve, reject) {
+        JxLoader.loadMultipleFiles(['/js/helper/jxPromise.js', '/js/helper/jxHelper.js'], 
+            function(jxPromiseText, jsHelperText){
+                JxLoader.addScriptTag(jxPromiseText, '/js/helper/jxPromise.js')
+                JxLoader.addScriptTag(jsHelperText, '/js/helper/jxHelper.js')
+                resolve()
+            }, 
+            function(err){
+                reject(err)
+            })
+    };
 
-    var newScript = document.createElement('script')
-    newScript.setAttribute('type', 'text/javascript')
-    newScript.innerHTML = rawText
+    function buildWebPage(resolve, reject) {
+        //step 1: load web page
 
-    if (typeof fileURL === 'string' && fileURL.length > 0) {
-        newScript.setAttribute('data-url', fileURL)
-    }
+        //step 2: build routing
 
-    header.appendChild(newScript)
-};
+        //step 3: trigger route
+        resolve()
+    };
 
-JxBoot.prototype.addStyleSheetTag = function(rawText, fileURL) {
-    //add into header
-    var header = document.head // document.getElementsByTagName('head')[0]
-
-    var found = false
-    var headCount = header.childElementCount
-    for (var i = 0; i < headCount; i++) {
-        if (header.children[i].nodeName.toLowerCase() === 'link' &&
-            header.children[i].dataset &&
-            header.children[i].dataset.url &&
-            header.children[i].dataset.url === fileURL) {
-            found = true
-        }
-    }
-    if (found) {
-        console.log('stylesheet URL ' + fileURL + ' already added')
-        return
-    }
-
-    var newStyleSheet = document.createElement('link')
-    newStyleSheet.setAttribute('rel', 'stylesheet')
-    newStyleSheet.innerHTML = rawText
-
-    if (typeof fileURL === 'string' && fileURL.length > 0) {
-        //newStyleSheet.setAttribute('data-url', fileURL)
-        newStyleSheet.dataset.url = fileURL
-    }
-
-    header.appendChild(newStyleSheet)
-};
-
-JxBoot.prototype.require = function(fileURL, successFN, failureFN) {
-
-    if (!fileURL.endsWith('.js') && !fileURL.endsWith('.css')) {
-        throw new Error("only support .js and .css: " + latestTask.url)
-    }
-
-    var reqTask = {
-        guid: 123, //TODO: generate GUID
-        url: fileURL,
-        isSuccess: null,
-        passFN: successFN,
-        failFN: failureFN,
-        arg: null
-    }
-
-    //step 1: queue request into task
-    this.task.push(reqTask)
-
-    //step 2: try load file from URL
-    this.loadFile(fileURL,
-        function(response) {
-            try {
-                //step 2.1: try evaluate JS script to trigger recursive JxBoot.require(...)
-                eval(response)
-
-                //step 2.1.1: mark success
-                reqTask.arg = response
-                reqTask.isSuccess = true
-            } catch (err) {
-                //step 2.1.2: mark failed due to encounter error
-                reqTask.isSuccess = false
-                reqTask.arg = err
-            }
-
-            //step 3: dequeue request from task
-            JxBoot.prototype.dequeueTask.call(this, reqTask.guid)
-        },
-        function(err) {
-            //step 2.2: mark failed due to failed to retrieve file
-            reqTask.arg = err
-            reqTask.isSuccess = false
-
-            //step 3: dequeue request from task
-            JxBoot.prototype.dequeueTask.call(this, reqTask.guid)
-        })
-};
-
-JxBoot.prototype.dequeueTask = function(taskID) {
-    //return if no more task available
-    if (this.task.length == 0) {
-        return
-    }
-
-    var latestTask = this.task[this.task.length - 1]
-    if (latestTask.guid == taskID) {
-        //remove task since latest task matach with taskID
-        this.task.pop()
-
-        if (latestTask.isSuccess) {
-
-            if (latestTask.url.endsWith('.js')) {
-                JxBoot.prototype.AddScriptTag.call(this, latestTask.arg, latestTask.url)
-                latestTask.successFN(latestTask.arg)
-            } else if (latestTask.url.endsWith('.css')) {
-                JxBoot.prototype.AddStyleSheetTag.call(this, latestTask.arg, latestTask.url)
-                latestTask.successFN(latestTask.arg)
-            } else {
-                var err = new Error("only support .js and .css: " + latestTask.url)
-
-                latestTask.failFN(err)
-            }
-        } else {
-            latestTask.failFN(latestTask.arg)
-        }
-    } else {
-        //otherwise, wait for 50ms and try dequeue task
-        setTimeout(JxBoot.prototype.dequeueTask.call(this, taskID), 50)
-    }
-}
-
-if (typeof JxLoader == 'undefined') {
-    window.JxLoader = new JxBoot()
-}
-
-function bootstrapWebPage() {
-
-    JxLoader.loadMultipleFiles([
-            '/libs/jquery-3.4.1.min.js',
-            '/libs/popper.min.js',
-            '/libs/bootstrap.min.js',
-            '/libs/jquery-3.4.1.min.js',
-            '/css/style.css',
-            '/css/bootstrap.min.css',
-            '/css/bootstrap-grid.min.css',
-            '/css/bootstrap-reboot.min.css',
-            '/css/bootstrap.min.css'
-        ],
-        function(
-            jquery, popper, bootstrap, bootstrap1,
-            styleCSS, bootstrapCSS, bootstrapGridCSS, boostrapRebootCSS, bootstrapCSS1) {
-
-            JxLoader.addScriptTag(jquery, '/libs/jquery-3.4.1.min.js')
-            JxLoader.addScriptTag(popper, '/libs/popper.min.js')
-            JxLoader.addScriptTag(bootstrap, '/libs/bootstrap.min.js')
-            JxLoader.addScriptTag(bootstrap1, '/libs/bootstrap.min.js')
-            console.log("load libs done")
-
-            JxLoader.addStyleSheetTag(styleCSS, '/css/style.css')
-            JxLoader.addStyleSheetTag(bootstrapCSS, '/css/bootstrap.min.css')
-            JxLoader.addStyleSheetTag(bootstrapGridCSS, '/css/bootstrap-grid.min.css')
-            JxLoader.addStyleSheetTag(boostrapRebootCSS, '/css/bootstrap-reboot.min.css')
-            JxLoader.addStyleSheetTag(bootstrapCSS1, '/css/bootstrap.min.css')
-            console.log("load stylesheets done")
-
-            $('.special-loading').text('asd')
-            $('.special-loading').addClass('visible')
-        },
-        function(err) {
-            console.error('failed to load file: ' + err.message)
-        })
-};
-
-(function() {
     if (typeof Promise == 'undefined') {
         //need to load Bluebird
         JxLoader.require('libs/bluebird-3.5.5.min.js',
-            function(text) {
-                //JxLoader.addScriptTag(text)
+            function() {
+                console.log("load Promise polyfill successfully")
 
-                //TODO: load series of scripts and stylesheets
-                console.log('load Promise polyfill successfully')
-                bootstrapWebPage()
+                var promise = new Promise(bootstrapSequence)
+                promise
+                    .then(function(){console.log('done!')})
+                    .catch(function(err){ console.log('failed! - ' + err.message)})
             },
             function(err) {
                 console.error('failed to load Promise polyfill: ' + err.message)
             })
     } else {
-        bootstrapWebPage()
+        var promise = new Promise(bootstrapSequence)
+        promise
+            .then(function(){console.log('done!')})
+            .catch(function(err){ console.log('failed! - ' + err.message)})
     }
-})();
+
+})(this);
