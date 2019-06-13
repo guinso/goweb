@@ -225,6 +225,60 @@ jxLoader.prototype.dequeueTask = function(taskID) {
     }
 };
 
+jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
+    var request = new XMLHttpRequest()
+    request.onerror = function() {
+        failedFN(new Error(
+            "Failed to get " + url +
+            ", HTTP status: " + request.status + " - " + request.statusText))
+    }
+
+    request.onload = function() {
+        if (request.status == 200 || request.status < 300) {
+            
+            var jsonObj = JSON.parse(request.responseText)
+            successFN(jsonObj)
+        } else {
+            failureFN(new Error(
+                "Failed to get " + url +
+                ", HTTP status: " + request.status + " - " + request.statusText))
+        }
+    }
+
+    var isAsynchronous = true
+
+    request.open('GET', urlFile, isAsynchronous)
+    request.send()
+}
+
+jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
+    var request = new XMLHttpRequest()
+    request.onerror = function() {
+        failedFN(new Error(
+            "Failed to post " + url +
+            ", HTTP status: " + request.status + " - " + request.statusText))
+    }
+
+    request.onload = function() {
+        if (request.status == 200 || request.status < 300) {
+            
+            var jsonObj = JSON.parse(request.responseText)
+            successFN(jsonObj)
+        } else {
+            failureFN(new Error(
+                "Failed to post " + url +
+                ", HTTP status: " + request.status + " - " + request.statusText))
+        }
+    }
+
+    var isAsynchronous = true
+    var param = JSON.stringify(inputJSON)
+
+    request.setRequestHeader("Content-type", "application/json")
+    request.open('POST', urlFile, isAsynchronous)
+    request.send(param)
+}
+
 /**
  * Source: stackoverflow
  * URL: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
@@ -240,10 +294,6 @@ jxLoader.prototype.generateUUID = function() {
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
 };
-
-// jxLoader.prototype.isNull = function(obj) {
-//     return obj === null && typeof obj === 'object'
-// };
 
 (function(global){
     if (typeof JxLoader == 'undefined') {

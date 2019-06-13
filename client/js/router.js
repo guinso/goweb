@@ -1,6 +1,3 @@
-import { JxHelper } from '/js/helper/jxHelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
-
 //this module is solely handle swaping content based on URL hash value
 export class Router {
     static async resolve(url) {

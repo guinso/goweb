@@ -31,7 +31,8 @@ jxHelper.prototype.hideAllContent = function() {
 
 //main content
 jxHelper.prototype.getMainContent = function() {
-    return document.querySelector('.main-content')
+    var mainContent = document.querySelector('.main-content')
+    return mainContent
 };
 
 jxHelper.prototype.showMainContent = function() {
@@ -102,7 +103,7 @@ jxHelper.prototype.parseHTMLString = function(htmlString) {
 
 (function(){
     if (typeof JxHelper === 'undefined') {
-        window.JxHelper = jxHelper()
+        window.JxHelper = new jxHelper()
     }
 })()
 //# sourceURL=js/helper/jxhelper.js

@@ -2,7 +2,7 @@
     'use strict';
 
     function bootstrapSequence(resolve, reject) {
-        //step 1: load basic libraries
+        
         var  loadBaseLibsTask = new jxPromiseTask(false, [
             function(){ return new Promise(loadGUILibs) },
             function(){ return new Promise(loadPolyfills) },
@@ -10,14 +10,12 @@
         ])
 
         var bootstrapTask = new jxPromiseTask(true, [
-            loadBaseLibsTask,
-            //step 2: build web page
-            function(){ return new Promise(buildWebPage)}
+            loadBaseLibsTask,                               //step 1: load basic libraries
+            function(){ return new Promise(buildWebPage)}   //step 2: build web page
         ])
 
         //trigger sequences
-        var promise = JxPromise.runPromise(bootstrapTask)
-        promise.then(resolve, reject)
+        JxPromise.runPromise(bootstrapTask).then(resolve, reject)
     };
 
     function loadGUILibs(resolve, reject) {
@@ -46,10 +44,6 @@
                 JxLoader.addStyleSheetTag(boostrapRebootCSS, '/css/bootstrap-reboot.min.css')
                 console.log("load stylesheets done")
 
-                //JxLoader.addScriptTag(jxHelper, '/js/helper/jxHelper.js')
-
-                // $('.special-loading').text('asd')
-                // $('.special-loading').addClass('visible')
                 resolve("a")
             },
             function(err) {
@@ -58,13 +52,25 @@
     };
 
     function loadPolyfills(resolve, reject) {
-        resolve("b")
+        if (typeof fetch === 'undefined') {
+            JxLoader.loadFile('/libs/fetch-3.0.0.umd.js', 
+                function(text){
+                    JxLoader.addScriptTag(text, '/libs/fetch-3.0.0.umd.js')
+                    resolve("b1")
+                },
+                reject)
+        } else {
+            resolve("b2")
+        }
     };
 
     function loadUtilities(resolve, reject) {
-        JxLoader.loadMultipleFiles(['/js/helper/jxHelper.js'], 
-            function(jsHelperText){
+        JxLoader.loadMultipleFiles([
+            '/js/helper/jxHelper.js', '/js/helper/jxUtil.js'], 
+            function(jsHelperText, jxUtilText){
                 JxLoader.addScriptTag(jsHelperText, '/js/helper/jxHelper.js')
+                JxLoader.addScriptTag(jxUtilText, '/js/helper/jxUtil.js')
+
                 resolve("c")
             }, 
             function(err){
@@ -73,12 +79,44 @@
     };
 
     function buildWebPage(resolve, reject) {
-        //step 1: load web page
+        //step 1: load web page layout
+        var loadHomePageTask = JxUtil.makeLoadFilePromise(
+            '/js/mainContent/partial.html', 
+            function(text){
+                JxHelper.getMainContent().innerHTML = text
+            })
 
-        //step 2: build routing
+        //step 2: load router handler
+        var loadRouterTask = JxUtil.makeRequireFilePromise(
+            '/js/router.js', 
+            function(){
+                //step 2.1. listen URL hash(#) change and swap content accordingly
+                window.onhashchange = function() {
+                    try {
+                        Router.resolve(decodeURI(window.location.hash))
+                    } catch (err) {
+                        JxHelper.showServerErrorMessage();
+                    }
+                }
+            })
 
-        //step 3: trigger route
-        resolve("d")
+        var startRouterTask = function(){ return new Promise(
+            function(resolve, reject){
+                //3. start resolve path
+                Router.resolve(decodeURI(window.location.hash))
+
+                resolve()
+            })}
+
+        var task = new jxPromiseTask(true, [
+            new jxPromiseTask(false, [
+                loadHomePageTask,
+                loadRouterTask
+            ]),
+            startRouterTask
+        ])
+
+        JxPromise.runPromise(task).then(resolve, reject)
     };
 
     if (typeof Promise == 'undefined') {
