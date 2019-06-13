@@ -2,51 +2,22 @@
     'use strict';
 
     function bootstrapSequence(resolve, reject) {
-        // var bootSequence = [loadGUILibs, loadPolyfills, buildWebPage]
+        //step 1: load basic libraries
+        var  loadBaseLibsTask = new jxPromiseTask(false, [
+            function(){ return new Promise(loadGUILibs) },
+            function(){ return new Promise(loadPolyfills) },
+            function(){ return new Promise(loadUtilities) }
+        ])
 
-        // var ss = [
-        //     function(){ return new Promise(function(s,r){ 
-        //         console.log("s1")
-        //         JxLoader.loadFile('/js/login/login.js', function(text){ s(text) }, function(err){ r(err) })
-        //     })},
-        //     function(){ return new Promise(function(s,r){ 
-        //         console.log("s2")
-        //         JxLoader.loadFile('/js/note/note.js', function(text){ s(text) }, function(err){ r(err) })
-        //     })},
-        //     function(){ return new Promise(function(s,r){ 
-        //         console.log("s3")
-        //         JxLoader.loadFile('/js/user/user.js', function(text){ s(text) }, function(err){ r(err) })
-        //     })}
-        // ]
+        var bootstrapTask = new jxPromiseTask(true, [
+            loadBaseLibsTask,
+            //step 2: build web page
+            function(){ return new Promise(buildWebPage)}
+        ])
 
-        // console.log('begin serial promises')
-        // var ssPromise = JxLoader.runPromiseInSerial(ss)
-        // ssPromise.then(
-        //     function(result){
-        //         console.log(result)
-        //         console.log('done serial promises')
-        //     },
-        //     function(err){
-        //         console.log('error encounter in serial promises: ' + err.message)
-        //     }
-        // )
-
-        //step 1: load base dependecies
-        var guiLibs = new Promise(loadGUILibs)
-        var polyfills = new Promise(loadPolyfills)
-        var utilities = new Promise(loadUtilities)
-
-        Promise.all([guiLibs, polyfills, utilities])
-            .then(function(){
-                //step 2: build web page
-                var buildPagePromise = new Promise(buildWebPage)
-                buildPagePromise
-                    .then(function(){ resolve()})
-                    .catch(function(err){reject(err)})
-            })
-            .catch(function(err){
-                reject(err)
-            })
+        //trigger sequences
+        var promise = JxPromise.runPromise(bootstrapTask)
+        promise.then(resolve, reject)
     };
 
     function loadGUILibs(resolve, reject) {
@@ -62,8 +33,7 @@
             ],
             function(
                 jquery, popper, bootstrap,
-                styleCSS, bootstrapCSS, bootstrapGridCSS, boostrapRebootCSS,
-                jxHelper) {
+                styleCSS, bootstrapCSS, bootstrapGridCSS, boostrapRebootCSS) {
 
                 JxLoader.addScriptTag(jquery, '/libs/jquery-3.4.1.min.js')
                 JxLoader.addScriptTag(popper, '/libs/popper.min.js')
@@ -80,7 +50,7 @@
 
                 // $('.special-loading').text('asd')
                 // $('.special-loading').addClass('visible')
-                resolve()
+                resolve("a")
             },
             function(err) {
                 reject(err)
@@ -88,15 +58,14 @@
     };
 
     function loadPolyfills(resolve, reject) {
-        resolve()
+        resolve("b")
     };
 
     function loadUtilities(resolve, reject) {
-        JxLoader.loadMultipleFiles(['/js/helper/jxPromise.js', '/js/helper/jxHelper.js'], 
-            function(jxPromiseText, jsHelperText){
-                JxLoader.addScriptTag(jxPromiseText, '/js/helper/jxPromise.js')
+        JxLoader.loadMultipleFiles(['/js/helper/jxHelper.js'], 
+            function(jsHelperText){
                 JxLoader.addScriptTag(jsHelperText, '/js/helper/jxHelper.js')
-                resolve()
+                resolve("c")
             }, 
             function(err){
                 reject(err)
@@ -109,28 +78,50 @@
         //step 2: build routing
 
         //step 3: trigger route
-        resolve()
+        resolve("d")
     };
 
     if (typeof Promise == 'undefined') {
         //need to load Bluebird
-        JxLoader.require('libs/bluebird-3.5.5.min.js',
-            function() {
-                console.log("load Promise polyfill successfully")
+        JxLoader.loadMultipleFiles(['libs/bluebird-3.5.5.min.js', 'js/helper/jxPromise.js'],
+            function(blueBirdText, jsPromiseText) {
+                JxLoader.addScriptTag(blueBirdText, 'libs/bluebird-3.5.5.min.js')
+                JxLoader.addScriptTag(jsPromiseText, 'js/helper/jxPromise.js')
+                console.log("successfully loaded Promise polyfill ")
+                console.log("successfully loaded jxPromise ")
 
                 var promise = new Promise(bootstrapSequence)
                 promise
                     .then(function(){console.log('done!')})
-                    .catch(function(err){ console.log('failed! - ' + err.message)})
+                    .catch(function(err){ 
+                        console.error('failed to run bootstrap sequence: ' + err.message)
+                        console.error(err.stack) 
+                    })
             },
             function(err) {
                 console.error('failed to load Promise polyfill: ' + err.message)
+                console.error(err.stack)
             })
     } else {
-        var promise = new Promise(bootstrapSequence)
-        promise
-            .then(function(){console.log('done!')})
-            .catch(function(err){ console.log('failed! - ' + err.message)})
-    }
+        JxLoader.loadMultipleFiles(['js/helper/jxPromise.js'],
+            function(jsPromiseText) {
+                JxLoader.addScriptTag(jsPromiseText, 'js/helper/jxPromise.js')
+                console.log("successfully loaded jxPromise ")
 
+                var promise = new Promise(bootstrapSequence)
+                promise
+                    .then(function(result){
+                        console.log('done!')
+                        console.log(result)
+                    })
+                    .catch(function(err){ 
+                        console.error('failed to run bootstrap sequence: ' + err.message)
+                        console.error(err.stack) 
+                    })
+            },
+            function(err) {
+                console.error('failed to load Promise polyfill: ' + err.message)
+                console.error(err.stack)
+            })
+    }
 })(this);
