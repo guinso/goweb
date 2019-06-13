@@ -120,7 +120,7 @@ jxLoader.prototype.addStyleSheetTag = function(rawText, fileURL) {
     var found = false
     var headCount = header.childElementCount
     for (var i = 0; i < headCount; i++) {
-        if (header.children[i].nodeName.toLowerCase() === 'link' &&
+        if (header.children[i].nodeName.toLowerCase() === 'style' &&
             header.children[i].dataset &&
             header.children[i].dataset.url &&
             header.children[i].dataset.url === fileURL) {
@@ -132,8 +132,9 @@ jxLoader.prototype.addStyleSheetTag = function(rawText, fileURL) {
         return
     }
 
-    var newStyleSheet = document.createElement('link')
+    var newStyleSheet = document.createElement('style')
     newStyleSheet.setAttribute('rel', 'stylesheet')
+    newStyleSheet.setAttribute('type', 'text/css')
     newStyleSheet.innerHTML = rawText
 
     if (typeof fileURL === 'string' && fileURL.length > 0) {
@@ -145,24 +146,24 @@ jxLoader.prototype.addStyleSheetTag = function(rawText, fileURL) {
 
 jxLoader.prototype.loadAndTagFile = function(urlFile, successFN, failureFN) {
     var instanceThis = this
-    this.loadFile(urlFile, 
-        function(rawText){
+    this.loadFile(urlFile,
+        function(rawText) {
             try {
                 instanceThis._addTag(urlFile, rawText)
                 successFN()
             } catch (err) {
                 failureFN(err)
             }
-        }, 
+        },
         failureFN)
 };
 
 jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failureFN) {
     var instanceThis = this
-    this.loadMultipleFiles(urlFiles, 
-        function(){
+    this.loadMultipleFiles(urlFiles,
+        function() {
             try {
-                for (var i=0; i < arguments.length; i++) {
+                for (var i = 0; i < arguments.length; i++) {
                     instanceThis._addTag(urlFiles[i], arguments[i])
                 }
 
@@ -170,7 +171,7 @@ jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failu
             } catch (err) {
                 failureFN(err)
             }
-        }, 
+        },
         failureFN)
 };
 
@@ -203,7 +204,7 @@ jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
     this.task.push(reqTask)
 
     var jxbootObj = this
-    
+
     //step 2: try load file from URL
     this.loadFile(fileURL,
         function(response) {
@@ -276,7 +277,7 @@ jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
 
     request.onload = function() {
         if (request.status == 200 || request.status < 300) {
-            
+
             var jsonObj = JSON.parse(request.responseText)
             successFN(jsonObj)
         } else {
@@ -302,7 +303,7 @@ jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
 
     request.onload = function() {
         if (request.status == 200 || request.status < 300) {
-            
+
             var jsonObj = JSON.parse(request.responseText)
             successFN(jsonObj)
         } else {
@@ -326,30 +327,30 @@ jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
  */
 jxLoader.prototype.generateUUID = function() {
     var d = Date.now();
-    if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
         d += performance.now(); //use high-precision timer if available
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
 };
 
-(function(global){
+(function(global) {
     if (typeof JxLoader == 'undefined') {
         global.JxLoader = new jxLoader()
 
         //load script if specify at data-main attribute
         var scriptTag = document.currentScript
-        if (scriptTag
-            && scriptTag.dataset 
-            && scriptTag.dataset.main) {
-                JxLoader.loadFile(scriptTag.dataset.main, 
-                function(responseText){
+        if (scriptTag &&
+            scriptTag.dataset &&
+            scriptTag.dataset.main) {
+            JxLoader.loadFile(scriptTag.dataset.main,
+                function(responseText) {
                     JxLoader.addScriptTag(responseText)
-                }, 
-                function(err){
+                },
+                function(err) {
                     console.error(err.message)
                     console.error('failed retrieve script: ' + scriptTag.dataset.main)
                 })

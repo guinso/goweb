@@ -1,19 +1,19 @@
-function jxUtil(){}
+function jxUtil() {}
 
 /**
  * Require jxLoader.js
  */
-jxUtil.prototype.makeLoadFilePromise = function(fileURL, successFN, failFN) {
-    return function(){
-        return new Promise(function(resolve, reject){
-            JxLoader.loadFile(fileURL, 
-                function(text){
+jxUtil.prototype.loadFilePromise = function(fileURL, successFN, failFN) {
+    return function() {
+        return new Promise(function(resolve, reject) {
+            JxLoader.loadFile(fileURL,
+                function(text) {
                     if (typeof successFN !== 'undefined') {
                         successFN(text)
                     }
                     resolve(text)
                 },
-                function(err){
+                function(err) {
                     if (typeof failFN !== 'undefiend') {
                         failFN(err)
                     }
@@ -26,17 +26,17 @@ jxUtil.prototype.makeLoadFilePromise = function(fileURL, successFN, failFN) {
 /**
  * Require jxLoader.js
  */
-jxUtil.prototype.makeRequireFilePromise = function(fileURL, successFN, failFN) {
-    return function(){
-        return new Promise(function(resolve, reject){
-            JxLoader.require(fileURL, 
-                function(x){
+jxUtil.prototype.requireFilePromise = function(fileURL, successFN, failFN) {
+    return function() {
+        return new Promise(function(resolve, reject) {
+            JxLoader.require(fileURL,
+                function(x) {
                     if (typeof successFN !== 'undefined') {
                         successFN(x)
                     }
                     resolve(x)
-                }, 
-                function(err){
+                },
+                function(err) {
                     if (typeof failFN !== 'undefined') {
                         failFN(err)
                     }
@@ -46,7 +46,7 @@ jxUtil.prototype.makeRequireFilePromise = function(fileURL, successFN, failFN) {
     }
 };
 
-(function(){
+(function() {
     if (typeof JxUtil === 'undefined') {
         window.JxUtil = new jxUtil()
     }

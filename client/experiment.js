@@ -1,17 +1,17 @@
-(function(global){
+(function(global) {
     'use strict';
 
     function bootstrapSequence(resolve, reject) {
-        
-        var  loadBaseLibsTask = new jxPromiseTask(false, [
-            function(){ return new Promise(loadGUILibs) },
-            function(){ return new Promise(loadPolyfills) },
-            function(){ return new Promise(loadUtilities) }
+
+        var loadBaseLibsTask = new jxPromiseTask(false, [
+            function() { return new Promise(loadGUILibs) },
+            function() { return new Promise(loadPolyfills) },
+            function() { return new Promise(loadUtilities) }
         ])
 
         var bootstrapTask = new jxPromiseTask(true, [
-            loadBaseLibsTask,                               //step 1: load basic libraries
-            function(){ return new Promise(buildWebPage)}   //step 2: build web page
+            loadBaseLibsTask, //step 1: load basic libraries
+            function() { return new Promise(buildWebPage) } //step 2: build web page
         ])
 
         //trigger sequences
@@ -26,13 +26,14 @@
                 '/css/style.css',
                 '/css/bootstrap.min.css',
                 '/css/bootstrap-grid.min.css',
-                '/css/bootstrap-reboot.min.css'], 
-                resolve, reject)
+                '/css/bootstrap-reboot.min.css'
+            ],
+            resolve, reject)
     };
 
     function loadPolyfills(resolve, reject) {
         if (typeof fetch === 'undefined') {
-            JxLoader.loadAndTagFile('/libs/fetch-3.0.0.umd.js', 
+            JxLoader.loadAndTagFile('/libs/fetch-3.0.0.umd.js',
                 resolve, reject)
         } else {
             resolve("b2")
@@ -41,23 +42,24 @@
 
     function loadUtilities(resolve, reject) {
         JxLoader.loadAndTagMultipleFiles([
-            '/js/helper/jxHelper.js', 
-            '/js/helper/jxUtil.js'], 
+                '/js/helper/jxHelper.js',
+                '/js/helper/jxUtil.js'
+            ],
             resolve, reject)
     };
 
     function buildWebPage(resolve, reject) {
         //step 1: load web page layout
-        var loadHomePageTask = JxUtil.makeLoadFilePromise(
-            '/js/mainContent/partial.html', 
-            function(text){
+        var loadHomePageTask = JxUtil.loadFilePromise(
+            '/js/mainContent/partial.html',
+            function(text) {
                 JxHelper.getMainContent().innerHTML = text
             })
 
         //step 2: load router handler
-        var loadRouterTask = JxUtil.makeRequireFilePromise(
-            '/js/router.js', 
-            function(){
+        var loadRouterTask = JxUtil.requireFilePromise(
+            '/js/router.js',
+            function() {
                 //step 2.1. listen URL hash(#) change and swap content accordingly
                 window.onhashchange = function() {
                     try {
@@ -68,13 +70,14 @@
                 }
             })
 
-        var startRouterTask = function(){ return new Promise(
-            function(resolve, reject){
-                //3. start resolve path
-                Router.resolve(decodeURI(window.location.hash))
-
-                resolve()
-            })}
+        //step 3. start resolve URL hash path
+        var startRouterTask = function() {
+            return new Promise(
+                function(resolve, reject) {
+                    Router.resolve(decodeURI(window.location.hash))
+                    resolve()
+                })
+        }
 
         var task = new jxPromiseTask(true, [
             new jxPromiseTask(false, [
@@ -84,7 +87,9 @@
             startRouterTask
         ])
 
-        JxPromise.runPromise(task).then(resolve, reject)
+        //JxPromise.runPromise(task).then(resolve, reject)
+
+        loadHomePageTask().then(resolve, reject)
     };
 
     if (typeof Promise == 'undefined') {
@@ -96,10 +101,10 @@
 
                 var promise = new Promise(bootstrapSequence)
                 promise
-                    .then(function(){console.log('done!')})
-                    .catch(function(err){ 
+                    .then(function() { console.log('done!') })
+                    .catch(function(err) {
                         console.error('failed to run bootstrap sequence: ' + err.message)
-                        console.error(err.stack) 
+                        console.error(err.stack)
                     })
             },
             function(err) {
@@ -113,13 +118,13 @@
 
                 var promise = new Promise(bootstrapSequence)
                 promise
-                    .then(function(result){
+                    .then(function(result) {
                         console.log('done!')
                         console.log(result)
                     })
-                    .catch(function(err){ 
+                    .catch(function(err) {
                         console.error('failed to run bootstrap sequence: ' + err.message)
-                        console.error(err.stack) 
+                        console.error(err.stack)
                     })
             },
             function(err) {
