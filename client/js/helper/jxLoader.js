@@ -143,6 +143,47 @@ jxLoader.prototype.addStyleSheetTag = function(rawText, fileURL) {
     header.appendChild(newStyleSheet)
 };
 
+jxLoader.prototype.loadAndTagFile = function(urlFile, successFN, failureFN) {
+    var instanceThis = this
+    this.loadFile(urlFile, 
+        function(rawText){
+            try {
+                instanceThis._addTag(urlFile, rawText)
+                successFN()
+            } catch (err) {
+                failureFN(err)
+            }
+        }, 
+        failureFN)
+};
+
+jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failureFN) {
+    var instanceThis = this
+    this.loadMultipleFiles(urlFiles, 
+        function(){
+            try {
+                for (var i=0; i < arguments.length; i++) {
+                    instanceThis._addTag(urlFiles[i], arguments[i])
+                }
+
+                successFN()
+            } catch (err) {
+                failureFN(err)
+            }
+        }, 
+        failureFN)
+};
+
+jxLoader.prototype._addTag = function(urlFile, rawText) {
+    if (urlFile.endsWith('.js')) {
+        this.addScriptTag(rawText, urlFile)
+    } else if (urlFile.endsWith('.css')) {
+        this.addStyleSheetTag(rawText, urlFile)
+    } else {
+        throw new Error("only support .js and .css: " + urlFile)
+    }
+};
+
 jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
 
     if (!fileURL.endsWith('.js') && !fileURL.endsWith('.css')) {

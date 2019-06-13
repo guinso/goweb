@@ -19,46 +19,21 @@
     };
 
     function loadGUILibs(resolve, reject) {
-
-        JxLoader.loadMultipleFiles([
+        JxLoader.loadAndTagMultipleFiles([
                 '/libs/jquery-3.4.1.min.js',
                 '/libs/popper.min.js',
                 '/libs/bootstrap.min.js',
                 '/css/style.css',
                 '/css/bootstrap.min.css',
                 '/css/bootstrap-grid.min.css',
-                '/css/bootstrap-reboot.min.css'
-            ],
-            function(
-                jquery, popper, bootstrap,
-                styleCSS, bootstrapCSS, bootstrapGridCSS, boostrapRebootCSS) {
-
-                JxLoader.addScriptTag(jquery, '/libs/jquery-3.4.1.min.js')
-                JxLoader.addScriptTag(popper, '/libs/popper.min.js')
-                JxLoader.addScriptTag(bootstrap, '/libs/bootstrap.min.js')
-                console.log("load libs done")
-
-                JxLoader.addStyleSheetTag(styleCSS, '/css/style.css')
-                JxLoader.addStyleSheetTag(bootstrapCSS, '/css/bootstrap.min.css')
-                JxLoader.addStyleSheetTag(bootstrapGridCSS, '/css/bootstrap-grid.min.css')
-                JxLoader.addStyleSheetTag(boostrapRebootCSS, '/css/bootstrap-reboot.min.css')
-                console.log("load stylesheets done")
-
-                resolve("a")
-            },
-            function(err) {
-                reject(err)
-            })
+                '/css/bootstrap-reboot.min.css'], 
+                resolve, reject)
     };
 
     function loadPolyfills(resolve, reject) {
         if (typeof fetch === 'undefined') {
-            JxLoader.loadFile('/libs/fetch-3.0.0.umd.js', 
-                function(text){
-                    JxLoader.addScriptTag(text, '/libs/fetch-3.0.0.umd.js')
-                    resolve("b1")
-                },
-                reject)
+            JxLoader.loadAndTagFile('/libs/fetch-3.0.0.umd.js', 
+                resolve, reject)
         } else {
             resolve("b2")
         }
@@ -141,9 +116,8 @@
                 console.error(err.stack)
             })
     } else {
-        JxLoader.loadMultipleFiles(['js/helper/jxPromise.js'],
-            function(jsPromiseText) {
-                JxLoader.addScriptTag(jsPromiseText, 'js/helper/jxPromise.js')
+        JxLoader.loadAndTagFile('js/helper/jxPromise.js',
+            function() {
                 console.log("successfully loaded jxPromise ")
 
                 var promise = new Promise(bootstrapSequence)
