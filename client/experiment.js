@@ -40,17 +40,10 @@
     };
 
     function loadUtilities(resolve, reject) {
-        JxLoader.loadMultipleFiles([
-            '/js/helper/jxHelper.js', '/js/helper/jxUtil.js'], 
-            function(jsHelperText, jxUtilText){
-                JxLoader.addScriptTag(jsHelperText, '/js/helper/jxHelper.js')
-                JxLoader.addScriptTag(jxUtilText, '/js/helper/jxUtil.js')
-
-                resolve("c")
-            }, 
-            function(err){
-                reject(err)
-            })
+        JxLoader.loadAndTagMultipleFiles([
+            '/js/helper/jxHelper.js', 
+            '/js/helper/jxUtil.js'], 
+            resolve, reject)
     };
 
     function buildWebPage(resolve, reject) {
@@ -96,10 +89,8 @@
 
     if (typeof Promise == 'undefined') {
         //need to load Bluebird
-        JxLoader.loadMultipleFiles(['libs/bluebird-3.5.5.min.js', 'js/helper/jxPromise.js'],
-            function(blueBirdText, jsPromiseText) {
-                JxLoader.addScriptTag(blueBirdText, 'libs/bluebird-3.5.5.min.js')
-                JxLoader.addScriptTag(jsPromiseText, 'js/helper/jxPromise.js')
+        JxLoader.loadAndTagMultipleFiles(['libs/bluebird-3.5.5.min.js', 'js/helper/jxPromise.js'],
+            function() {
                 console.log("successfully loaded Promise polyfill ")
                 console.log("successfully loaded jxPromise ")
 
