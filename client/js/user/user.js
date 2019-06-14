@@ -1,7 +1,4 @@
-import { JxHelper } from '/js/helper/jxhelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
-
-export class User {
+function user(){}
 
     static async renderPage() {
         JxHelper.showLoadingPanel();
@@ -26,5 +23,4 @@ export class User {
 
         JxHelper.hideLoadingPanel();
     }
-}
 //# sourceURL=user/user.js

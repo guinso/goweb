@@ -1,96 +1,99 @@
-import { JxHelper } from '/js/helper/jxhelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
-
-export class Login {
+function login() {}
 
     //show login page
-    static renderLoginPage() {
-        //empty main-content child elements
-        const mainContent = JxHelper.getMainContent()
-        JxHelper.emptyElementChildren(mainContent)
+login.prototype.renderLoginPage = function() {
+    var thisInstance = this
 
-        JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
-        JxHelper.showSpecialLoading()
+    //empty main-content child elements
+    var mainContent = JxHelper.getMainContent()
+    JxHelper.emptyElementChildren(mainContent)
 
-        FetchHelper.text('/js/login/partial.html')
-            .then(text => {
-                JxHelper.getSpecialContent().innerHTML = text
+    JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
+    JxHelper.showSpecialLoading()
 
-                //setup event handler
-                Login.setupEventHandler()
+    JxLoader.loadFile('/js/login/partial.html', 
+        function(text){
+            JxHelper.getSpecialContent().innerHTML = text
 
-                JxHelper.showSpecialContent()
-                JxHelper.hideSpecialLoading()
+            //setup event handler
+            thisInstance.setupEventHandler()
 
-                setTimeout(function() {
-                    const xx = document.querySelector('.login-placeholder')
-                    xx.classList.add('show-login')
-                }, 100)
-            })
-            .catch(err => {
-                console.error(err)
-                JxHelper.showServerErrorMessage()
-            })
-    }
+            JxHelper.showSpecialContent()
+            JxHelper.hideSpecialLoading()
 
-    static setupEventHandler() {
-        //implement event handler
-        const form = document.querySelector('#loginForm')
-
-        form.addEventListener('submit', e => {
-            console.log('entering login form submit handler...')
-
-            var jsonData = {
-                username: document.querySelector('#usernameCtl').value,
-                pwd: document.querySelector('#pwdCtl').value
-            }
-
-            var loginMsg = document.querySelector('#loginFailMsg')
-            loginMsg.classList.remove('text-danger')
-            loginMsg.innerHTML ="try login..."
-
-            console.log('start send POST request')
-            FetchHelper.postJson('/api/login', jsonData)
-                .then(responseJson => {
-                    if (responseJson.statusCode === 0) {
-                        loginMsg.innerHTML = "login success"
-
-                        window.location = "/"; //redirect to default page
-                    } else {
-                        loginMsg.innerHTML = responseJson.statusMsg
-                        loginMsg.classList.add('text-danger')
-                    }
-                })
-                .catch(err => {
-                    console.error(`failed to login: ${err.message}`)
-                    JxHelper.showServerErrorMessage()
-                })
-
-            e.preventDefault()
+            setTimeout(function() {
+                var xx = document.querySelector('.login-placeholder')
+                xx.classList.add('show-login')
+            }, 100)
+        }, 
+        function(err){
+            console.error(err)
+            JxHelper.showServerErrorMessage()
         })
-    }
+};
 
-    static logout() {
-        //handle logout
-        FetchHelper.postJson('/api/logout', {})
-            .then(jsonData => {
-                if (jsonData.statusCode === 0) {
-                    //logout success
-                    window.location = "#login"
+login.prototype.setupEventHandler = function() {
+    //implement event handler
+    var form = document.querySelector('#loginForm')
+
+    form.addEventListener('submit', function(e){
+        console.log('entering login form submit handler...')
+        e.preventDefault()
+
+        var jsonData = {
+            username: document.querySelector('#usernameCtl').value,
+            pwd: document.querySelector('#pwdCtl').value
+        }
+
+        var loginMsg = document.querySelector('#loginFailMsg')
+        loginMsg.classList.remove('text-danger')
+        loginMsg.innerHTML ="try login..."
+
+        console.log('start send POST request')
+        JxLoader.postJSON('/api/login', jsonData, 
+            function(responseJson){
+                if (responseJson.statusCode === 0) {
+                    loginMsg.innerHTML = "login success"
+
+                    window.location = "/"; //redirect to default page
                 } else {
-                    //logout failed
-                    console.error(jsonData.statusMsg)
-
-                    const specialError = JxHelper.getSpecialError()
-                    specialError.innerHTML = 
-                        `<h3>opps, failed to logout...</h3><p>${jsonData.statusMsg}</p>`
-                    JxHelper.showSpecialError()
+                    loginMsg.innerHTML = responseJson.statusMsg
+                    loginMsg.classList.add('text-danger')
                 }
-            })
-            .catch(err =>{
-                console.error(`failed to logout: ${err.message}`)
+            }, 
+            function(err){
+                console.error('failed to login: ' + err.message)
                 JxHelper.showServerErrorMessage()
             })
+    })
+};
+
+login.prototype.logout = function() {
+    //handle logout
+    jxLoader.postJSON('/api/logout', {}, 
+        function(jsonData){
+            if (jsonData.statusCode === 0) {
+                //logout success
+                window.location = "#login"
+            } else {
+                //logout failed
+                console.error(jsonData.statusMsg)
+
+                var specialError = JxHelper.getSpecialError()
+                specialError.innerHTML = 
+                    '<h3>opps, failed to logout...</h3><p>' + jsonData.statusMsg + '</p>'
+                JxHelper.showSpecialError()
+            }
+        }, 
+        function(err){
+            console.error('failed to logout: ' + err.message)
+            JxHelper.showServerErrorMessage()
+        })
+};
+
+(function(){
+    if (typeof Login === 'undefined') {
+        window.Login = new login()
     }
-}
+})()
 //# sourceURL=login/login.js

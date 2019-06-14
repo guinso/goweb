@@ -7,10 +7,6 @@ function jxPromiseTask(isSerial, tasks) {
     this.tasks = tasks
 }
 
-jxPromiseTask.prototype.addTask = function(promiseFN) {
-    this.tasks.push(promiseFN)
-}
-
 function jxPromise(){}
 
 /**
@@ -26,20 +22,20 @@ function jxPromise(){}
  *      resolve() 
  * }
 */
-jxPromise.prototype.runPromiseInSerial = function(promisesFN) {
-    return promisesFN.reduce(
-        this._promiseFunctionReducer, //reducer
-        Promise.resolve([])) //initial promise
-};
+// jxPromise.prototype.runPromiseInSerial = function(promisesFN) {
+//     return promisesFN.reduce(
+//         this._promiseFunctionReducer, //reducer
+//         Promise.resolve([])) //initial promise
+// };
 
-jxPromise.prototype._promiseFunctionReducer = function(promiseChain, fn){
-    return promiseChain.then(function(chainResult){
-        return fn().then(function(fnResult){
-            chainResult.push(fnResult)
-            return chainResult
-        })
-    })
-};
+// jxPromise.prototype._promiseFunctionReducer = function(promiseChain, fn){
+//     return promiseChain.then(function(chainResult){
+//         return fn().then(function(fnResult){
+//             chainResult.push(fnResult)
+//             return chainResult
+//         })
+//     })
+// };
 
 jxPromise.prototype.runPromise = function(promiseTask) {
     if (promiseTask.isSerial === true) { //run in serial

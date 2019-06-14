@@ -1,6 +1,10 @@
 'use strict'
 
-/** polyfills for string */
+/** 
+ * =============================================================
+ * polyfills for string 
+ * =============================================================
+ */
 String.prototype.contains = String.prototype.contains || function(str) {
     return this.indexOf(str) >= 0;
 };
@@ -17,7 +21,11 @@ function jxLoader() {
     this.task = [] //stack data type
 }
 
-/** JxLoader */
+/** 
+ * ======================================================================
+ * JxLoader 
+ * ======================================================================
+ */
 jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     if (!('jxFiles' in window)) {
         window['jxFiles'] = new Array()
@@ -57,6 +65,28 @@ jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     request.send()
 };
 
+jxLoader.prototype.loadFilePromise = function(fileURL, successFN, failFN) {
+    var thisInstance = this
+
+    return function() {
+        return new Promise(function(resolve, reject) {
+            thisInstance.loadFile(fileURL,
+                function(text) {
+                    if (typeof successFN !== 'undefined') {
+                        successFN(text)
+                    }
+                    resolve(text)
+                },
+                function(err) {
+                    if (typeof failFN !== 'undefiend') {
+                        failFN(err)
+                    }
+                    reject(err)
+                })
+        })
+    }
+};
+
 jxLoader.prototype.loadMultipleFiles = function(urls, successFN, failedFN) {
     var urlCount = urls.length
 
@@ -82,6 +112,28 @@ jxLoader.prototype.loadMultipleFiles = function(urls, successFN, failedFN) {
                 }
             })
     }
+};
+
+jxLoader.prototype.loadMultipleFilesPromise = function(urls, successFN, failedFN) {
+    var thisInstance = this
+
+    return new Promise(function(resolve, reject){
+        thisInstance.loadMultipleFiles(urls, 
+            function(){
+                if (typeof successFN !== 'undefined') {
+                    successFN(Array.prototype.slice.call(arguments))
+                }
+
+                resolve(Array.prototype.slice.call(arguments))
+            }, 
+            function(err){
+                if (typeof failedFN !== 'undefined') {
+                    failedFN(err)
+                }
+
+                reject(err)
+            })
+    })
 };
 
 jxLoader.prototype.addScriptTag = function(rawText, fileURL) {
@@ -158,6 +210,28 @@ jxLoader.prototype.loadAndTagFile = function(urlFile, successFN, failureFN) {
         failureFN)
 };
 
+jxLoader.prototype.loadAndTagFilePromise = function(urlFile, successFN, failureFN) {
+    var thisInstance = this
+
+    return new Promise(function(resolve, reject){
+        thisInstance.loadAndTagFile(urlFile, 
+            function(){
+                if (typeof successFN !== 'undefined') {
+                    successFN()
+                }
+
+                resolve()
+            }, 
+            function(err){
+                if (typeof failureFN !== 'undefined') {
+                    failureFN(err)
+                }
+
+                reject(err)
+            })
+    })
+};
+
 jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failureFN) {
     var instanceThis = this
     this.loadMultipleFiles(urlFiles,
@@ -173,6 +247,27 @@ jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failu
             }
         },
         failureFN)
+};
+
+jxLoader.prototype.loadTagMultipleFilesPromise = function(urlFiles, successFN, failureFN) {
+    var thisInstance = this
+    return new Promise(function(resolve, reject){
+        thisInstance.loadAndTagMultipleFiles(urlFiles, 
+            function(){
+                if (typeof successFN !== 'undefined') {
+                    successFN()
+                }
+
+                resolve()
+            }, 
+            function(err){
+                if (typeof failureFN !== 'undefined') {
+                    failureFN(err)
+                }
+
+                reject(err)
+            })
+    })
 };
 
 jxLoader.prototype._addTag = function(urlFile, rawText) {
@@ -234,6 +329,28 @@ jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
         })
 };
 
+//require promise
+jxLoader.prototype.requirePromise = function(fileURL, successFN, failFN) {
+    var thisInstance = this
+    return function() {
+        return new Promise(function(resolve, reject) {
+            thisInstance.require(fileURL,
+                function(x) {
+                    if (typeof successFN !== 'undefined') {
+                        successFN(x)
+                    }
+                    resolve(x)
+                },
+                function(err) {
+                    if (typeof failFN !== 'undefined') {
+                        failFN(err)
+                    }
+                    reject(err)
+                })
+        })
+    }
+};
+
 jxLoader.prototype.dequeueTask = function(taskID) {
     //return if no more task available
     if (this.task.length == 0) {
@@ -289,7 +406,7 @@ jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
 
     var isAsynchronous = true
 
-    request.open('GET', urlFile, isAsynchronous)
+    request.open('GET', url, isAsynchronous)
     request.send()
 }
 
@@ -314,10 +431,10 @@ jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
     }
 
     var isAsynchronous = true
-    var param = JSON.stringify(inputJSON)
+    var param = JSON.stringify(inputJson)
 
+    request.open('POST', url, isAsynchronous)
     request.setRequestHeader("Content-type", "application/json")
-    request.open('POST', urlFile, isAsynchronous)
     request.send(param)
 }
 

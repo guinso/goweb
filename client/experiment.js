@@ -42,22 +42,21 @@
 
     function loadUtilities(resolve, reject) {
         JxLoader.loadAndTagMultipleFiles([
-                '/js/helper/jxHelper.js',
-                '/js/helper/jxUtil.js'
+                '/js/helper/jxHelper.js'
             ],
             resolve, reject)
     };
 
     function buildWebPage(resolve, reject) {
         //step 1: load web page layout
-        var loadHomePageTask = JxUtil.loadFilePromise(
+        var loadHomePageTask = JxLoader.loadFilePromise(
             '/js/mainContent/partial.html',
             function(text) {
                 JxHelper.getMainContent().innerHTML = text
             })
 
         //step 2: load router handler
-        var loadRouterTask = JxUtil.requireFilePromise(
+        var loadRouterTask = JxLoader.requirePromise(
             '/js/router.js',
             function() {
                 //step 2.1. listen URL hash(#) change and swap content accordingly
@@ -74,8 +73,13 @@
         var startRouterTask = function() {
             return new Promise(
                 function(resolve, reject) {
-                    Router.resolve(decodeURI(window.location.hash))
-                    resolve()
+                    try
+                    {
+                        Router.resolve(decodeURI(window.location.hash))
+                        resolve()
+                    } catch (err) {
+                        reject(err)
+                    }
                 })
         }
 
@@ -87,49 +91,28 @@
             startRouterTask
         ])
 
-        //JxPromise.runPromise(task).then(resolve, reject)
+        JxPromise.runPromise(task).then(resolve, reject)
 
-        loadHomePageTask().then(resolve, reject)
+        //loadHomePageTask().then(resolve, reject)
     };
 
-    if (typeof Promise == 'undefined') {
-        //need to load Bluebird
-        JxLoader.loadAndTagMultipleFiles(['libs/bluebird-3.5.5.min.js', 'js/helper/jxPromise.js'],
-            function() {
-                console.log("successfully loaded Promise polyfill ")
-                console.log("successfully loaded jxPromise ")
-
-                var promise = new Promise(bootstrapSequence)
-                promise
-                    .then(function() { console.log('done!') })
-                    .catch(function(err) {
-                        console.error('failed to run bootstrap sequence: ' + err.message)
-                        console.error(err.stack)
-                    })
-            },
-            function(err) {
-                console.error('failed to load Promise polyfill: ' + err.message)
-                console.error(err.stack)
-            })
-    } else {
-        JxLoader.loadAndTagFile('js/helper/jxPromise.js',
-            function() {
-                console.log("successfully loaded jxPromise ")
-
-                var promise = new Promise(bootstrapSequence)
-                promise
-                    .then(function(result) {
-                        console.log('done!')
-                        console.log(result)
-                    })
-                    .catch(function(err) {
-                        console.error('failed to run bootstrap sequence: ' + err.message)
-                        console.error(err.stack)
-                    })
-            },
-            function(err) {
-                console.error('failed to load Promise polyfill: ' + err.message)
-                console.error(err.stack)
-            })
+    var urlFiles = ['js/helper/jxPromise.js']
+    if (typeof Promise == 'undefined') { //need to load Bluebird (Promise polyfill)
+        urlFiles.push('libs/bluebird-3.5.5.min.js')
     }
-})(this);
+
+    JxLoader.loadAndTagMultipleFiles(urlFiles,
+        function() {
+            var promise = new Promise(bootstrapSequence)
+            promise
+                .then(function() { console.log('done!') })
+                .catch(function(err) {
+                    console.error('failed to run bootstrap sequence: ' + err.message)
+                    console.error(err.stack)
+                })
+        },
+        function(err) {
+            console.error('failed to load Promise polyfill: ' + err.message)
+            console.error(err.stack)
+        })
+})(window);
