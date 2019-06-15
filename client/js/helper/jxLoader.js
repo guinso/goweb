@@ -35,7 +35,7 @@ jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     var cacheFiles = fileLUT.filter(function(x) { return x.fileName == urlFile })
 
     if (cacheFiles.length > 0) {
-        console.warn("File " + urlFile + " is cached")
+        console.log("File " + urlFile + " is cached")
         successFN(cacheFiles[0].text)
         return //cached
     }
@@ -117,16 +117,16 @@ jxLoader.prototype.loadMultipleFiles = function(urls, successFN, failedFN) {
 jxLoader.prototype.loadMultipleFilesPromise = function(urls, successFN, failedFN) {
     var thisInstance = this
 
-    return new Promise(function(resolve, reject){
-        thisInstance.loadMultipleFiles(urls, 
-            function(){
+    return new Promise(function(resolve, reject) {
+        thisInstance.loadMultipleFiles(urls,
+            function() {
                 if (typeof successFN !== 'undefined') {
                     successFN(Array.prototype.slice.call(arguments))
                 }
 
                 resolve(Array.prototype.slice.call(arguments))
-            }, 
-            function(err){
+            },
+            function(err) {
                 if (typeof failedFN !== 'undefined') {
                     failedFN(err)
                 }
@@ -213,16 +213,16 @@ jxLoader.prototype.loadAndTagFile = function(urlFile, successFN, failureFN) {
 jxLoader.prototype.loadAndTagFilePromise = function(urlFile, successFN, failureFN) {
     var thisInstance = this
 
-    return new Promise(function(resolve, reject){
-        thisInstance.loadAndTagFile(urlFile, 
-            function(){
+    return new Promise(function(resolve, reject) {
+        thisInstance.loadAndTagFile(urlFile,
+            function() {
                 if (typeof successFN !== 'undefined') {
                     successFN()
                 }
 
                 resolve()
-            }, 
-            function(err){
+            },
+            function(err) {
                 if (typeof failureFN !== 'undefined') {
                     failureFN(err)
                 }
@@ -251,16 +251,16 @@ jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failu
 
 jxLoader.prototype.loadTagMultipleFilesPromise = function(urlFiles, successFN, failureFN) {
     var thisInstance = this
-    return new Promise(function(resolve, reject){
-        thisInstance.loadAndTagMultipleFiles(urlFiles, 
-            function(){
+    return new Promise(function(resolve, reject) {
+        thisInstance.loadAndTagMultipleFiles(urlFiles,
+            function() {
                 if (typeof successFN !== 'undefined') {
                     successFN()
                 }
 
                 resolve()
-            }, 
-            function(err){
+            },
+            function(err) {
                 if (typeof failureFN !== 'undefined') {
                     failureFN(err)
                 }
