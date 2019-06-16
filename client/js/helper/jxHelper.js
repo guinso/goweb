@@ -1,6 +1,6 @@
 'use strict';
 
-function jxHelper(){}
+function jxHelper() {}
 
 //loading panel
 jxHelper.prototype.getLoadingPanel = function() {
@@ -101,7 +101,7 @@ jxHelper.prototype.parseHTMLString = function(htmlString) {
     return x
 };
 
-(function(){
+(function() {
     if (typeof JxHelper === 'undefined') {
         window.JxHelper = new jxHelper()
     }

@@ -2,12 +2,14 @@
 function router() {}
 
 router.prototype.resolve = function(url) {
+    console.log('Router: start resolve - ' + url)
+
     //This function decides what type of page to show
     //depending on the current url hash value.
     var thisInstance = this
 
-    JxLoader.getJSON('/api/current-user', 
-        function(currentUser){
+    JxLoader.getJSON('/api/current-user',
+        function(currentUser) {
             if (currentUser.statusCode === 0) {
                 if (currentUser.response.id === '-') {
                     //show login page
@@ -16,9 +18,9 @@ router.prototype.resolve = function(url) {
                     })
                 } else {
                     //update current login username
-                    document.querySelector('#usernameHolder').innerHTML = 
+                    document.querySelector('#usernameHolder').innerHTML =
                         currentUser.response.username //TODO: get full name
-        
+
                     //route to actual URL
                     thisInstance.actualRouting(url)
                 }
@@ -26,8 +28,8 @@ router.prototype.resolve = function(url) {
                 console.log('failed to get current user info: ' + currentUser.statusMsg)
                 JxHelper.showServerErrorMessage()
             }
-        }, 
-        function(err){
+        },
+        function(err) {
             console.error('failed to get current user information - ' + err.message)
             console.error(err.stack)
             JxHelper.showServerErrorMessage()
@@ -49,7 +51,7 @@ router.prototype.actualRouting = function(url) {
     var mainContent = JxHelper.getContentPanel()
 
     if (paths[0] === "") {
-        location.href = "#user" //redirect to user page...
+        location.hash = "user" //redirect to user page...
     } else if (paths[0] === "asd") {
 
         mainContent.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
@@ -101,12 +103,12 @@ router.prototype.renderPageNotFound = function() {
 router.prototype.getModule = function(urlVal, execFn) {
     JxHelper.showSpecialLoading()
 
-    JxLoader.require(urlVal, 
-        function(){
+    JxLoader.require(urlVal,
+        function() {
             execFn()
             JxHelper.hideSpecialLoading()
-        }, 
-        function(err){
+        },
+        function(err) {
             console.error("failed to load module: " + urlVal)
             console.error(err.trace)
             JxHelper.showServerErrorMessage()
@@ -117,7 +119,7 @@ router.prototype.strPrefixMatch = function(strCompare, prefix) {
     return strCompare.indexOf(prefix) === 0
 };
 
-(function(){
+(function() {
     if (typeof Router === 'undefined') {
         window.Router = new router()
     }

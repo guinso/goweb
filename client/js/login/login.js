@@ -1,61 +1,80 @@
-function login() {}
+function login() {
+    this.partial = null
+}
 
 //show login page
 login.prototype.renderLoginPage = function() {
     var thisInstance = this
 
-    //empty main-content child elements
-    var mainContent = JxHelper.getMainContent()
-    JxHelper.emptyElementChildren(mainContent)
+    if (this.partial) {
+        this._showLoginPage()
+    } else {
+        JxLoader.loadPartial('/js/login/partial.html',
+            function(partialTmp) {
+                thisInstance.partial = partialTmp
+                thisInstance.setupEventHandler(thisInstance.partial)
 
-    JxHelper.getSpecialLoading().innerText = 'redirecting to login page...'
-    JxHelper.showSpecialLoading()
+                thisInstance._showLoginPage()
+            },
+            function(err) {
+                console.error('failed to get login partial - ' + err.message)
+                console.error(err.trace)
 
-    JxLoader.loadFile('/js/login/partial.html',
-        function(text) {
-            JxHelper.getSpecialContent().innerHTML = text
-
-            //setup event handler
-            thisInstance.setupEventHandler()
-
-            JxHelper.showSpecialContent()
-            JxHelper.hideSpecialLoading()
-
-            setTimeout(function() {
-                var xx = document.querySelector('.login-placeholder')
-                xx.classList.add('show-login')
-            }, 100)
-        },
-        function(err) {
-            console.error(err)
-            JxHelper.showServerErrorMessage()
-        })
+                JxHelper.showServerErrorMessage()
+            })
+    }
 };
 
-login.prototype.setupEventHandler = function() {
+login.prototype._showLoginPage = function() {
+    var content = JxHelper.getSpecialContent()
+    JxLoader.setElementChild(content, this.partial)
+
+    //TODO: clear login form
+    this.partial.querySelector('#usernameCtl').value = ''
+    this.partial.querySelector('#pwdCtl').value = ''
+
+    var loginMsg = this.partial.querySelector('#loginFailMsg')
+    loginMsg.classList.remove('text-danger')
+    loginMsg.innerHTML = "please fill in username and pasword"
+
+    JxHelper.showSpecialContent()
+    JxHelper.hideSpecialLoading()
+
+    setTimeout(function() {
+        var xx = document.querySelector('.login-placeholder')
+        xx.classList.add('show-login')
+    }, 100)
+};
+
+login.prototype.setupEventHandler = function(partial) {
     //implement event handler
-    var form = document.querySelector('#loginForm')
+    //var form = document.querySelector('#loginForm')
+    var form = partial.querySelector('#loginForm')
 
     form.addEventListener('submit', function(e) {
-        console.log('entering login form submit handler...')
+        //console.log('entering login form submit handler...')
         e.preventDefault()
 
         var jsonData = {
-            username: document.querySelector('#usernameCtl').value,
-            pwd: document.querySelector('#pwdCtl').value
+            username: partial.querySelector('#usernameCtl').value,
+            pwd: partial.querySelector('#pwdCtl').value
         }
 
-        var loginMsg = document.querySelector('#loginFailMsg')
+        var loginMsg = partial.querySelector('#loginFailMsg')
         loginMsg.classList.remove('text-danger')
         loginMsg.innerHTML = "try login..."
 
-        console.log('start send POST request')
+        //console.log('start send POST request')
         JxLoader.postJSON('/api/login', jsonData,
             function(responseJson) {
                 if (responseJson.statusCode === 0) {
                     loginMsg.innerHTML = "login success"
 
+                    JxHelper.getSpecialContent().innerHTML =
+                        'login success, navigating to ' + decodeURI(location.hash) + '...'
+
                     window.location = "/"; //redirect to default page
+
                 } else {
                     loginMsg.innerHTML = responseJson.statusMsg
                     loginMsg.classList.add('text-danger')
@@ -74,7 +93,7 @@ login.prototype.logout = function() {
         function(jsonData) {
             if (jsonData.statusCode === 0) {
                 //logout success
-                window.location = "#login"
+                location.hash = 'login'
             } else {
                 //logout failed
                 console.error(jsonData.statusMsg)

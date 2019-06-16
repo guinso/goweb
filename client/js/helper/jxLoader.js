@@ -136,6 +136,40 @@ jxLoader.prototype.loadMultipleFilesPromise = function(urls, successFN, failedFN
     })
 };
 
+jxLoader.prototype.loadPartial = function(url, successFN, failedFN) {
+    this.loadFile(url,
+        function(text) {
+            var partial = document.createElement('div')
+            partial.innerHTML = text
+
+            successFN(partial)
+        },
+        failedFN);
+};
+
+jxLoader.prototype.loadPartialPromise = function(url, successFN, failedFN) {
+    var thisInstance = this
+    return function() {
+        return new Promise(function(resolve, reject) {
+            thisInstance.loadPartial(url,
+                function(partial) {
+                    if (typeof successFN !== 'undefined') {
+                        successFN(partial)
+                    }
+
+                    resolve(partial)
+                },
+                function(err) {
+                    if (typeof failedFN !== 'undefined') {
+                        failedFN(err)
+                    }
+
+                    reject(err)
+                })
+        })
+    }
+};
+
 jxLoader.prototype.addScriptTag = function(rawText, fileURL) {
     var header = document.head // document.getElementsByTagName('head')[0]
 
@@ -408,7 +442,7 @@ jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
 
     request.open('GET', url, isAsynchronous)
     request.send()
-}
+};
 
 jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
     var request = new XMLHttpRequest()
@@ -452,6 +486,14 @@ jxLoader.prototype.generateUUID = function() {
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
+};
+
+jxLoader.prototype.setElementChild = function(parentElement, childElement) {
+    while (parentElement.firstChild) {
+        parentElement.firstChild.remove()
+    }
+
+    parentElement.appendChild(childElement)
 };
 
 (function(global) {

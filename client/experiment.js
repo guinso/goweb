@@ -42,7 +42,8 @@
 
     function loadUtilities(resolve, reject) {
         JxLoader.loadAndTagMultipleFiles([
-                '/js/helper/jxHelper.js'
+                '/js/helper/jxHelper.js',
+                '/js/helper/jxRouter.js'
             ],
             resolve, reject)
     };
@@ -60,21 +61,21 @@
             '/js/router.js',
             function() {
                 //step 2.1. listen URL hash(#) change and swap content accordingly
-                window.onhashchange = function() {
-                    try {
-                        Router.resolve(decodeURI(window.location.hash))
-                    } catch (err) {
-                        JxHelper.showServerErrorMessage();
-                    }
-                }
+                window.addEventListener('hashchange',
+                    function() {
+                        try {
+                            Router.resolve(decodeURI(window.location.hash))
+                        } catch (err) {
+                            JxHelper.showServerErrorMessage();
+                        }
+                    }, false)
             })
 
         //step 3. start resolve URL hash path
         var startRouterTask = function() {
             return new Promise(
                 function(resolve, reject) {
-                    try
-                    {
+                    try {
                         Router.resolve(decodeURI(window.location.hash))
                         resolve()
                     } catch (err) {
