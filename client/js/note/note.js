@@ -5,22 +5,6 @@ function note() {
 note.prototype.renderPage = function() {
     JxHelper.showLoadingPanel()
 
-    // try {
-    //     const fragment = await Note.fetchPartial()
-    //     const todoPlaceHolder = fragment.querySelector('.todo-holder')
-    //     Note.reloadTodoList(todoPlaceHolder)
-
-    //     const contentPanel = JxHelper.getContentPanel()
-    //     JxHelper.emptyElementChildren(contentPanel)
-
-    //     contentPanel.appendChild(fragment)
-    // } catch (err) {
-    //     console.error(err)
-    //     const specialError = JxHelper.getSpecialError()
-    //     specialError.innerHTML = "<h2>Opps, something wrong happen :(</h2>"
-    //     specialError.classList.add("visible")
-    // }
-
     var thisInstance = this
     this.fetchPartial(
         function(fragment) {
