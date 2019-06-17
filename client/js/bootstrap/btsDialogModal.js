@@ -1,10 +1,10 @@
-function btsDialogModel() {}
+function btsDialogModal() {}
 
 /**
  * Create an empty Boostrap Modal HTML element, tagname is DIV
  * @returns {Element} Boostrap modal HTML element, tagname is DIV
  */
-btsDialogModel.prototype.buildElement = function() {
+btsDialogModal.prototype.buildElement = function() {
     var element = document.createElement("div");
     element.classList.add('modal');
     element.setAttribute('role', 'dialog');
@@ -55,7 +55,7 @@ btsDialogModel.prototype.buildElement = function() {
  * @param {Element} element - HTML DIV element
  * @param {String} title - Modal title 
  */
-btsDialogModel.prototype.setTitle = function(element, title) {
+btsDialogModal.prototype.setTitle = function(element, title) {
     var titleElement = element.querySelector('.modal-title');
 
     if (titleElement !== null) {
@@ -68,7 +68,7 @@ btsDialogModel.prototype.setTitle = function(element, title) {
  * @param {Element} element - HTML DIV element
  * @return {Element}  HTML DIV element
  */
-btsDialogModel.prototype.getBody = function(element) {
+btsDialogModal.prototype.getBody = function(element) {
     return element.querySelector('.modal-body');
 };
 
@@ -77,7 +77,7 @@ btsDialogModel.prototype.getBody = function(element) {
  * @param {Element} element - HTML DIV element
  * @return {Element}  HTML DIV element
  */
-btsDialogModel.prototype.getFooter = function(element) {
+btsDialogModal.prototype.getFooter = function(element) {
     return element.querySelector('.modal-footer');
 };
 
@@ -86,14 +86,14 @@ btsDialogModel.prototype.getFooter = function(element) {
  * @param {Element} element - HTML DIV element
  * @return {Element}  HTML DIV element
  */
-btsDialogModel.prototype.getHeader = function(element) {
+btsDialogModal.prototype.getHeader = function(element) {
     return element.querySelector('.modal-header');
 };
 
 (function() {
-    if (typeof BtsDialogModel === 'undefined') {
-        window.BtsDialogModel = new btsDialogModel()
+    if (typeof BtsDialogModal === 'undefined') {
+        window.BtsDialogModal = new btsDialogModal()
     }
 })()
 
-//# source=/js/bootstrap/btsDialogModel.js
+//# source=/js/bootstrap/btsDialogModal.js

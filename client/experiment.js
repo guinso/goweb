@@ -23,7 +23,6 @@
                 '/libs/jquery-3.4.1.min.js',
                 '/libs/popper.min.js',
                 '/libs/bootstrap.min.js',
-                '/css/style.css',
                 '/css/bootstrap.min.css',
                 '/css/bootstrap-grid.min.css',
                 '/css/bootstrap-reboot.min.css'
@@ -50,14 +49,14 @@
 
     function buildWebPage(resolve, reject) {
         //step 1: load web page layout
-        var loadHomePageTask = JxLoader.loadFilePromise(
+        var loadHomePageTask = JxLoader.loadFilePromiseFN(
             '/js/mainContent/partial.html',
             function(text) {
                 JxHelper.getMainContent().innerHTML = text
             })
 
         //step 2: load router handler
-        var loadRouterTask = JxLoader.requirePromise(
+        var loadRouterTask = JxLoader.requirePromiseFN(
             '/js/router.js',
             function() {
                 //step 2.1. listen URL hash(#) change and swap content accordingly
@@ -115,5 +114,9 @@
         function(err) {
             console.error('failed to load Promise polyfill: ' + err.message)
             console.error(err.stack)
+
+            var loaderDiv = document.querySelector('.special-loading')
+            loaderDiv.innerHTML = "<p>Ops, something going wrong :(</p>";
+            loaderDiv
         })
 })(window);

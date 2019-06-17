@@ -9,34 +9,6 @@ function jxPromiseTask(isSerial, tasks) {
 
 function jxPromise(){}
 
-/**
- * @param promisesFN an array of function that will return Promise object 
- * 
- * example: 
- * var promisesFN = [
- *      function(){ return new Promise(FnForPromise) },
- *      function(){ return new Promise(FnForPromise) },
- *      function(){ return new Promise(FnForPromise) }];
- * 
- * function FnForPromise(resolve, reject) { 
- *      resolve() 
- * }
-*/
-// jxPromise.prototype.runPromiseInSerial = function(promisesFN) {
-//     return promisesFN.reduce(
-//         this._promiseFunctionReducer, //reducer
-//         Promise.resolve([])) //initial promise
-// };
-
-// jxPromise.prototype._promiseFunctionReducer = function(promiseChain, fn){
-//     return promiseChain.then(function(chainResult){
-//         return fn().then(function(fnResult){
-//             chainResult.push(fnResult)
-//             return chainResult
-//         })
-//     })
-// };
-
 jxPromise.prototype.runPromise = function(promiseTask) {
     if (promiseTask.isSerial === true) { //run in serial
         return promiseTask.tasks.reduce(this._serialTaskReducer, Promise.resolve([]))

@@ -65,7 +65,7 @@ jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     request.send()
 };
 
-jxLoader.prototype.loadFilePromise = function(fileURL, successFN, failFN) {
+jxLoader.prototype.loadFilePromiseFN = function(fileURL, successFN, failFN) {
     var thisInstance = this
 
     return function() {
@@ -114,7 +114,7 @@ jxLoader.prototype.loadMultipleFiles = function(urls, successFN, failedFN) {
     }
 };
 
-jxLoader.prototype.loadMultipleFilesPromise = function(urls, successFN, failedFN) {
+jxLoader.prototype.loadMultipleFilesPromiseFN = function(urls, successFN, failedFN) {
     var thisInstance = this
 
     return new Promise(function(resolve, reject) {
@@ -147,7 +147,7 @@ jxLoader.prototype.loadPartial = function(url, successFN, failedFN) {
         failedFN);
 };
 
-jxLoader.prototype.loadPartialPromise = function(url, successFN, failedFN) {
+jxLoader.prototype.loadPartialPromiseFN = function(url, successFN, failedFN) {
     var thisInstance = this
     return function() {
         return new Promise(function(resolve, reject) {
@@ -174,12 +174,18 @@ jxLoader.prototype.addScriptTag = function(rawText, fileURL) {
     var header = document.head // document.getElementsByTagName('head')[0]
 
     var found = false
-    var headCount = header.childElementCount
+    var headerChildren = header.querySelectorAll('script, link')
+
+    var headCount = headerChildren.length
     for (var i = 0; i < headCount; i++) {
-        if (header.children[i].nodeName.toLowerCase() === 'script' &&
-            header.children[i].dataset &&
-            header.children[i].dataset.url &&
-            header.children[i].dataset.url === fileURL) {
+        var childHead = headerChildren[i]
+
+        if (typeof childHead.nodeName !== 'undefined' &&
+            childHead.nodeName &&
+            childHead.nodeName.toLowerCase() === 'script' &&
+            childHead.dataset &&
+            childHead.dataset.url &&
+            childHead.dataset.url === fileURL) {
             found = true
         }
     }
@@ -244,7 +250,7 @@ jxLoader.prototype.loadAndTagFile = function(urlFile, successFN, failureFN) {
         failureFN)
 };
 
-jxLoader.prototype.loadAndTagFilePromise = function(urlFile, successFN, failureFN) {
+jxLoader.prototype.loadAndTagFilePromiseFN = function(urlFile, successFN, failureFN) {
     var thisInstance = this
 
     return new Promise(function(resolve, reject) {
@@ -283,7 +289,7 @@ jxLoader.prototype.loadAndTagMultipleFiles = function(urlFiles, successFN, failu
         failureFN)
 };
 
-jxLoader.prototype.loadTagMultipleFilesPromise = function(urlFiles, successFN, failureFN) {
+jxLoader.prototype.loadTagMultipleFilesPromiseFN = function(urlFiles, successFN, failureFN) {
     var thisInstance = this
     return new Promise(function(resolve, reject) {
         thisInstance.loadAndTagMultipleFiles(urlFiles,
@@ -323,7 +329,8 @@ jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
     var reqTask = {
         guid: this.generateUUID(), //TODO: generate GUID
         url: fileURL,
-        isSuccess: null,
+        isSuccess: false,
+        isDone: false,
         passFN: successFN,
         failFN: failureFN,
         arg: null
@@ -350,21 +357,24 @@ jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
                 reqTask.arg = err
             }
 
+            reqTask.isDone = true
+
             //step 3: dequeue request from task
-            jxLoader.prototype.dequeueTask.call(jxbootObj, reqTask.guid)
+            jxLoader.prototype.dequeueTask.call(jxbootObj)
         },
         function(err) {
             //step 2.2: mark failed due to failed to retrieve file
             reqTask.arg = err
             reqTask.isSuccess = false
+            reqTask.isDone = true
 
             //step 3: dequeue request from task
-            jxLoader.prototype.dequeueTask.call(jxbootObj, reqTask.guid)
+            jxLoader.prototype.dequeueTask.call(jxbootObj)
         })
 };
 
 //require promise
-jxLoader.prototype.requirePromise = function(fileURL, successFN, failFN) {
+jxLoader.prototype.requirePromiseFN = function(fileURL, successFN, failFN) {
     var thisInstance = this
     return function() {
         return new Promise(function(resolve, reject) {
@@ -385,14 +395,14 @@ jxLoader.prototype.requirePromise = function(fileURL, successFN, failFN) {
     }
 };
 
-jxLoader.prototype.dequeueTask = function(taskID) {
+jxLoader.prototype.dequeueTask = function() {
     //return if no more task available
     if (this.task.length == 0) {
         return
     }
 
     var latestTask = this.task[this.task.length - 1]
-    if (latestTask.guid == taskID) {
+    if (latestTask.isDone === true) {
         //remove task since latest task matach with taskID
         this.task.pop()
 
@@ -400,21 +410,27 @@ jxLoader.prototype.dequeueTask = function(taskID) {
 
             if (latestTask.url.endsWith('.js')) {
                 jxLoader.prototype.addScriptTag.call(this, latestTask.arg, latestTask.url)
-                latestTask.passFN(latestTask.arg)
+                if (latestTask.passFN) {
+                    latestTask.passFN(latestTask.arg)
+                }
             } else if (latestTask.url.endsWith('.css')) {
                 jxLoader.prototype.addStyleSheetTag.call(this, latestTask.arg, latestTask.url)
-                latestTask.passFN(latestTask.arg)
+                if (latestTask.passFN) {
+                    latestTask.passFN(latestTask.arg)
+                }
             } else {
                 var err = new Error("only support .js and .css: " + latestTask.url)
-
-                latestTask.failFN(err)
+                if (latestTask.failFN) {
+                    latestTask.failFN(err)
+                }
             }
         } else {
-            latestTask.failFN(latestTask.arg)
+            if (latestTask.failFN) {
+                latestTask.failFN(latestTask.arg)
+            }
         }
-    } else {
-        //otherwise, wait for 50ms and try dequeue task
-        setTimeout(jxLoader.prototype.dequeueTask.call(this, taskID), 50)
+
+        this.dequeueTask() //recursuvely dequeue tasks
     }
 };
 
@@ -444,6 +460,29 @@ jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
     request.send()
 };
 
+jxLoader.prototype.getJSONPromiseFN = function(url, successFN, failedFN) {
+    var thisInstance = this
+    return function(){
+        return new Promise(function(resolve, reject){
+            thisInstance.getJSON(url, 
+                function(jsonObj){
+                    if (typeof successFN !== 'undefined') {
+                        successFN(jsonObj)
+                    }
+
+                    resolve(jsonObj)
+                }, 
+                function(err){
+                    if (typeof failedFN !== 'undefined') {
+                        failedFN(err)
+                    }
+
+                    reject(err)
+                })
+        })
+    }
+};
+
 jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
     var request = new XMLHttpRequest()
     request.onerror = function() {
@@ -470,7 +509,7 @@ jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
     request.open('POST', url, isAsynchronous)
     request.setRequestHeader("Content-type", "application/json")
     request.send(param)
-}
+};
 
 /**
  * Source: stackoverflow
@@ -490,7 +529,9 @@ jxLoader.prototype.generateUUID = function() {
 
 jxLoader.prototype.setElementChild = function(parentElement, childElement) {
     while (parentElement.firstChild) {
-        parentElement.firstChild.remove()
+        if (typeof parentElement.firstChild.remove !== 'undefined') {
+            parentElement.firstChild.remove()
+        }
     }
 
     parentElement.appendChild(childElement)
