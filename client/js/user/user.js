@@ -1,6 +1,6 @@
 function user() {
     this.partial = null,
-    this.tmpPartial = document.createElement('div')
+        this.tmpPartial = document.createElement('div')
 }
 
 user.prototype.getPartial = function(successFN, failureFN) {
@@ -34,7 +34,7 @@ user.prototype.getPartial = function(successFN, failureFN) {
 
 user.prototype.isPartialEmpty = function() {
     return this.tmpPartial.innerHTML === ''
-}
+};
 
 (function() {
     if (typeof User === 'undefined') {

@@ -18,8 +18,7 @@ router.prototype.resolve = function(url) {
                     })
                 } else {
                     //update current login username
-                    document.querySelector('#usernameHolder').innerHTML =
-                        currentUser.response.username //TODO: get full name
+                    PageFrame.setLoginName(currentUser.response.username)
 
                     //route to actual URL
                     thisInstance.actualRouting(url)
@@ -47,11 +46,12 @@ router.prototype.actualRouting = function(url) {
 
     //TODO: render side panel menu items
 
-    
+
 
     if (paths[0] === "") {
         location.hash = "user" //redirect to user page...
     } else if (paths[0] === "asd") {
+        var mainContent = JxHelper.getContentPanel()
         var hyperLink = document.createElement('div')
 
         hyperLink.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
@@ -60,7 +60,7 @@ router.prototype.actualRouting = function(url) {
         aaa.classList.add('green')
 
         PageFrame.setPlaceHolder(
-            hyperlink, 
+            hyperlink,
             PageFrame.render,
             JxHelper.showServerErrorMessage
         )
@@ -75,13 +75,11 @@ router.prototype.actualRouting = function(url) {
     } else if (paths[0] === "user") {
         Router.getModule('/js/user/user.js', function() {
             User.getPartial(
-                function(partial){
-                    PageFrame.setPlaceHolder(
-                        partial, 
-                        PageFrame.render,
-                        JxHelper.showServerErrorMessage)
-                }, 
-                function(err){
+                function(partial) {
+                    PageFrame.setPlaceHolder(partial)
+                    PageFrame.render()
+                },
+                function(err) {
                     Console.error('failed to render User page: ' + err.message)
                     JxHelper.showServerErrorMessage()
                 })
@@ -92,7 +90,7 @@ router.prototype.actualRouting = function(url) {
         });
     } else if (paths[0] === "login") {
         Router.getModule('/js/login/login.js', function() {
-            Login.renderLoginPage()
+            Login.render()
         });
     } else if (paths[0] === "logout") {
         Router.getModule('/js/login/login.js', function() {
