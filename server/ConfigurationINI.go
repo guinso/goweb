@@ -61,7 +61,7 @@ func (iniconfig *ConfigurationINI) InitializeConfiguration(filepath string) (*Co
 
 //LoadConfiguration load .ini file
 func (iniconfig *ConfigurationINI) LoadConfiguration(filepath string) (*ConfigInfo, error) {
-	return iniconfig.reload(filepath)
+	return iniconfig.InitializeConfiguration(filepath)
 }
 
 //reload load .ini file
