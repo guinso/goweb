@@ -14,7 +14,7 @@ router.prototype.resolve = function(url) {
                 if (currentUser.response.id === '-') {
                     //show login page
                     thisInstance.getModule('/js/login/login.js', function() {
-                        Login.renderLoginPage()
+                        Login.render()
                     })
                 } else {
                     //update current login username
@@ -43,26 +43,30 @@ router.prototype.actualRouting = function(url) {
     }
     var paths = url.split('/')
 
-    //hide whatever page is currently shown
-    JxHelper.hideAllContent()
+    //TODO: hide whatever page is currently shown
 
     //TODO: render side panel menu items
 
-    var mainContent = JxHelper.getContentPanel()
+    
 
     if (paths[0] === "") {
         location.hash = "user" //redirect to user page...
     } else if (paths[0] === "asd") {
+        var hyperLink = document.createElement('div')
 
-        mainContent.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
+        hyperLink.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
         var aaa = mainContent.querySelector('.aaa')
         aaa.classList.add('color')
         aaa.classList.add('green')
 
-        JxHelper.showMainContent()
+        PageFrame.setPlaceHolder(
+            hyperlink, 
+            PageFrame.render,
+            JxHelper.showServerErrorMessage
+        )
 
     } else if (paths[0] === "qwe") {
-
+        var mainContent = JxHelper.getContentPanel()
         mainContent.innerHTML =
             '<a href="#asd">ASD</a><br/>' +
             '<a href="#user">User</a>'
@@ -70,7 +74,17 @@ router.prototype.actualRouting = function(url) {
         JxHelper.showMainContent()
     } else if (paths[0] === "user") {
         Router.getModule('/js/user/user.js', function() {
-            User.renderPage()
+            User.getPartial(
+                function(partial){
+                    PageFrame.setPlaceHolder(
+                        partial, 
+                        PageFrame.render,
+                        JxHelper.showServerErrorMessage)
+                }, 
+                function(err){
+                    Console.error('failed to render User page: ' + err.message)
+                    JxHelper.showServerErrorMessage()
+                })
         });
     } else if (paths[0] === "note") {
         Router.getModule('/js/note/note.js', function() {
@@ -94,19 +108,14 @@ router.prototype.actualRouting = function(url) {
 };
 
 router.prototype.renderPageNotFound = function() {
-    var placeHolder = JxHelper.getSpecialError()
+    var placeHolder = JxHelper.getMainContent()
     placeHolder.innerHTML = "<h2>Opps, can't find the page you are looking for</h2>"
-
-    JxHelper.showSpecialLoading()
 };
 
 router.prototype.getModule = function(urlVal, execFn) {
-    JxHelper.showSpecialLoading()
-
     JxLoader.require(urlVal,
         function() {
             execFn()
-            JxHelper.hideSpecialLoading()
         },
         function(err) {
             console.error("failed to load module: " + urlVal)

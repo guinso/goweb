@@ -528,12 +528,13 @@ jxLoader.prototype.generateUUID = function() {
 };
 
 jxLoader.prototype.setElementChild = function(parentElement, childElement) {
-    while (parentElement.firstChild) {
-        if (typeof parentElement.firstChild.remove !== 'undefined') {
-            parentElement.firstChild.remove()
-        }
-    }
-
+    // while (parentElement.firstChild) {
+    //     if (typeof parentElement.firstChild.remove !== 'undefined') {
+    //         parentElement.firstChild.remove()
+    //     }
+    // }
+    
+    parentElement.innerHTML = ''
     parentElement.appendChild(childElement)
 };
 

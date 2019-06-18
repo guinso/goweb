@@ -21,14 +21,6 @@ jxHelper.prototype.getContentPanel = function() {
     return document.querySelector('.content-panel')
 };
 
-//hide all content
-jxHelper.prototype.hideAllContent = function() {
-    var pages = document.getElementsByClassName('page')
-    for (var i = 0; i < pages.length; i++) {
-        pages[i].classList.remove('visible')
-    }
-};
-
 //main content
 jxHelper.prototype.getMainContent = function() {
     var mainContent = document.querySelector('.main-content')
@@ -43,55 +35,15 @@ jxHelper.prototype.hideMainContain = function() {
     this.getMainContent().classList.remove('visible')
 };
 
-//special error
-jxHelper.prototype.getSpecialError = function() {
-    return document.querySelector('.special-error')
-};
-
-jxHelper.prototype.showSpecialError = function() {
-    this.getSpecialError().classList.add('visible')
-};
-
-jxHelper.prototype.hideSpecialError = function() {
-    this.getSpecialError().classList.remove('visible')
+jxHelper.prototype.setMainContent = function(element) {
+    var mainContent = this.getMainContent()
+    mainContent.innerHTML = ''
+    mainContent.appendChild(element)
 };
 
 jxHelper.prototype.showServerErrorMessage = function() {
-    this.getSpecialError()
+    this.getMainContent()
         .innerHTML = "<h2>Opps, there's problem try to connect to server</h2>"
-    this.showSpecialError()
-};
-
-//special content
-jxHelper.prototype.getSpecialContent = function() {
-    return document.querySelector('.special-content')
-};
-
-jxHelper.prototype.showSpecialContent = function() {
-    this.getSpecialContent().classList.add('visible')
-};
-
-jxHelper.prototype.hideSpecialContent = function() {
-    this.getSpecialContent().classList.remove('visible')
-};
-
-//special loading
-jxHelper.prototype.getSpecialLoading = function() {
-    return document.querySelector('.special-loading')
-};
-
-jxHelper.prototype.showSpecialLoading = function() {
-    this.getSpecialLoading().classList.add('visible')
-};
-
-jxHelper.prototype.hideSpecialLoading = function() {
-    this.getSpecialLoading().classList.remove('visible')
-};
-
-jxHelper.prototype.emptyElementChildren = function(element) {
-    while (element.firstChild) {
-        element.firstChild.remove()
-    }
 };
 
 jxHelper.prototype.parseHTMLString = function(htmlString) {

@@ -1,67 +1,138 @@
-import { JxHelper } from '/js/helper/jxhelper.js'
-import { FetchHelper } from '/js/helper/fetchHelper.js'
-import { Router } from '/js/router.js'
+(function(global) {
+    'use strict';
 
-//run script
-(async function() {
-    try {
-        //1. load dependencies
-        const jsfiles = await FetchHelper.texts(
-            ['/libs/jquery-3.2.1.min.js', '/libs/popper.min.js', '/libs/bootstrap.min.js'])
-        jsfiles.forEach(file => addJSTag(file))
+    function bootstrapSequence(resolve, reject) {
 
-        const cssFiles = await FetchHelper.texts(
-            ['/css/bootstrap.min.css', '/css/bootstrap-grid.min.css', '/css/bootstrap-reboot.min.css'])
-        cssFiles.forEach(file => addCSSTag(file))
+        var loadBaseLibsTask = new jxPromiseTask(false, [
+            function() { return new Promise(loadGUILibs) },
+            function() { return new Promise(loadPolyfills) },
+            function() { return new Promise(loadUtilities) }
+        ])
 
-        //2. load webpage layout
-        const partial = await FetchHelper.text('/js/mainContent/partial.html')
-        JxHelper.getMainContent().innerHTML = partial
+        var bootstrapTask = new jxPromiseTask(true, [
+            loadBaseLibsTask, //step 1: load basic libraries
+            function() { return new Promise(buildWebPage) } //step 2: build web page
+        ])
 
-        //3. listen URL hash(#) change and swap content accordingly
-        window.onhashchange = function() {
-            try {
-                Router.resolve(decodeURI(window.location.hash))
-            } catch (err) {
-                JxHelper.showServerErrorMessage();
-            }
+        //trigger sequences
+        JxPromise.runPromise(bootstrapTask).then(resolve, reject)
+    };
+
+    function loadGUILibs(resolve, reject) {
+        JxLoader.loadAndTagMultipleFiles([
+                '/libs/jquery-3.4.1.min.js',
+                '/libs/popper.min.js',
+                '/libs/bootstrap.min.js',
+                '/css/bootstrap.min.css',
+                '/css/bootstrap-grid.min.css',
+                '/css/bootstrap-reboot.min.css'
+            ],
+            resolve, reject)
+    };
+
+    function loadPolyfills(resolve, reject) {
+        if (typeof fetch === 'undefined') {
+            JxLoader.loadAndTagFile('/libs/fetch-3.0.0.umd.js',
+                resolve, reject)
+        } else {
+            resolve("b2")
         }
+    };
 
-        //4. start resolve path
-        Router.resolve(decodeURI(window.location.hash))
+    function loadUtilities(resolve, reject) {
+        JxLoader.loadAndTagMultipleFiles([
+                '/js/helper/jxHelper.js',
+                '/js/helper/jxRouter.js',
+                '/js/pageFrame/pageFrame.js',
+                '/js/router.js'
+            ],
+            resolve, reject)
+    };
 
-    } catch (err) {
-        console.error(err)
-        triggerFailMessage()
+    function buildWebPage(resolve, reject) {
+        // //step 1: load web page layout
+        // var loadHomePageTask = JxLoader.loadFilePromiseFN(
+        //     '/js/mainContent/partial.html',
+        //     function(text) {
+        //         JxHelper.getMainContent().innerHTML = text
+        //     })
+
+        // //step 2: load router handler
+        // var loadRouterTask = JxLoader.requirePromiseFN(
+        //     '/js/router.js',
+        //     function() {
+        //         //step 2.1. listen URL hash(#) change and swap content accordingly
+        //         window.addEventListener('hashchange',
+        //             function() {
+        //                 try {
+        //                     Router.resolve(decodeURI(window.location.hash))
+        //                 } catch (err) {
+        //                     JxHelper.showServerErrorMessage();
+        //                 }
+        //             }, false)
+        //     })
+        //
+        // //step 3. start resolve URL hash path
+        // var startRouterTask = function() {
+        //     return new Promise(
+        //         function(resolve, reject) {
+        //             try {
+        //                 Router.resolve(decodeURI(window.location.hash))
+        //                 resolve()
+        //             } catch (err) {
+        //                 reject(err)
+        //             }
+        //         })
+        // }
+
+        // var task = new jxPromiseTask(true, [
+        //     new jxPromiseTask(false, [
+        //         loadHomePageTask,
+        //         loadRouterTask
+        //     ]),
+        //     startRouterTask
+        // ])
+
+        // JxPromise.runPromise(task).then(resolve, reject)
+
+        window.addEventListener('hashchange',
+            function() {
+                try {
+                    Router.resolve(decodeURI(window.location.hash))
+                } catch (err) {
+                    JxHelper.showServerErrorMessage();
+                }
+            }, false)
+
+        try {
+            Router.resolve(decodeURI(window.location.hash))
+            resolve()
+        } catch(err) {
+            reject(err)
+        }
+    };
+
+    var urlFiles = ['js/helper/jxPromise.js']
+    if (typeof Promise == 'undefined') { //need to load Bluebird (Promise polyfill)
+        urlFiles.push('libs/bluebird-3.5.5.min.js')
     }
-})()
 
-function addCSSTag(source) {
-    const element = document.createElement("style")
-    element.setAttribute('rel', 'stylesheet')
-    element.setAttribute('type', 'text/css')
-    element.innerHTML = source
+    JxLoader.loadAndTagMultipleFiles(urlFiles,
+        function() {
+            var promise = new Promise(bootstrapSequence)
+            promise
+                .then(function() { console.log('done!') })
+                .catch(function(err) {
+                    console.error('failed to run bootstrap sequence: ' + err.message)
+                    console.error(err.stack)
+                })
+        },
+        function(err) {
+            console.error('failed to load Promise polyfill: ' + err.message)
+            console.error(err.stack)
 
-    document.getElementsByTagName("body")[0].appendChild(element)
-}
-
-function addJSTag(innerHTML) {
-    const element = document.createElement('script')
-    element.type = 'text/javascript'
-    element.innerHTML = innerHTML
-
-    document.getElementsByTagName("body")[0].appendChild(element)
-}
-
-function appendElement(body, tagName, innerHTML) {
-    var element = document.createElement(tagName);
-    element.innerHTML = innerHTML;
-
-    body.appendChild(element);
-}
-
-function triggerFailMessage() {
-    //handle error exception
-    JxHelper.getSpecialLoading().innerHTML = "<p>Ops, something going wrong :(</p>";
-    JxHelper.showSpecialLoading()
-}
+            var loaderDiv = document.querySelector('.special-loading')
+            loaderDiv.innerHTML = "<p>Ops, something going wrong :(</p>";
+            loaderDiv
+        })
+})(window);

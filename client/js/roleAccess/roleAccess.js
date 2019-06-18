@@ -37,7 +37,9 @@ roleAccess.prototype.renderPage = function() {
             thisInstance._generateSelectOptions(tmp, "#accessSelect", accessItems)
 
             //register search button event handler
-            tmp.querySelector("#roleAccessSearch").onclick = function() {
+            tmp.querySelector("#roleAccessSearch").onclick = function(e) {
+                e.preventDefault()
+                
                 thisInstance._search(tmp)
             }
 
@@ -63,24 +65,22 @@ roleAccess.prototype.renderPage = function() {
         .catch(function(err){
             console.error('failed to render role access page: ' + err.message)
 
-            var specialContent = JxHelper.getSpecialError()
+            var specialContent = JxHelper.getMainContent()
             specialContent.innerHTML = '<h2>Opps, something wrong happen :(</h2>'
-            JxHelper.showSpecialError()
         })
-
-    //JxHelper.hideLoadingPanel()
 };
 
 roleAccess.prototype._renderTable = function(element, items) {
 
     var table = document.createElement("table")
-    table.classList.add("table")
     table.innerHTML = '<tr><th>#</th><th>Access</th><th>Role</th>' +
         '<th>Is Authorized</th></tr>'
 
     for (var i = 0; i < items.length; i++) {
         table.appendChild(this._generateTableRow(i, items[i]))
     }
+
+    table.classList.add("table")
 
     var container = element.querySelector("#roleAccessTable")
     JxLoader.setElementChild(container, table)
