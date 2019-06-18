@@ -37,7 +37,9 @@ roleAccess.prototype.renderPage = function() {
             thisInstance._generateSelectOptions(tmp, "#accessSelect", accessItems)
 
             //register search button event handler
-            tmp.querySelector("#roleAccessSearch").onclick = function() {
+            tmp.querySelector("#roleAccessSearch").onclick = function(e) {
+                e.preventDefault()
+                
                 thisInstance._search(tmp)
             }
 
