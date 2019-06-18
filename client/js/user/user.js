@@ -1,28 +1,40 @@
-function user() {}
+function user() {
+    this.partial = null,
+    this.tmpPartial = document.createElement('div')
+}
 
-user.prototype.renderPage = function() {
-    JxHelper.showLoadingPanel()
+user.prototype.getPartial = function(successFN, failureFN) {
+    var thisInstance = this
 
-    // const partial = FetchHelper.text("/js/user/partial.html")
-    // const userData = FetchHelper.json("js/user/dummy.json")
-    // const optionalDemo = FetchHelper.json("/api/meals")
+    if (this.isPartialEmpty()) {
+        JxLoader.loadPartial('/js/user/partial.html',
+            function(partial) {
+                thisInstance.partial = partial
+                thisInstance.tmpPartial.innerHTML = ''
+                thisInstance.tmpPartial.appendChild(thisInstance.partial)
 
-    // const responses = await Promise.all([partial, userData, optionalDemo])
-    // const partialString = responses[0]
+                if (typeof successFN !== 'undefined') {
+                    successFN(thisInstance.partial)
+                }
+            },
+            function(err) {
+                console.error('failed to get User partial: ' + err.message)
+                console.error(err.trace)
 
-    JxLoader.loadFile('/js/user/partial.html',
-        function(htmlPartial) {
-            var contentPanel = JxHelper.getContentPanel()
-            contentPanel.innerHTML = htmlPartial
-
-            JxHelper.hideLoadingPanel()
-        },
-        function(err) {
-            var specialError = JxHelper.getSpecialError()
-            specialError.innerHTML = "<h2>Opps, something wrong happen :(</h2>"
-            specialError.addClass("visible")
-        })
+                if (typeof failureFN !== 'undefined') {
+                    failureFN(err)
+                }
+            })
+    } else {
+        if (typeof successFN !== 'undefined') {
+            successFN(this.partial)
+        }
+    }
 };
+
+user.prototype.isPartialEmpty = function() {
+    return this.tmpPartial.innerHTML === ''
+}
 
 (function() {
     if (typeof User === 'undefined') {

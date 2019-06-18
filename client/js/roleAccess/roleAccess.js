@@ -65,9 +65,8 @@ roleAccess.prototype.renderPage = function() {
         .catch(function(err){
             console.error('failed to render role access page: ' + err.message)
 
-            var specialContent = JxHelper.getSpecialError()
+            var specialContent = JxHelper.getMainContent()
             specialContent.innerHTML = '<h2>Opps, something wrong happen :(</h2>'
-            JxHelper.showSpecialError()
         })
 };
 

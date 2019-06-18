@@ -1,7 +1,7 @@
 function login() {}
 
 //show login page
-login.prototype.renderLoginPage = function() {
+login.prototype.render = function() {
     var thisInstance = this
 
     JxLoader.loadPartial('/js/login/partial.html',
@@ -18,7 +18,7 @@ login.prototype.renderLoginPage = function() {
 };
 
 login.prototype._showLoginPage = function(partial) {
-    var content = JxHelper.getSpecialContent()
+    var content = JxHelper.getMainContent()
     JxLoader.setElementChild(content, partial)
 
     //TODO: clear login form
@@ -28,9 +28,6 @@ login.prototype._showLoginPage = function(partial) {
     var loginMsg = partial.querySelector('#loginFailMsg')
     loginMsg.classList.remove('text-danger')
     loginMsg.innerHTML = "please fill in username and pasword"
-
-    JxHelper.showSpecialContent()
-    JxHelper.hideSpecialLoading()
 
     setTimeout(function() {
         var xx = document.querySelector('.login-placeholder')
@@ -62,7 +59,7 @@ login.prototype.setupEventHandler = function(partial) {
                 if (responseJson.statusCode === 0) {
                     loginMsg.innerHTML = "login success"
 
-                    JxHelper.getSpecialContent().innerHTML =
+                    JxHelper.getMainContent().innerHTML =
                         'login success, navigating to ' + decodeURI(location.hash) + '...'
 
                     window.location = "/"; //redirect to default page
@@ -90,10 +87,9 @@ login.prototype.logout = function() {
                 //logout failed
                 console.error(jsonData.statusMsg)
 
-                var specialError = JxHelper.getSpecialError()
+                var specialError = JxHelper.getMainContent()
                 specialError.innerHTML =
                     '<h3>opps, failed to logout...</h3><p>' + jsonData.statusMsg + '</p>'
-                JxHelper.showSpecialError()
             }
         },
         function(err) {

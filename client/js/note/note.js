@@ -17,7 +17,7 @@ note.prototype.renderPage = function() {
         },
         function(err) {
             console.error(err.trace)
-            var specialError = JxHelper.getSpecialError()
+            var specialError = JxHelper.getMainContent()
             specialError.innerHTML = "<h2>Opps, something wrong happen :(</h2>"
             specialError.classList.add("visible")
         })
