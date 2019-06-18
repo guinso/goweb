@@ -88,12 +88,6 @@ jxHelper.prototype.hideSpecialLoading = function() {
     this.getSpecialLoading().classList.remove('visible')
 };
 
-jxHelper.prototype.emptyElementChildren = function(element) {
-    while (element.firstChild) {
-        element.firstChild.remove()
-    }
-};
-
 jxHelper.prototype.parseHTMLString = function(htmlString) {
     var x = document.createElement('div')
     x.innerHTML = htmlString

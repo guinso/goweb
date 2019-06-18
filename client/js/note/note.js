@@ -1,6 +1,4 @@
-function note() {
-    this.placeHolder = null
-}
+function note() { }
 
 note.prototype.renderPage = function() {
     JxHelper.showLoadingPanel()
@@ -9,12 +7,12 @@ note.prototype.renderPage = function() {
     this.fetchPartial(
         function(fragment) {
             var todoPlaceHolder = fragment.querySelector('.todo-holder')
+
             thisInstance.reloadTodoList(todoPlaceHolder)
 
             var contentPanel = JxHelper.getContentPanel()
-            JxHelper.emptyElementChildren(contentPanel)
+            JxLoader.setElementChild(contentPanel, fragment)
 
-            contentPanel.appendChild(fragment)
             JxHelper.hideLoadingPanel()
         },
         function(err) {
@@ -26,24 +24,17 @@ note.prototype.renderPage = function() {
 };
 
 note.prototype.fetchPartial = function(resolve, reject) {
-    var thisInstance = this
+    JxLoader.loadFile('/js/note/partial.html',
+        function(partialHTML) {
+            var placeHolder = JxHelper.parseHTMLString(partialHTML)
 
-    if (!this.placeHolder) {
-        JxLoader.loadFile('/js/note/partial.html',
-            function(partialHTML) {
-                thisInstance.placeHolder = JxHelper.parseHTMLString(partialHTML)
-
-                resolve(thisInstance.placeHolder)
-            },
-            reject)
-    } else {
-        resolve(this.placeHolder)
-    }
+            resolve(placeHolder)
+        },
+        reject)
 };
 
 note.prototype.reloadTodoList = function(todoPlaceHolder) {
-    JxHelper.emptyElementChildren(todoPlaceHolder)
-
+    todoPlaceHolder.innerHTML = ''
     todoPlaceHolder.appendChild(Note.generateToDoItem("buy lunch"))
     todoPlaceHolder.appendChild(Note.generateToDoItem("mop floor"))
     todoPlaceHolder.appendChild(Note.generateToDoItem("clean dishes"))
