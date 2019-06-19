@@ -70,6 +70,15 @@ pageFrame.prototype.isPartialEmpty = function() {
     return !(this.partial && this.partial.innerHTML !== '')
 };
 
+pageFrame.prototype._setLoadingPanelVisibility = function(isVisible) {
+    var panel = this.partial.querySelector('.loading-panel')
+    if (isVisible) {
+        panel.classList.add('visible-panel')
+    } else {
+        panel.classList.remove('visible-panel')
+    }
+};
+
 (function() {
     if (typeof PageFrame === 'undefined') {
         window.PageFrame = new pageFrame()
