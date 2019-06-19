@@ -50,66 +50,18 @@
     };
 
     function buildWebPage(resolve, reject) {
-        // //step 1: load web page layout
-        // var loadHomePageTask = JxLoader.loadFilePromiseFN(
-        //     '/js/mainContent/partial.html',
-        //     function(text) {
-        //         JxHelper.getMainContent().innerHTML = text
-        //     })
-
-        // //step 2: load router handler
-        // var loadRouterTask = JxLoader.requirePromiseFN(
-        //     '/js/router.js',
-        //     function() {
-        //         //step 2.1. listen URL hash(#) change and swap content accordingly
-        //         window.addEventListener('hashchange',
-        //             function() {
-        //                 try {
-        //                     Router.resolve(decodeURI(window.location.hash))
-        //                 } catch (err) {
-        //                     JxHelper.showServerErrorMessage();
-        //                 }
-        //             }, false)
-        //     })
-        //
-        // //step 3. start resolve URL hash path
-        // var startRouterTask = function() {
-        //     return new Promise(
-        //         function(resolve, reject) {
-        //             try {
-        //                 Router.resolve(decodeURI(window.location.hash))
-        //                 resolve()
-        //             } catch (err) {
-        //                 reject(err)
-        //             }
-        //         })
-        // }
-
-        // var task = new jxPromiseTask(true, [
-        //     new jxPromiseTask(false, [
-        //         loadHomePageTask,
-        //         loadRouterTask
-        //     ]),
-        //     startRouterTask
-        // ])
-
-        // JxPromise.runPromise(task).then(resolve, reject)
+        Router.initialize()
 
         window.addEventListener('hashchange',
             function() {
                 try {
-                    Router.resolve(decodeURI(window.location.hash))
+                    Router.resolve(decodeURI(location.hash))
                 } catch (err) {
                     JxHelper.showServerErrorMessage();
                 }
             }, false)
 
-        try {
-            Router.resolve(decodeURI(window.location.hash))
-            resolve()
-        } catch(err) {
-            reject(err)
-        }
+        resolve()
     };
 
     var urlFiles = ['js/helper/jxPromise.js']
@@ -121,7 +73,12 @@
         function() {
             var promise = new Promise(bootstrapSequence)
             promise
-                .then(function() { console.log('done!') })
+                .then(function() { 
+                    console.log('done!') 
+
+                    //start routing
+                    Router.resolve(decodeURI(location.hash))
+                })
                 .catch(function(err) {
                     console.error('failed to run bootstrap sequence: ' + err.message)
                     console.error(err.stack)

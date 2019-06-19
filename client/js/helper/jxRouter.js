@@ -1,13 +1,13 @@
 function jxRouter() {
     this.route = {}
-    this.preRoutePromiseFN = null
+    this.notFoundRouteFN = null
 }
 
-jxRouter.prototype.setPreRoute = function(execPromsieFN) {
-    this.preRoutePromiseFN = execPromsieFN
-};
+jxRouter.prototype.setRouteNotFound = function(notFoundFN) {
+    this.notFoundRouteFN = notFoundFN
+}
 
-jxRouter.prototype.addRoute = function(routePath, execFN) {
+jxRouter.prototype.setRoute = function(routePath, execFN) {
     this.route[routePath] = execFN
 };
 
@@ -23,23 +23,21 @@ jxRouter.prototype.clearRoute = function() {
 
 jxRouter.prototype.goto = function(routePath) {
     if (!this._isRouteDefined(routePath)) {
-        return
-    } else if (this.preRoutePromiseFN) {
-        this.preRoutePromiseFN()
-            .then(function() {
-                this.route[routePath]()
-            })
-            .catch(function(err) {
-                console.error('failed to execute preRoute')
-                console.error(err.trace)
-            })
+        console.warn('route <' + routePath + '> not found!')
+        if (this.notFoundRouteFN) {
+            this.notFoundRouteFN(routePath)
+        }
     } else {
         this.route[routePath]()
     }
 };
 
 jxRouter.prototype._isRouteDefined = function(routePath) {
-    return typeof this.route[routePath] !== 'undefined'
+    if(this.route[routePath]) {
+        return true
+    } else {
+        return false
+    }
 };
 
 (function() {

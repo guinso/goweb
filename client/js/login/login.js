@@ -62,8 +62,19 @@ login.prototype.setupEventHandler = function(partial) {
                     JxHelper.getMainContent().innerHTML =
                         'login success, navigating to ' + decodeURI(location.hash) + '...'
 
-                    window.location = "/"; //redirect to default page
+                    //extract path from URL hash value
+                    var path = decodeURI(location.hash)
+                    if (path[0] === "#") {
+                        path = path.substring(1)
+                    }
 
+                    if (path === 'login') {
+                        console.log('login: redirect to default page')
+                        location.hash = '' //redirect to default page
+                    } else {
+                        console.log('login: back to previous page')
+                        JxRouter.goto(path) //back to previous page
+                    }
                 } else {
                     loginMsg.innerHTML = responseJson.statusMsg
                     loginMsg.classList.add('text-danger')
