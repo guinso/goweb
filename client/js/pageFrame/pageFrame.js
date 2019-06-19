@@ -1,6 +1,5 @@
 function pageFrame() {
     this.partial = null
-    this.tmpDIV = document.createElement('div')
     this.loginName = ''
     this.placeHolder = null
 }
@@ -15,9 +14,17 @@ pageFrame.prototype.render = function() {
 
             //set placeholder
             var contentPanel = partial.querySelector('.content-panel')
-            JxLoader.setElementChild(contentPanel, thisInstance.placeHolder)
+            if (thisInstance.placeHolder) {
+                JxLoader.setElementChild(contentPanel, thisInstance.placeHolder)
+            } else {
+                contentPanel.innerHTML = ''
+            }
 
-            JxHelper.setMainContent(partial)
+            //place PageFrame into HTML body if not attached into HTML document yet
+            if (!thisInstance.isAlreadyAttached()) {
+                console.log('attach PageFrame into HTML document')
+                JxHelper.setMainContent(partial)
+            }
         },
         function(err) {
             console.error('failed to render page frame: ' + err.message)
@@ -30,8 +37,7 @@ pageFrame.prototype.getPartial = function(successFN, failureFN) {
     if (this.isPartialEmpty()) {
         JxLoader.loadPartial('/js/pageFrame/partial.html',
             function(partial) {
-                thisInstance.tmpDIV.innerHTML = ''
-                thisInstance.tmpDIV.appendChild(partial)
+                partial.id = JxLoader.generateUUID()
                 thisInstance.partial = partial
 
                 successFN(thisInstance.partial)
@@ -42,37 +48,26 @@ pageFrame.prototype.getPartial = function(successFN, failureFN) {
     }
 };
 
+pageFrame.prototype.isAlreadyAttached = function() {
+    if (this.isPartialEmpty()) {
+        return false
+    } else {
+        var elements = document.getElementById(this.partial.id)
+
+        return elements !== null
+    }
+};
+
 pageFrame.prototype.setLoginName = function(loginName) {
     this.loginName = loginName
 };
 
 pageFrame.prototype.setPlaceHolder = function(element) {
     this.placeHolder = element
-        // this.getPartial(
-        //     function(mainPartial) {
-        //         var placeHolder = mainPartial.querySelector('.content-panel')
-        //         JxLoader.setElementChild(placeHolder, element)
-
-    //         if (typeof successFN !== 'undefined') {
-    //             successFN(mainPartial)
-    //         }
-    //     },
-    //     function(err) {
-    //         console.error('failed to set content for page frame: ' + err.message)
-    //         console.error(err.trace)
-
-    //         if (typeof failureFN !== 'undefined') {
-    //             failureFN(err)
-    //         }
-    //     })
 };
 
 pageFrame.prototype.isPartialEmpty = function() {
-    if (this.tmpDIV.innerHTML === '') {
-        return true
-    } else {
-        return false
-    }
+    return !(this.partial && this.partial.innerHTML !== '')
 };
 
 (function() {

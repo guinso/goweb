@@ -42,36 +42,28 @@ router.prototype.actualRouting = function(url) {
     }
     var paths = url.split('/')
 
-    //TODO: hide whatever page is currently shown
-
     //TODO: render side panel menu items
-
-
 
     if (paths[0] === "") {
         location.hash = "user" //redirect to user page...
     } else if (paths[0] === "asd") {
-        var mainContent = JxHelper.getContentPanel()
         var hyperLink = document.createElement('div')
 
         hyperLink.innerHTML = '<a href="#qwe" class="aaa">QWE</a>'
-        var aaa = mainContent.querySelector('.aaa')
+        var aaa = hyperLink.querySelector('.aaa')
         aaa.classList.add('color')
         aaa.classList.add('green')
 
-        PageFrame.setPlaceHolder(
-            hyperlink,
-            PageFrame.render,
-            JxHelper.showServerErrorMessage
-        )
+        PageFrame.setPlaceHolder(hyperLink)
+        PageFrame.render()
 
     } else if (paths[0] === "qwe") {
-        var mainContent = JxHelper.getContentPanel()
-        mainContent.innerHTML =
-            '<a href="#asd">ASD</a><br/>' +
+        var ele = document.createElement('div')
+        ele.innerHTML ='<a href="#asd">ASD</a><br/>' +
             '<a href="#user">User</a>'
 
-        JxHelper.showMainContent()
+        PageFrame.setPlaceHolder(ele)
+        PageFrame.render()
     } else if (paths[0] === "user") {
         Router.getModule('/js/user/user.js', function() {
             User.getPartial(
@@ -80,13 +72,24 @@ router.prototype.actualRouting = function(url) {
                     PageFrame.render()
                 },
                 function(err) {
-                    Console.error('failed to render User page: ' + err.message)
+                    console.error('failed to render User page: ' + err.message)
+                    console.error(err.trace)
                     JxHelper.showServerErrorMessage()
                 })
         });
     } else if (paths[0] === "note") {
         Router.getModule('/js/note/note.js', function() {
-            Note.renderPage()
+            Note.getPartial(
+                function(partial){
+                    PageFrame.setPlaceHolder(partial)
+                    PageFrame.render()
+                },
+                function(err) {
+                    console.error('failed to render Note page: ' + err.message)
+                    console.error(err.trace)
+                    JxHelper.showServerErrorMessage()
+                }
+            )
         });
     } else if (paths[0] === "login") {
         Router.getModule('/js/login/login.js', function() {
@@ -98,7 +101,17 @@ router.prototype.actualRouting = function(url) {
         });
     } else if (paths[0] === "role-access") {
         Router.getModule('/js/roleAccess/roleAccess.js', function() {
-            RoleAccess.renderPage()
+            RoleAccess.getPartial(
+                function(partial){
+                    PageFrame.setPlaceHolder(partial)
+                    PageFrame.render()
+                },
+                function(err) {
+                    console.error('failed to render Role Access page: ' + err.message)
+                    console.error(err.trace)
+                    JxHelper.showServerErrorMessage()
+                }
+            )
         });
     } else {
         Router.renderPageNotFound()

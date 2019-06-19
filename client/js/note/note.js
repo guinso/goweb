@@ -1,43 +1,24 @@
-function note() { }
+function note() { 
+    this.partial = null
+}
 
-note.prototype.renderPage = function() {
-    JxHelper.showLoadingPanel()
-
+note.prototype.getPartial = function(successFN, failFN) {
     var thisInstance = this
-    this.fetchPartial(
-        function(fragment) {
-            var todoPlaceHolder = fragment.querySelector('.todo-holder')
 
+    this._fetchPartial(
+        function(partial){
+            var todoPlaceHolder = partial.querySelector('.todo-holder')
             thisInstance.reloadTodoList(todoPlaceHolder)
 
-            var contentPanel = JxHelper.getContentPanel()
-            JxLoader.setElementChild(contentPanel, fragment)
-
-            JxHelper.hideLoadingPanel()
-        },
-        function(err) {
-            console.error(err.trace)
-            var specialError = JxHelper.getMainContent()
-            specialError.innerHTML = "<h2>Opps, something wrong happen :(</h2>"
-            specialError.classList.add("visible")
-        })
-};
-
-note.prototype.fetchPartial = function(resolve, reject) {
-    JxLoader.loadFile('/js/note/partial.html',
-        function(partialHTML) {
-            var placeHolder = JxHelper.parseHTMLString(partialHTML)
-
-            resolve(placeHolder)
-        },
-        reject)
+            successFN(partial)
+        }, failFN)
 };
 
 note.prototype.reloadTodoList = function(todoPlaceHolder) {
     todoPlaceHolder.innerHTML = ''
-    todoPlaceHolder.appendChild(Note.generateToDoItem("buy lunch"))
-    todoPlaceHolder.appendChild(Note.generateToDoItem("mop floor"))
-    todoPlaceHolder.appendChild(Note.generateToDoItem("clean dishes"))
+    todoPlaceHolder.appendChild(this.generateToDoItem("buy lunch"))
+    todoPlaceHolder.appendChild(this.generateToDoItem("mop floor"))
+    todoPlaceHolder.appendChild(this.generateToDoItem("clean dishes"))
 
     //TODO: bind event for each todo item
 };
@@ -48,6 +29,25 @@ note.prototype.generateToDoItem = function(message) {
     element.textContent = message
 
     return element;
+};
+
+note.prototype._fetchPartial = function(successFN, failureFN) {
+    var thisInstance = this
+    
+    if (this._isPartialEmpty()) {
+        JxLoader.loadPartial('/js/note/partial.html', 
+        function(partial){
+            thisInstance.partial = partial
+            successFN(partial)
+        }, 
+        failureFN)
+    } else {
+        successFN(this.partial)
+    }
+}
+
+note.prototype._isPartialEmpty = function() {
+    return !(this.partial && this.partial.innerHTML !== '')
 };
 
 (function() {

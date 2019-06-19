@@ -6,69 +6,53 @@ JxLoader.require('/js/bootstrap/btsPagination.js')
 function roleAccess() {
     this.selectedPageIndex = 0
     this.pageSize = 10
-    this.partialElement = null
+    this.partial = null
 };
 
-roleAccess.prototype.renderPage = function() {
-    JxHelper.showLoadingPanel();
+roleAccess.prototype.getPartial = function(successFN, failFN) {
     var thisInstance = this
 
-    var task = new jxPromiseTask(false, [
-        JxLoader.loadFilePromiseFN('/js/roleAccess/partial.html'),
-        JxLoader.getJSONPromiseFN('/api/role'),
-        JxLoader.getJSONPromiseFN('/api/access'),
-        JxLoader.getJSONPromiseFN('api/role-access'),
-        JxLoader.getJSONPromiseFN('/api/role-access-count')
-    ])
+    this._fetchPartial(function(partial){
+        var task = new jxPromiseTask(false, [
+            JxLoader.getJSONPromiseFN('/api/role'),
+            JxLoader.getJSONPromiseFN('/api/access'),
+            JxLoader.getJSONPromiseFN('api/role-access'),
+            JxLoader.getJSONPromiseFN('/api/role-access-count')
+        ])
 
-    JxPromise.runPromise(task)
-        .then(function(reponses){
-            var items = reponses[3]['response'] //JSON.parse(roleAccessResponse[0]);
-            var itemsCount = reponses[4]['response'] //JSON.parse(roleAccessCntResponse[0])['response'];
-            var roleItems = reponses[1]['response'] //JSON.parse(roleResponse[0]);
-            var accessItems = reponses[2]['response'] //JSON.parse(accessResponse[0]);
-
-            var tmp = JxHelper.parseHTMLString(reponses[0]) //document.createElement("div")
-            thisInstance.partialElement = tmp
-
-            thisInstance._renderTable(tmp, items)
-
-            thisInstance._generateSelectOptions(tmp, "#roleSelect", roleItems)
-            thisInstance._generateSelectOptions(tmp, "#accessSelect", accessItems)
-
-            //register search button event handler
-            tmp.querySelector("#roleAccessSearch").onclick = function(e) {
-                e.preventDefault()
+        JxPromise.runPromise(task)
+            .then(function(reponses){
+                var roleItems = reponses[0]['response'] //JSON.parse(roleResponse[0]);
+                var accessItems = reponses[1]['response'] //JSON.parse(accessResponse[0]);
+                var items = reponses[2]['response'] //JSON.parse(roleAccessResponse[0]);
+                var itemsCount = reponses[3]['response'] //JSON.parse(roleAccessCntResponse[0])['response'];
                 
-                thisInstance._search(tmp)
-            }
+                thisInstance._renderTable(partial, items)
 
-            //build pagination
-            var paginationElement = BtsPagination.buildPaginationElement(
-                thisInstance.selectedPageIndex, 
-                thisInstance.pageSize, 
-                itemsCount.count, 
-                thisInstance._pageIndexSearch)
-            var paginationPlaceholder = tmp.querySelector("#paginationPlaceholder")
-            JxLoader.setElementChild(paginationPlaceholder, paginationElement)
+                thisInstance._generateSelectOptions(partial, "#roleSelect", roleItems)
+                thisInstance._generateSelectOptions(partial, "#accessSelect", accessItems)
 
-            //test create modal
-            var modalEle = BtsDialogModal.buildElement()
-            BtsDialogModal.setTitle(modalEle, "Sample Modal Dialog")
-            tmp.appendChild(modalEle)
+                //register search button event handler
+                partial.querySelector("#roleAccessSearch").onclick = function(e) {
+                    e.preventDefault()
+                    
+                    thisInstance._search(partial)
+                }
 
-            var contentPanel = JxHelper.getContentPanel()
-            JxLoader.setElementChild(contentPanel, tmp)
+                //build pagination
+                var paginationElement = BtsPagination.buildPaginationElement(
+                    thisInstance.selectedPageIndex, 
+                    thisInstance.pageSize, 
+                    itemsCount.count, 
+                    thisInstance._pageIndexSearch)
+                var paginationPlaceholder = partial.querySelector("#paginationPlaceholder")
+                JxLoader.setElementChild(paginationPlaceholder, paginationElement)
 
-            JxHelper.hideLoadingPanel()
-        })
-        .catch(function(err){
-            console.error('failed to render role access page: ' + err.message)
-
-            var specialContent = JxHelper.getMainContent()
-            specialContent.innerHTML = '<h2>Opps, something wrong happen :(</h2>'
-        })
-};
+                successFN(partial)
+            })
+            .catch(failFN)
+    }, failFN)
+}
 
 roleAccess.prototype._renderTable = function(element, items) {
 
@@ -175,7 +159,7 @@ roleAccess.prototype._pageIndexSearch = function(index) {
     var thisIntance = this
     return function() {
         thisIntance.selectedPageIndex = index
-        thisIntance._search(thisIntance.partialElement)
+        thisIntance._search(thisIntance.partial)
     }
 };
 
@@ -198,6 +182,31 @@ roleAccess.prototype._search = function(partialEle) {
 
             container.innerHTML = "<p>opps, failed to retrieve info from server</p>"
         })
+};
+
+roleAccess.prototype._fetchPartial = function(successFN, failureFN) {
+    var thisInstance = this
+    
+    if (this._isPartialEmpty()) {
+        JxLoader.loadPartial('/js/roleAccess/partial.html', 
+        function(partial){
+            thisInstance.partial = partial
+
+            //create modal
+            var modalEle = BtsDialogModal.buildElement()
+            BtsDialogModal.setTitle(modalEle, "Sample Modal Dialog")
+            partial.appendChild(modalEle)
+
+            successFN(partial)
+        }, 
+        failureFN)
+    } else {
+        successFN(this.partial)
+    }
+};
+
+roleAccess.prototype._isPartialEmpty = function() {
+    return !(this.partial && this.partial.innerHTML !== '')
 };
 
 (function(){

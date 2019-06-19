@@ -17,9 +17,9 @@ jxHelper.prototype.hideLoadingPanel = function() {
 };
 
 //content panel
-jxHelper.prototype.getContentPanel = function() {
-    return document.querySelector('.content-panel')
-};
+// jxHelper.prototype.getContentPanel = function() {
+//     return document.querySelector('.content-panel')
+// };
 
 //main content
 jxHelper.prototype.getMainContent = function() {
@@ -27,13 +27,13 @@ jxHelper.prototype.getMainContent = function() {
     return mainContent
 };
 
-jxHelper.prototype.showMainContent = function() {
-    this.getMainContent().classList.add('visible')
-};
+// jxHelper.prototype.showMainContent = function() {
+//     this.getMainContent().classList.add('visible')
+// };
 
-jxHelper.prototype.hideMainContain = function() {
-    this.getMainContent().classList.remove('visible')
-};
+// jxHelper.prototype.hideMainContain = function() {
+//     this.getMainContent().classList.remove('visible')
+// };
 
 jxHelper.prototype.setMainContent = function(element) {
     var mainContent = this.getMainContent()
