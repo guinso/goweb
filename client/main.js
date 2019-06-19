@@ -61,7 +61,16 @@
                 }
             }, false)
 
-        resolve()
+        //register service worker (for PWA)
+        if ('serviceWorker' in navigator) {
+            console.log('service worker found, register serviceWorker.js')
+            navigator.serviceWorker.register('/js/serviceWorker.js')
+                .then(resolve, reject)
+        } else {
+            console.log('service worker not available')
+            resolve()
+        }
+        
     };
 
     var urlFiles = ['js/helper/jxPromise.js']

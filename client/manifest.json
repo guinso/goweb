@@ -1,0 +1,22 @@
+{
+    "name": "Simple Web Page",
+    "short_name": "SWP",
+    "lang": "en",
+    "start_url": "/",
+    "display": "fullscreen",
+    "theme_color": "#c2f442",
+    "icons": [
+        {
+            "src": "img/icon64.png",
+            "size": "64x64"
+        },
+        {
+            "src": "img/icon128.png",
+            "size": "128x128"
+        },
+        {
+            "src": "img/icon512.png",
+            "size": "512x512"
+        }
+    ]
+}

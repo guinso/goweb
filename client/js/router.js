@@ -145,7 +145,7 @@ router.prototype.renderAsd = function() {
 
     PageFrame.setPlaceHolder(hyperLink)
     PageFrame.render()
-}
+};
 
 router.prototype.getModule = function(urlVal, execFn) {
     JxLoader.require(urlVal,
