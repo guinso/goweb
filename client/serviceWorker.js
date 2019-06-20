@@ -31,15 +31,11 @@ self.addEventListener('fetch', event => {
 
         try {
             //Try to get the cached response
-            console.log(event.request)
-
-            if (isCachable()) {
-                const cachedResponse = await caches.match(event.request)
-                if (cachedResponse) {
-                    //Return the cached response if present
-                    //console.log(`Cached response ${cachedResponse}`)
-                    return cachedResponse
-                }
+            const cachedResponse = await caches.match(event.request)
+            if (cachedResponse) {
+                //Return the cached response if present
+                //console.log(`Cached response ${cachedResponse}`)
+                return cachedResponse
             }
             
             //Get the network response if no cached response is present
@@ -61,9 +57,9 @@ self.addEventListener('fetch', event => {
         }
     }
 
-    function isCachable() {
-        return event.request.method === 'GET'
-    }
+    // function isCachable() {
+    //     return event.request.method === 'GET'
+    // }
 
     //In order to override the default fetch behavior, we must provide the result of our custom behavoir to the
     //event.respondWith method
