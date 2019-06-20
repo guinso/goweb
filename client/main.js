@@ -1,4 +1,4 @@
-(function(global) {
+(function() {
     'use strict';
 
     function bootstrapSequence(resolve, reject) {
@@ -51,6 +51,7 @@
 
     function buildWebPage(resolve, reject) {
         Router.initialize()
+        resolve()
 
         window.addEventListener('hashchange',
             function() {
@@ -60,45 +61,50 @@
                     JxHelper.showServerErrorMessage();
                 }
             }, false)
+    };
 
+    function registerServiceWorker() {
         //register service worker (for PWA)
         if ('serviceWorker' in navigator) {
             console.log('service worker found, register serviceWorker.js')
-            navigator.serviceWorker.register('/js/serviceWorker.js')
-                .then(resolve, reject)
+            navigator.serviceWorker.register('/serviceWorker.js')
         } else {
             console.log('service worker not available')
-            resolve()
         }
-        
     };
 
-    var urlFiles = ['js/helper/jxPromise.js']
-    if (typeof Promise == 'undefined') { //need to load Bluebird (Promise polyfill)
-        urlFiles.push('libs/bluebird-3.5.5.min.js')
-    }
+    function initBootSequence() {
+        var urlFiles = ['/js/helper/jxPromise.js']
+        if (typeof Promise == 'undefined') { //need to load Bluebird (Promise polyfill)
+            urlFiles.push('libs/bluebird-3.5.5.min.js')
+        }
 
-    JxLoader.loadAndTagMultipleFiles(urlFiles,
-        function() {
-            var promise = new Promise(bootstrapSequence)
-            promise
-                .then(function() { 
-                    console.log('done!') 
+        JxLoader.loadAndTagMultipleFiles(urlFiles,
+            function() {
+                var promise = new Promise(bootstrapSequence)
+                promise
+                    .then(function() { 
+                        console.log('done!') 
 
-                    //start routing
-                    Router.resolve(decodeURI(location.hash))
-                })
-                .catch(function(err) {
-                    console.error('failed to run bootstrap sequence: ' + err.message)
-                    console.error(err.stack)
-                })
-        },
-        function(err) {
-            console.error('failed to load Promise polyfill: ' + err.message)
-            console.error(err.stack)
+                        //start routing
+                        Router.resolve(decodeURI(location.hash))
+                    })
+                    .catch(function(err) {
+                        console.error('failed to run bootstrap sequence: ' + err.message)
+                        console.error(err.stack)
+                    })
+            },
+            function(err) {
+                console.error('failed to load Promise polyfill: ' + err.message)
+                console.error(err.stack)
 
-            var loaderDiv = document.querySelector('.special-loading')
-            loaderDiv.innerHTML = "<p>Ops, something going wrong :(</p>";
-            loaderDiv
-        })
-})(window);
+                var loaderDiv = document.querySelector('.main-content')
+                loaderDiv.innerHTML = "<p>Ops, something going wrong :(</p>";
+            })
+    };
+
+    //window.addEventListener('load', registerServiceWorker())
+
+    registerServiceWorker()
+    initBootSequence()
+})();

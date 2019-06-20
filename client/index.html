@@ -8,8 +8,26 @@
 
     <!-- Bootstrap specifiec metadata -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="/css/style.css" />
-    <!-- <link rel="manifest" href="manifest.json" /> -->
+    <link rel="manifest" href="manifest.json" />
+    <style rel="stylesheet">
+        body {
+            background-color: white;
+        }
+
+        .main-content {
+            visibility: visible;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: transparent;
+        }
+
+        .visible {
+            visibility: visible;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,8 +35,7 @@
     <div class="main-content">loading...</div>
 
     <script type="text/javascript" src="/js/helper/jxLoader.js"></script>
-    <script type="text/javascript" src="/js/dummy.js"></script>
-    <!-- <script type="text/javascript" src="main.js"></script> -->
+    <script type="text/javascript" src="main.js"></script>
 </body>
 
 </html>

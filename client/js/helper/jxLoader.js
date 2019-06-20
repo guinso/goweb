@@ -19,6 +19,7 @@ String.prototype.endsWith = String.prototype.endsWith || function(suffix) {
 
 function jxLoader() {
     this.task = [] //stack data type
+    this.debug = false
 }
 
 /** 
@@ -35,7 +36,7 @@ jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     var cacheFiles = fileLUT.filter(function(x) { return x.fileName == urlFile })
 
     if (cacheFiles.length > 0) {
-        console.log("File " + urlFile + " is cached")
+        this._log("File " + urlFile + " is cached")
         successFN(cacheFiles[0].text)
         return //cached
     }
@@ -190,7 +191,7 @@ jxLoader.prototype.addScriptTag = function(rawText, fileURL) {
         }
     }
     if (found) {
-        console.log('script URL ' + fileURL + ' already added')
+        this._log('script URL ' + fileURL + ' already added')
         return
     }
 
@@ -220,7 +221,7 @@ jxLoader.prototype.addStyleSheetTag = function(rawText, fileURL) {
         }
     }
     if (found) {
-        console.log('stylesheet URL ' + fileURL + ' already added')
+        this._log('stylesheet URL ' + fileURL + ' already added')
         return
     }
 
@@ -346,8 +347,10 @@ jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
         function(response) {
             try {
                 //step 2.1: try evaluate JS script to trigger recursive jxLoader.require(...)
-                eval(response)
-
+                if (fileURL.endsWith('.js')) {
+                    eval(response)
+                }
+                
                 //step 2.1.1: mark success
                 reqTask.arg = response
                 reqTask.isSuccess = true
@@ -536,6 +539,12 @@ jxLoader.prototype.setElementChild = function(parentElement, childElement) {
     
     parentElement.innerHTML = ''
     parentElement.appendChild(childElement)
+};
+
+jxLoader.prototype._log = function(message) {
+    if (this.debug === true) {
+        console.log(message)
+    }
 };
 
 (function(global) {

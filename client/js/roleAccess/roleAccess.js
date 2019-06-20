@@ -2,6 +2,7 @@ JxLoader.require('/js/bootstrap/btsButton.js')
 JxLoader.require('/js/bootstrap/btsComboBox.js')
 JxLoader.require('/js/bootstrap/btsDialogModal.js')
 JxLoader.require('/js/bootstrap/btsPagination.js')
+JxLoader.require('/css/toggleBtn.css')
 
 function roleAccess() {
     this.selectedPageIndex = 0
