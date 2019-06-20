@@ -91,6 +91,7 @@ func (handler *HTTPRequestHandler) HandleCurrentUser(w http.ResponseWriter, r *h
 		return true
 	}
 
+	w.Header().Add("Cache-control", "no-cache,no-store")
 	handler.Server.SendHTTPResponse(w, 0, "", string(jsonStr))
 
 	return true
