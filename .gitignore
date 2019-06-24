@@ -21,6 +21,8 @@ npm-debug.log
 .glide/
 config.ini
 debug
+localhost.key
+localhost.cert
 
 # Databases
 sample.db

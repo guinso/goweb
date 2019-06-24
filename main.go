@@ -91,22 +91,25 @@ func main() {
 	log.Println("[done]")
 
 	//start web server
-	log.Printf("Starting web server with port number %d \r\n", config.PortNumber)
-	if webErr := startWebServer(config.PortNumber); webErr != nil {
+	if webErr := startWebServer(config); webErr != nil {
 		log.Printf("Failed to start web server: %s\r\n", webErr.Error())
 		return
 	}
 }
 
-func startWebServer(port int) error {
+func startWebServer(config *server.ConfigInfo) error {
 	// handler all request start from "/"
 	http.HandleFunc("/", WebHandler)
 
-	// start HTTP server in socket 7777
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	if strings.Compare(config.SSLKey, "") != 0 && strings.Compare(config.SSLCert, "") != 0 {
+		log.Printf("start web server in HTTPS protocol, port %d\r\n", config.PortNumber)
+		return http.ListenAndServeTLS(fmt.Sprintf(":%d", config.PortNumber),
+			config.SSLCert, config.SSLKey, nil)
+	}
 
-	// start HTTPS server (default socket 443)
-	//x http.ListenAndServeTLS("/", "abc.crt", "abc.key", handler)
+	log.Printf("start web server in HTTP protocol, port %d\r\n", config.PortNumber)
+	return http.ListenAndServe(fmt.Sprintf(":%d", config.PortNumber), nil)
+
 }
 
 func checkMySQLDbConnection(config *server.ConfigInfo) (*sql.DB, error) {

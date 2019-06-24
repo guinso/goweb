@@ -17,6 +17,8 @@ type ConfigInfo struct {
 	PortNumber int    //web server listen port number
 	LogicDir   string //directory where store logical physical files; e.g. pay-slip.pdf
 	StaticDir  string //directory where store direct access physical files; e.g. index.html
+	SSLKey     string //file where store SSL private key
+	SSLCert    string //file where store SSL public certificate
 }
 
 //ConfigurationService To load and retrieve configuration file

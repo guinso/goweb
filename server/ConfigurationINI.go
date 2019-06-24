@@ -49,6 +49,12 @@ func (iniconfig *ConfigurationINI) InitializeConfiguration(filepath string) (*Co
 		if _, err = sec.NewKey("logicaldir", "logical-files"); err != nil {
 			return nil, err
 		}
+		if _, err = sec.NewKey("SSLKey", ""); err != nil {
+			return nil, err
+		}
+		if _, err = sec.NewKey("SSLCert", ""); err != nil {
+			return nil, err
+		}
 
 		//save to physical INI file
 		if err = cfg.SaveTo(filepath); err != nil {
@@ -117,6 +123,12 @@ func (iniconfig *ConfigurationINI) reload(filepath string) (*ConfigInfo, error) 
 		return nil, err
 	}
 	if config.StaticDir, err = iniconfig.getConfigString(httpSection, "staticdir", "static-files"); err != nil {
+		return nil, err
+	}
+	if config.SSLKey, err = iniconfig.getConfigString(httpSection, "SSLKey", ""); err != nil {
+		return nil, err
+	}
+	if config.SSLCert, err = iniconfig.getConfigString(httpSection, "SSLCert", ""); err != nil {
 		return nil, err
 	}
 
