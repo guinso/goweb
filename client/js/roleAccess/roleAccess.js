@@ -21,7 +21,7 @@ roleAccess.prototype.getPartial = function(successFN, failFN) {
             JxLoader.getJSONPromiseFN('/api/role-access-count')
         ])
 
-        JxPromise.runPromise(task)
+        JxLoader.runPromise(task)
             .then(function(reponses){
                 var roleItems = reponses[0]['response'] //JSON.parse(roleResponse[0]);
                 var accessItems = reponses[1]['response'] //JSON.parse(accessResponse[0]);

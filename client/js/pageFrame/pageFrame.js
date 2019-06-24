@@ -4,7 +4,7 @@ function pageFrame() {
     this.placeHolder = null
 }
 
-pageFrame.prototype.render = function() {
+pageFrame.prototype.render = function(postRenderFN) {
     var thisInstance = this
 
     this.getPartial(
@@ -24,6 +24,11 @@ pageFrame.prototype.render = function() {
             if (!thisInstance.isAlreadyAttached()) {
                 console.log('attach PageFrame into HTML document')
                 JxHelper.setMainContent(partial)
+            }
+
+            //run additional routine once it is page frame is renderered
+            if (typeof postRenderFN !== 'undefined') {
+                postRenderFN()
             }
         },
         function(err) {

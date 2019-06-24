@@ -1,8 +1,4 @@
 function jxPromiseTask(isSerial, tasks) {
-    if (typeof isSerial === 'undefined') {
-        isSerial = false //default value is parallel task
-    }
-
     this.isSerial = isSerial
     this.tasks = tasks
 }

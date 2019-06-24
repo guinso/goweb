@@ -22,6 +22,16 @@ function jxLoader() {
     this.debug = false
 }
 
+/**
+ * =====================================================================
+ * JxPromiseTask
+ * =====================================================================
+ */
+function jxPromiseTask(isSerial, tasks) {
+    this.isSerial = isSerial
+    this.tasks = tasks
+}
+
 /** 
  * ======================================================================
  * JxLoader 
@@ -512,6 +522,52 @@ jxLoader.prototype.postJSON = function(url, inputJson, successFN, failedFN) {
     request.open('POST', url, isAsynchronous)
     request.setRequestHeader("Content-type", "application/json")
     request.send(param)
+};
+
+jxLoader.prototype.runPromise = function(promiseTask) {
+    if (promiseTask.isSerial === true) { //run in serial
+        return promiseTask.tasks.reduce(this._serialTaskReducer, Promise.resolve([]))
+    } else if (promiseTask.isSerial === false) { //run in parallel
+        return jxLoader.prototype._parallelTaskReducer.call(this, promiseTask.tasks)
+    } else {
+        return Promise.reject(new Error(
+            'unknown promiseTask.isSerial value - ' + promiseTask.isSerial))
+    }
+};
+
+jxLoader.prototype._parallelTaskReducer = function(tasks) {
+    var promises = []
+
+    for (var i=0; i < tasks.length; i++) {
+        var fn = tasks[i]
+
+        if (typeof fn === 'function') {
+            promises.push(fn())
+        } else if (typeof fn === 'object' && fn instanceof jxPromiseTask) {
+            promises.push(this.runPromise.call(fn))
+        } else {
+            return Promise.reject(new Error(
+                "fn is not valid task type ('function' or 'jxPromiseTask') - " + typeof fn))
+        }
+    }
+
+    return Promise.all(promises)
+};
+
+jxLoader.prototype._serialTaskReducer = function(promiseChain, fn){
+    if (typeof fn === 'function') {
+        return promiseChain.then(function(chainResult){
+            return fn().then(function(fnResult){
+                chainResult.push(fnResult)
+                return chainResult
+            })
+        })
+    } else if (typeof fn === 'object' && fn instanceof jxPromiseTask) {
+        return jxLoader.prototype.runPromise.call(this, fn)
+    } else {
+        return Promise.reject(new Error(
+            "fn is not valid task type ('function' or 'jxPromiseTask') - " + typeof fn))
+    }
 };
 
 /**

@@ -15,7 +15,7 @@
         ])
 
         //trigger sequences
-        JxPromise.runPromise(bootstrapTask).then(resolve, reject)
+        JxLoader.runPromise(bootstrapTask).then(resolve, reject)
     };
 
     function loadGUILibs(resolve, reject) {
@@ -74,7 +74,7 @@
     };
 
     function initBootSequence() {
-        var urlFiles = ['/js/helper/jxPromise.js']
+        var urlFiles = ['/js/login/login.js'] //x ['/js/helper/jxPromise.js']
         if (typeof Promise == 'undefined') { //need to load Bluebird (Promise polyfill)
             urlFiles.push('libs/bluebird-3.5.5.min.js')
         }
@@ -105,6 +105,6 @@
 
     //window.addEventListener('load', registerServiceWorker())
 
-    registerServiceWorker()
+    //registerServiceWorker()
     initBootSequence()
 })();

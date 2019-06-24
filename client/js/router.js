@@ -60,6 +60,7 @@ router.prototype.initialize = function() {
     JxRouter.setRoute('login', function(){ thisInstance.renderLogin() })
     JxRouter.setRoute('logout', function(){ thisInstance.renderLogout() })
     JxRouter.setRoute('role-access', function(){ thisInstance.renderRoleAccess() })
+    JxRouter.setRoute('sea-map', function(){ thisInstance.renderSeaMap() })
 };
 
 router.prototype.renderPageNotFound = function() {
@@ -145,6 +146,24 @@ router.prototype.renderAsd = function() {
 
     PageFrame.setPlaceHolder(hyperLink)
     PageFrame.render()
+};
+
+router.prototype.renderSeaMap = function() {
+    this.getModule('/js/seaMap/seaMap.js', function() {
+        SeaMap.getPartial(
+            function(partial){
+                PageFrame.setPlaceHolder(partial)
+                PageFrame.render(function(){
+                    SeaMap.drawMap()
+                })
+            },
+            function(err) {
+                console.error('failed to render Sea Map page: ' + err.message)
+                console.error(err.trace)
+                JxHelper.showServerErrorMessage()
+            }
+        )
+    })
 };
 
 router.prototype.getModule = function(urlVal, execFn) {
