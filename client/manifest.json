@@ -3,20 +3,25 @@
     "short_name": "SWP",
     "lang": "en",
     "start_url": "/",
-    "display": "fullscreen",
+    "scope": "/",
+    "display": "standalone",
     "theme_color": "#c2f442",
+    "background_color": "#c2f442",
     "icons": [
         {
-            "src": "img/icon64.png",
-            "size": "64x64"
+            "src": "images/icon195.png",
+            "type": "image/png",
+            "sizes": "195x195"
         },
         {
-            "src": "img/icon128.png",
-            "size": "128x128"
+            "src": "images/icon256.png",
+            "type": "image/png",
+            "sizes": "256x256"
         },
         {
-            "src": "img/icon512.png",
-            "size": "512x512"
+            "src": "images/icon512.png",
+            "type": "image/png",
+            "sizes": "512x512"
         }
     ]
 }

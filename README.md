@@ -41,3 +41,7 @@ cookie cutter for small scale web application
     * comment back `TestGenerateRecords()`
 5. Run unit test
     > $> go test ./...
+
+# Credits
+[icons made by Freepik](https://www.flaticon.com/free-icon/toucan_874949)
+[background image made by Tookapic](https://www.pexels.com/photo/rice-grain-grass-field-7976/)
