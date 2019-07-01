@@ -41,26 +41,44 @@ router.prototype.resolve = function(path) {
 router.prototype.initialize = function() {
     var thisInstance = this
 
+    this._setDependency()
+
     JxRouter.clearRoute()
 
     //setup path not found handler
-    JxRouter.setRouteNotFound(function(){
+    JxRouter.setRouteNotFound(function() {
         thisInstance.renderPageNotFound()
     })
 
     //redirect home page
-    JxRouter.setRoute('', function(){ 
-        location.hash = 'user' 
+    JxRouter.setRoute('', function() {
+        location.hash = 'user'
     })
 
-    JxRouter.setRoute('asd', function(){ thisInstance.renderAsd() })
-    JxRouter.setRoute('qwe', function(){ thisInstance.renderQwe() })
-    JxRouter.setRoute('user', function(){ thisInstance.renderUser() })
-    JxRouter.setRoute('note', function(){ thisInstance.renderNote() })
-    JxRouter.setRoute('login', function(){ thisInstance.renderLogin() })
-    JxRouter.setRoute('logout', function(){ thisInstance.renderLogout() })
-    JxRouter.setRoute('role-access', function(){ thisInstance.renderRoleAccess() })
-    JxRouter.setRoute('sea-map', function(){ thisInstance.renderSeaMap() })
+    JxRouter.setRoute('asd', function() { thisInstance.renderAsd() })
+    JxRouter.setRoute('qwe', function() { thisInstance.renderQwe() })
+    JxRouter.setRoute('user', function() { thisInstance.renderUser() })
+    JxRouter.setRoute('note', function() { thisInstance.renderNote() })
+    JxRouter.setRoute('login', function() { thisInstance.renderLogin() })
+    JxRouter.setRoute('logout', function() { thisInstance.renderLogout() })
+    JxRouter.setRoute('role-access', function() { thisInstance.renderRoleAccess() })
+    JxRouter.setRoute('sea-map', function() { thisInstance.renderSeaMap() })
+};
+
+router.prototype._setDependency = function() {
+    JxLoader.setRequireDependency('/js/seaMap/seaMap.js', [
+        '/libs/openlayers-5.3.0.js',
+        '/libs/openlayers-5.3.0.css',
+        '/js/seaMap/seaMapGUI.js'
+    ])
+
+    JxLoader.setRequireDependency('/js/roleAccess/roleAccess.js', [
+        '/js/bootstrap/btsButton.js',
+        '/js/bootstrap/btsComboBox.js',
+        '/js/bootstrap/btsDialogModal.js',
+        '/js/bootstrap/btsPagination.js',
+        '/css/toggleBtn.css'
+    ])
 };
 
 router.prototype.renderPageNotFound = function() {
@@ -74,7 +92,7 @@ router.prototype.renderLogin = function() {
     })
 };
 
-router.prototype.renderLogout = function(){
+router.prototype.renderLogout = function() {
     this.getModule('/js/login/login.js', function() {
         Login.logout()
     })
@@ -83,7 +101,7 @@ router.prototype.renderLogout = function(){
 router.prototype.renderNote = function() {
     this.getModule('/js/note/note.js', function() {
         Note.getPartial(
-            function(partial){
+            function(partial) {
                 PageFrame.setPlaceHolder(partial)
                 PageFrame.render()
             },
@@ -114,7 +132,7 @@ router.prototype.renderUser = function() {
 router.prototype.renderRoleAccess = function() {
     this.getModule('/js/roleAccess/roleAccess.js', function() {
         RoleAccess.getPartial(
-            function(partial){
+            function(partial) {
                 PageFrame.setPlaceHolder(partial)
                 PageFrame.render()
             },
@@ -129,7 +147,7 @@ router.prototype.renderRoleAccess = function() {
 
 router.prototype.renderQwe = function() {
     var ele = document.createElement('div')
-    ele.innerHTML ='<a href="#asd">ASD</a><br/>' +
+    ele.innerHTML = '<a href="#asd">ASD</a><br/>' +
         '<a href="#user">User</a>'
 
     PageFrame.setPlaceHolder(ele)
@@ -151,9 +169,9 @@ router.prototype.renderAsd = function() {
 router.prototype.renderSeaMap = function() {
     this.getModule('/js/seaMap/seaMap.js', function() {
         SeaMap.getPartial(
-            function(partial){
+            function(partial) {
                 PageFrame.setPlaceHolder(partial)
-                PageFrame.render(function(){
+                PageFrame.render(function() {
                     SeaMap.drawMap()
                 })
             },

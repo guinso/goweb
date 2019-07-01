@@ -1,29 +1,24 @@
-JxLoader.require('/libs/openlayers-5.3.0.js')
-JxLoader.require('/libs/openlayers-5.3.0.css')
-
-function seaMap() {
-    this.partial = null
-}
-
 seaMap.prototype.getPartial = function(successFN, failureFN) {
     var thisInstance = this
 
-    this._fetchPartial(function(partial){
+    this._fetchPartial(function(partial) {
+        thisInstance._initGUI(partial)
+
         successFN(partial)
     }, failureFN)
 };
 
 seaMap.prototype._fetchPartial = function(successFN, failureFN) {
     var thisInstance = this
-    
-    if (this._isPartialEmpty()) {
-        JxLoader.loadPartial('/js/seaMap/partial.html', 
-        function(partial){
-            thisInstance.partial = partial
 
-            successFN(partial)
-        }, 
-        failureFN)
+    if (this._isPartialEmpty()) {
+        JxLoader.loadPartial('/js/seaMap/partial.html',
+            function(partial) {
+                thisInstance.partial = partial
+
+                successFN(partial)
+            },
+            failureFN)
     } else {
         successFN(thisInstance.partial)
     }
@@ -48,7 +43,7 @@ seaMap.prototype.drawMap = function() {
     });
 };
 
-(function(){
+(function() {
     if (typeof SeaMap === 'undefined') {
         window.SeaMap = new seaMap()
     }

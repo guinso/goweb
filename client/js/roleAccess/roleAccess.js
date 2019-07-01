@@ -1,9 +1,3 @@
-JxLoader.require('/js/bootstrap/btsButton.js')
-JxLoader.require('/js/bootstrap/btsComboBox.js')
-JxLoader.require('/js/bootstrap/btsDialogModal.js')
-JxLoader.require('/js/bootstrap/btsPagination.js')
-JxLoader.require('/css/toggleBtn.css')
-
 function roleAccess() {
     this.selectedPageIndex = 0
     this.pageSize = 10
@@ -13,7 +7,7 @@ function roleAccess() {
 roleAccess.prototype.getPartial = function(successFN, failFN) {
     var thisInstance = this
 
-    this._fetchPartial(function(partial){
+    this._fetchPartial(function(partial) {
         var task = new jxPromiseTask(false, [
             JxLoader.getJSONPromiseFN('/api/role'),
             JxLoader.getJSONPromiseFN('/api/access'),
@@ -22,12 +16,12 @@ roleAccess.prototype.getPartial = function(successFN, failFN) {
         ])
 
         JxLoader.runPromise(task)
-            .then(function(reponses){
+            .then(function(reponses) {
                 var roleItems = reponses[0]['response'] //JSON.parse(roleResponse[0]);
                 var accessItems = reponses[1]['response'] //JSON.parse(accessResponse[0]);
                 var items = reponses[2]['response'] //JSON.parse(roleAccessResponse[0]);
                 var itemsCount = reponses[3]['response'] //JSON.parse(roleAccessCntResponse[0])['response'];
-                
+
                 thisInstance._renderTable(partial, items)
 
                 thisInstance._generateSelectOptions(partial, "#roleSelect", roleItems)
@@ -36,15 +30,15 @@ roleAccess.prototype.getPartial = function(successFN, failFN) {
                 //register search button event handler
                 partial.querySelector("#roleAccessSearch").onclick = function(e) {
                     e.preventDefault()
-                    
+
                     thisInstance._search(partial)
                 }
 
                 //build pagination
                 var paginationElement = BtsPagination.buildPaginationElement(
-                    thisInstance.selectedPageIndex, 
-                    thisInstance.pageSize, 
-                    itemsCount.count, 
+                    thisInstance.selectedPageIndex,
+                    thisInstance.pageSize,
+                    itemsCount.count,
                     thisInstance._pageIndexSearch)
                 var paginationPlaceholder = partial.querySelector("#paginationPlaceholder")
                 JxLoader.setElementChild(paginationPlaceholder, paginationElement)
@@ -88,20 +82,20 @@ roleAccess.prototype._buildPagination = function(selectedIndex, pageSize, totalC
     var pageRange = endIndex - startIndex + 1
     var pageItems = []
 
-    var tmpX = { text: "<<", onClick: function(){ onIndexSelectFn(0)} }
+    var tmpX = { text: "<<", onClick: function() { onIndexSelectFn(0) } }
     pageItems.push(tmpX)
 
     tmpX = { text: "<", onClick: null }
     if (selectedIndex - 1 < 0)
-        tmpX.onClick = function(){ onIndexSelectFn(0) }
+        tmpX.onClick = function() { onIndexSelectFn(0) }
     else
-        tmpX.onClick = function(){ onIndexSelectFn(selectedIndex - 1) }
+        tmpX.onClick = function() { onIndexSelectFn(selectedIndex - 1) }
     pageItems.push(tmpX)
 
     for (var i = startIndex; i <= endIndex; i++) {
         pageItems.push({
             text: (i + 1).toString(),
-            onClick: function(){ onIndexSelectFn(i) }
+            onClick: function() { onIndexSelectFn(i) }
         })
     }
 
@@ -145,12 +139,12 @@ roleAccess.prototype._generateSelectOptions = function(element, selectID, items)
 roleAccess.prototype._generateTableRow = function(index, item) {
     var row = document.createElement("tr")
 
-    row.innerHTML = 
-        "<td>" + (index + 1) + "</td>" + 
-        "<td>" + item['access'] + "</td>" + 
-        "<td>" + item['role'] + "</td>" + 
+    row.innerHTML =
+        "<td>" + (index + 1) + "</td>" +
+        "<td>" + item['access'] + "</td>" +
+        "<td>" + item['role'] + "</td>" +
         "<td><input class='tgl tgl-light' id='cb" + index + "'  " + "type='checkbox'/>" +
-            "<label class='tgl-btn' for='cb" + index + "'></label></td>"
+        "<label class='tgl-btn' for='cb" + index + "'></label></td>"
 
     row.querySelector("td > input").checked = item['isAuthorize']
     return row
@@ -174,10 +168,10 @@ roleAccess.prototype._search = function(partialEle) {
     var roleID = roleSelectElement.options[roleSelectElement.selectedIndex].value
 
     JxLoader.getJSON('/api/role-access?accessID=' + accessID + '&roleID=' + roleID,
-        function(items){
+        function(items) {
             thisInstance._renderTable(partialEle, items['response'])
         },
-        function(err){
+        function(err) {
             console.error('Failed to get role access records: ' + err.message)
             var container = element.querySelector("#roleAccessTable")
 
@@ -187,20 +181,20 @@ roleAccess.prototype._search = function(partialEle) {
 
 roleAccess.prototype._fetchPartial = function(successFN, failureFN) {
     var thisInstance = this
-    
+
     if (this._isPartialEmpty()) {
-        JxLoader.loadPartial('/js/roleAccess/partial.html', 
-        function(partial){
-            thisInstance.partial = partial
+        JxLoader.loadPartial('/js/roleAccess/partial.html',
+            function(partial) {
+                thisInstance.partial = partial
 
-            //create modal
-            var modalEle = BtsDialogModal.buildElement()
-            BtsDialogModal.setTitle(modalEle, "Sample Modal Dialog")
-            partial.appendChild(modalEle)
+                //create modal
+                var modalEle = BtsDialogModal.buildElement()
+                BtsDialogModal.setTitle(modalEle, "Sample Modal Dialog")
+                partial.appendChild(modalEle)
 
-            successFN(partial)
-        }, 
-        failureFN)
+                successFN(partial)
+            },
+            failureFN)
     } else {
         successFN(this.partial)
     }
@@ -210,7 +204,7 @@ roleAccess.prototype._isPartialEmpty = function() {
     return !(this.partial && this.partial.innerHTML !== '')
 };
 
-(function(){
+(function() {
     if (typeof RoleAccess === 'undefined') {
         window.RoleAccess = new roleAccess()
     }

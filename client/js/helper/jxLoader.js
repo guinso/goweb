@@ -17,11 +17,6 @@ String.prototype.endsWith = String.prototype.endsWith || function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) >= 0;
 };
 
-function jxLoader() {
-    this.task = [] //stack data type
-    this.debug = false
-}
-
 /**
  * =====================================================================
  * JxPromiseTask
@@ -37,6 +32,11 @@ function jxPromiseTask(isSerial, tasks) {
  * JxLoader 
  * ======================================================================
  */
+function jxLoader() {
+    this.debug = false
+    this.requireDependecy = []
+}
+
 jxLoader.prototype.loadFile = function(urlFile, successFN, failureFN) {
     if (!('jxFiles' in window)) {
         window['jxFiles'] = new Array()
@@ -331,59 +331,35 @@ jxLoader.prototype._addTag = function(urlFile, rawText) {
     }
 };
 
+/**
+ * @param urlFile string URL file path
+ * @param dependencyFiles array list of URL files path
+ */
+jxLoader.prototype.setRequireDependency = function(urlFile, dependencyFiles) {
+    this.requireDependecy[urlFile] = dependencyFiles;
+};
+
 jxLoader.prototype.require = function(fileURL, successFN, failureFN) {
+    var resolveFiles = this._resolveDependency(fileURL)
+    resolveFiles.push(fileURL)
+    this.loadAndTagMultipleFiles(resolveFiles, successFN, failureFN)
+};
 
-    if (!fileURL.endsWith('.js') && !fileURL.endsWith('.css')) {
-        throw new Error("only support .js and .css: " + latestTask.url)
-    }
+jxLoader.prototype._resolveDependency = function(urlFile) {
+    var thisInstance = this
+    var dependencies = this.requireDependecy[urlFile]
 
-    var reqTask = {
-        guid: this.generateUUID(), //TODO: generate GUID
-        url: fileURL,
-        isSuccess: false,
-        isDone: false,
-        passFN: successFN,
-        failFN: failureFN,
-        arg: null
-    }
-
-    //step 1: queue request into task
-    this.task.push(reqTask)
-
-    var jxbootObj = this
-
-    //step 2: try load file from URL
-    this.loadFile(fileURL,
-        function(response) {
-            try {
-                //step 2.1: try evaluate JS script to trigger recursive jxLoader.require(...)
-                if (fileURL.endsWith('.js')) {
-                    eval(response)
-                }
-                
-                //step 2.1.1: mark success
-                reqTask.arg = response
-                reqTask.isSuccess = true
-            } catch (err) {
-                //step 2.1.2: mark failed due to encounter error
-                reqTask.isSuccess = false
-                reqTask.arg = err
-            }
-
-            reqTask.isDone = true
-
-            //step 3: dequeue request from task
-            jxLoader.prototype.dequeueTask.call(jxbootObj)
-        },
-        function(err) {
-            //step 2.2: mark failed due to failed to retrieve file
-            reqTask.arg = err
-            reqTask.isSuccess = false
-            reqTask.isDone = true
-
-            //step 3: dequeue request from task
-            jxLoader.prototype.dequeueTask.call(jxbootObj)
+    if (dependencies) {
+        var result = []
+        dependencies.forEach(function(url) {
+            var tempDependencies = thisInstance._resolveDependency(url)
+            result = tempDependencies.concat(result)
         })
+
+        return result
+    } else {
+        return [urlFile]
+    }
 };
 
 //require promise
@@ -405,45 +381,6 @@ jxLoader.prototype.requirePromiseFN = function(fileURL, successFN, failFN) {
                     reject(err)
                 })
         })
-    }
-};
-
-jxLoader.prototype.dequeueTask = function() {
-    //return if no more task available
-    if (this.task.length == 0) {
-        return
-    }
-
-    var latestTask = this.task[this.task.length - 1]
-    if (latestTask.isDone === true) {
-        //remove task since latest task matach with taskID
-        this.task.pop()
-
-        if (latestTask.isSuccess) {
-
-            if (latestTask.url.endsWith('.js')) {
-                jxLoader.prototype.addScriptTag.call(this, latestTask.arg, latestTask.url)
-                if (latestTask.passFN) {
-                    latestTask.passFN(latestTask.arg)
-                }
-            } else if (latestTask.url.endsWith('.css')) {
-                jxLoader.prototype.addStyleSheetTag.call(this, latestTask.arg, latestTask.url)
-                if (latestTask.passFN) {
-                    latestTask.passFN(latestTask.arg)
-                }
-            } else {
-                var err = new Error("only support .js and .css: " + latestTask.url)
-                if (latestTask.failFN) {
-                    latestTask.failFN(err)
-                }
-            }
-        } else {
-            if (latestTask.failFN) {
-                latestTask.failFN(latestTask.arg)
-            }
-        }
-
-        this.dequeueTask() //recursuvely dequeue tasks
     }
 };
 
@@ -475,17 +412,17 @@ jxLoader.prototype.getJSON = function(url, successFN, failedFN) {
 
 jxLoader.prototype.getJSONPromiseFN = function(url, successFN, failedFN) {
     var thisInstance = this
-    return function(){
-        return new Promise(function(resolve, reject){
-            thisInstance.getJSON(url, 
-                function(jsonObj){
+    return function() {
+        return new Promise(function(resolve, reject) {
+            thisInstance.getJSON(url,
+                function(jsonObj) {
                     if (typeof successFN !== 'undefined') {
                         successFN(jsonObj)
                     }
 
                     resolve(jsonObj)
-                }, 
-                function(err){
+                },
+                function(err) {
                     if (typeof failedFN !== 'undefined') {
                         failedFN(err)
                     }
@@ -538,7 +475,7 @@ jxLoader.prototype.runPromise = function(promiseTask) {
 jxLoader.prototype._parallelTaskReducer = function(tasks) {
     var promises = []
 
-    for (var i=0; i < tasks.length; i++) {
+    for (var i = 0; i < tasks.length; i++) {
         var fn = tasks[i]
 
         if (typeof fn === 'function') {
@@ -554,10 +491,10 @@ jxLoader.prototype._parallelTaskReducer = function(tasks) {
     return Promise.all(promises)
 };
 
-jxLoader.prototype._serialTaskReducer = function(promiseChain, fn){
+jxLoader.prototype._serialTaskReducer = function(promiseChain, fn) {
     if (typeof fn === 'function') {
-        return promiseChain.then(function(chainResult){
-            return fn().then(function(fnResult){
+        return promiseChain.then(function(chainResult) {
+            return fn().then(function(fnResult) {
                 chainResult.push(fnResult)
                 return chainResult
             })
@@ -592,7 +529,7 @@ jxLoader.prototype.setElementChild = function(parentElement, childElement) {
     //         parentElement.firstChild.remove()
     //     }
     // }
-    
+
     parentElement.innerHTML = ''
     parentElement.appendChild(childElement)
 };
