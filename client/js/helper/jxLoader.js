@@ -353,7 +353,7 @@ jxLoader.prototype._resolveDependency = function(urlFile) {
         var result = []
         dependencies.forEach(function(url) {
             var tempDependencies = thisInstance._resolveDependency(url)
-            result = tempDependencies.concat(result)
+            result = result.concat(tempDependencies)
         })
 
         return result
