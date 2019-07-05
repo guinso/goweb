@@ -1,37 +1,42 @@
-function btsButton() {}
 /**
- * Create Boostrap button HTML element
- * @param {String} innerText - button display text 
- * @param {String} btnClass - additional Boostrap button CSS class 
- * @returns {Element} HTML BUTTON element
+ * Create Button
+ * @param {JSON} option 
+ * 1. {string} text set button text
+ * 2. {string} type bootstrap button style: (default set to primary)
+ *      primary : cadet blue
+ *      secondary: grey
+ *      success: green
+ *      danger: red
+ *      warning: orange
+ *      info: washed blue
+ *      light: no border button
+ *      dark: black
+ *      link: link style, no button decoration
  */
-btsButton.prototype.buildButton = function(innerText, btnClass) {
-    var element = document.createElement('button');
-    element.type = 'button';
-    element.classList.add('btn');
-
-    if (btnClass !== '') {
-        element.classList.add(btnClass.toLowerCase());
+function BtsButton(option) {
+    this.config = {}
+    if (option) {
+        this.config = option
     }
 
-    if (innerText !== '') {
-        element.innerText = innerText;
+    this.styles = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'link']
+
+    this.element = document.createElement('button')
+    this.element.type = 'button'
+    this.element.classList.add('btn')
+
+    if (this.option.style && this.styles.contains(this.option.style)) {
+        this.element.classList.add('btn-' + this.option.style)
+    } else {
+        this.element.classList.add('btn-primary')
+    }
+
+    if (this.config.text) {
+        this.element.innerText = this.config.text
     }
 };
 
-/**
- * Empty HTML element child(ren)
- * @param {Element} element - HTML element
- */
-btsButton.prototype.emptyChild = function(element) {
-    while (element.firstChild)
-        element.removeChild(element.firstChild);
-}
-
-(function() {
-    if (typeof BtsButton === 'undefined') {
-        window.BtsButton = new btsButton()
-    }
-})()
-
+BtsButton.prototype.getElement = function() {
+    return this.element
+};
 //# source=/js/bootstrap/btsButton.js

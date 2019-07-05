@@ -142,11 +142,15 @@ roleAccess.prototype._generateTableRow = function(index, item) {
     row.innerHTML =
         "<td>" + (index + 1) + "</td>" +
         "<td>" + item['access'] + "</td>" +
-        "<td>" + item['role'] + "</td>" +
-        "<td><input class='tgl tgl-light' id='cb" + index + "'  " + "type='checkbox'/>" +
-        "<label class='tgl-btn' for='cb" + index + "'></label></td>"
+        "<td>" + item['role'] + "</td>" 
 
-    row.querySelector("td > input").checked = item['isAuthorize']
+    var tmp = new BtsToggleCheckBox(document.createElement('td'), {
+        value : item['isAuthorize'],
+        id : 'cb' + index
+    })
+
+    row.appendChild(tmp.getElement())
+
     return row
 };
 

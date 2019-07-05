@@ -77,6 +77,7 @@ router.prototype._setDependency = function() {
         '/js/bootstrap/btsComboBox.js',
         '/js/bootstrap/btsDialogModal.js',
         '/js/bootstrap/btsPagination.js',
+        '/js/bootstrap/btsToggleCheckBox.js',
         '/css/toggleBtn.css'
     ])
 };
