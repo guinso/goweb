@@ -5,6 +5,7 @@
 *.dylib
 goweb
 go.sum
+dist
 
 # Test binary, build with `go test -c`
 *.test
@@ -15,12 +16,10 @@ go.sum
 # Public HTMLs
 publicHTML
 node_modules
-package-lock.json
 npm-debug.log
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
-config.ini
 debug
 localhost.key
 localhost.cert
