@@ -5,7 +5,10 @@
 *.dylib
 goweb
 go.sum
-dist
+frontend/dist/js/bundle.js
+frontend/dist/js/bundle.js.map
+frontend/dist/js/*.bundle.js
+frontend/dist/js/*.bundle.js.map
 
 # Test binary, build with `go test -c`
 *.test

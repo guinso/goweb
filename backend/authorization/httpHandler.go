@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/server"
+	"localsrc/authentication"
+	"localsrc/server"
+
 	"github.com/guinso/rdbmstool"
 )
 

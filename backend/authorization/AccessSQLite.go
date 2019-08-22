@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/goweb/server"
+	"localsrc/server"
 )
 
 //AccessSQLite access service with SQLite storage

@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/goweb/server"
+	"localsrc/server"
+
 	"github.com/guinso/stringtool"
 
 	"github.com/guinso/rdbmstool"

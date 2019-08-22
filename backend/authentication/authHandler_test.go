@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guinso/goweb/server"
+	"localsrc/server"
 )
 
 func TestLogin(t *testing.T) {

@@ -8,4 +8,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0
 	gopkg.in/go-sql-driver/mysql.v1 v1.4.1
 	gopkg.in/ini.v1 v1.42.0
+
+	localsrc v0.0.0
 )
+
+replace localsrc => ./

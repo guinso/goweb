@@ -10,7 +10,7 @@ import (
 
 	"github.com/guinso/rdbmstool"
 
-	"github.com/guinso/goweb/server"
+	"localsrc/server"
 )
 
 //HTTPRequestHandler HTTP request handler for authentication

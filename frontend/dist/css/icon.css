@@ -1,0 +1,28 @@
+img .icon {
+    display: inline;
+}
+
+.icon8 {
+    width: 8px;
+    height: 8px;
+}
+
+.icon16 {
+    width: 16px;
+    height: 16px;
+}
+
+.icon32 {
+    width: 32px;
+    height: 32px;
+}
+
+.icon64 {
+    width: 64px;
+    height: 64px;
+}
+
+.icon128 {
+    width: 128px;
+    height: 128px;
+}

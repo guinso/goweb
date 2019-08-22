@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guinso/goweb/authentication"
+	"localsrc/authentication"
 
-	"github.com/guinso/goweb/server"
+	"localsrc/server"
+
 	"github.com/guinso/rdbmstool"
 )
 

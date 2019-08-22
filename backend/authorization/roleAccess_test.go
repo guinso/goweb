@@ -3,8 +3,8 @@ package authorization
 import (
 	"testing"
 
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/server"
+	"localsrc/authentication"
+	"localsrc/server"
 )
 
 func TestIsAuthorize(t *testing.T) {
