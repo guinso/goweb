@@ -17,7 +17,7 @@
   "dependencies": {
     "@guinso/bts": "^1.0.1",
     "@guinso/jx": "^1.0.4",
-    "core-js": "^3.1.4",
+    "core-js": "^3.2.0",
     "ol": "^5.3.3",
     "regenerator-runtime": "^0.13.3"
   },
