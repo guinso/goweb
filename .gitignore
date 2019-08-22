@@ -27,6 +27,5 @@ debug
 localhost.key
 localhost.cert
 
-# Databases
-sample.db
+# Data
 ./privatefiles
