@@ -18,15 +18,43 @@ cookie cutter for small scale web application
 
     hide physical file path from end user
 
-# Setup & Run Web Server
-1. Install MySQL server
-2. edit **config.ini**
-    * modify _database_ section's setting
-    * enable `dbinittable` if you wish to auto generate authentication and authorization data table
-3. build and run
-    > $> go build
+# Setup
+1. install golang
+2. install nodeJS
+3. install GCC compiler (for golang compile github.com/mattn/go-sqlite3 package)
+4. install Visual Studio Code (or any equivalent text editor)
+5. Open command line terminal (target directory to project directory)
 
-    > $> ./goweb
+    > cd backend
+
+    > go build
+
+    > cd ../frontend
+
+    > npm install
+
+    > npm run build
+
+# Build & Run
+Using terminal: (target directory to project directory)
+
+To build backend server:
+
+    > cd backend
+
+    > go build
+
+To build frontend server:
+
+    > cd frontend
+
+    > npm run build
+
+To start web server:
+
+    > cd frontend
+
+    > npm run start
 
 # Setup & Run Unit Test
 1. Create an empty database
@@ -40,8 +68,9 @@ cookie cutter for small scale web application
     * run test on `TestGenerateRecords()`
     * comment back `TestGenerateRecords()`
 5. Run unit test
-    > $> go test ./...
+    > go test ./...
 
 # Credits
 [icons made by Freepik](https://www.flaticon.com/free-icon/toucan_874949)
+
 [background image made by Tookapic](https://www.pexels.com/photo/rice-grain-grass-field-7976/)
