@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/guinso/goweb/util"
+	"localsrc/util"
 )
 
 type role struct {

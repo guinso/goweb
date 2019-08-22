@@ -25,9 +25,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/authorization"
-	"github.com/guinso/goweb/server"
+	"localsrc/authentication"
+	"localsrc/authorization"
+	"localsrc/server"
 
 	_ "github.com/mattn/go-sqlite3"
 )

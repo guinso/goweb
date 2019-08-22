@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/guinso/goweb/route"
+	"localsrc/route"
 )
 
 func TestMeals(t *testing.T) {

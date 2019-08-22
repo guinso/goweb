@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/guinso/goweb/authentication"
-	"github.com/guinso/goweb/authorization"
-	"github.com/guinso/goweb/util"
+	"localsrc/authentication"
+	"localsrc/authorization"
+	"localsrc/util"
 )
 
 const createSQLite3DBScript = `

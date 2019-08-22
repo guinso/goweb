@@ -44,7 +44,7 @@ export class RoleAccess {
         this.partial.querySelector("#roleAccessSearch").onclick = function(e) {
             e.preventDefault()
 
-            thisInstance._search(partial)
+            thisInstance._search(thisInstance.partial)
         }
 
         //build pagination

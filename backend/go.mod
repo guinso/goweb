@@ -1,4 +1,4 @@
-module github.com/guinso/goweb
+module goweb
 
 go 1.12
 
