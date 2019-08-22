@@ -18,12 +18,14 @@ cookie cutter for small scale web application
 
     hide physical file path from end user
 
-# Setup
+# Prepare Development Tools
 1. install golang
 2. install nodeJS
 3. install GCC compiler (for golang compile github.com/mattn/go-sqlite3 package)
 4. install Visual Studio Code (or any equivalent text editor)
-5. Open command line terminal (target directory to project directory)
+
+# Initialize Source Code
+Open command line terminal (target directory to project directory)
 
     > cd backend
 
